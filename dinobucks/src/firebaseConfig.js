@@ -11,13 +11,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 const firebaseConfig = {
-  apiKey:            "PASTE_YOUR_API_KEY_HERE",
-  authDomain:        "PASTE_YOUR_AUTH_DOMAIN_HERE",
-  databaseURL:       "PASTE_YOUR_DATABASE_URL_HERE",
-  projectId:         "PASTE_YOUR_PROJECT_ID_HERE",
-  storageBucket:     "PASTE_YOUR_STORAGE_BUCKET_HERE",
-  messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID_HERE",
-  appId:             "PASTE_YOUR_APP_ID_HERE",
+  apiKey:            "AIzaSyBbHYIkYB8SCMf5B3wsJ6T47pqfYlyHrmU",
+  authDomain:        "dino-bucks-42064.firebaseapp.com",
+  databaseURL:       "https://dino-bucks-42064-default-rtdb.firebaseio.com",
+  projectId:         "dino-bucks-42064",
+  storageBucket:     "dino-bucks-42064.firebasestorage.app",
+  messagingSenderId: "15116557",
+  appId:             "1:15116557:web:0687a988040bf7506aa844",
 };
 
 export default firebaseConfig;
