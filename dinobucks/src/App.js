@@ -584,7 +584,7 @@ export default function App() {
                       <div style={{ fontWeight:800,fontSize:14,color:"#1a1a2e" }}>{s.name}</div>
                       <div style={{ fontSize:12,color:"#666",fontFamily:"'Nunito',sans-serif",marginTop:2 }}>{job ? `${job.emoji} ${job.name} · ${fmt(job.pay)}/payday` : "No job yet"}</div>
                     </div>
-                    <select value={assigned[s.id]||""} onChange={e => update(prev => ({ ...prev, assigned: { ...prev.assigned, [s.id]: e.target.value||null } }))}
+                    <select value={(assigned||{})[s.id]||""} onChange={e => update(prev => ({ ...prev, assigned: { ...prev.assigned, [s.id]: e.target.value||null } }))}
                       style={{ padding:"5px 7px",borderRadius:8,border:"2px solid #4B9B6E",fontSize:12,fontFamily:"'Nunito',sans-serif",background:"#fff",outline:"none",maxWidth:130 }}>
                       <option value="">— No job —</option>
                       {jobs.map(j => <option key={j.id} value={j.id}>{j.emoji} {j.name} ({fmt(j.pay)})</option>)}
