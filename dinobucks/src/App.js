@@ -576,7 +576,7 @@ export default function App() {
             <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(250px,1fr))",gap:12,marginBottom:26 }}>
               {students.map(s => {
                 const dino = DINOS.find(d => d.id === s.dinoId) || DINOS[0];
-                const job = jobs.find(j => j.id === assigned[s.id]);
+                const job = (jobs||[]).find(j => j.id === (assigned||{})[s.id]);
                 return (
                   <div key={s.id} style={{ background:job?`linear-gradient(135deg,${dino.colour}14,#f0fbf4)`:"#fafafa",border:`2.5px solid ${job?dino.colour+"44":"#e0e0e0"}`,borderRadius:16,padding:"12px 14px",display:"flex",alignItems:"center",gap:10 }}>
                     <DinoSVG id={s.dinoId} c={dino.colour} size={44}/>
