@@ -462,7 +462,7 @@ export default function App() {
             <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(116px,1fr))",gap:12 }}>
               {students.map(s => (
                 <DinoCard key={s.id} student={s} balance={balances[s.id]||0}
-                  job={jobs.find(j => j.id === assigned[s.id])}
+                  job={(jobs||{}).find(j => j.id === (assigned||{})[s.id])}
                   onClick={() => setSelected(s.id === selected ? null : s.id)}
                   selected={selected === s.id}/>
               ))}
