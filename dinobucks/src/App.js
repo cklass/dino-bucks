@@ -470,7 +470,7 @@ export default function App() {
 
             {selStudent && selDino && (() => {
               const bc = billColour(balances[selected]||0);
-              const sLog = txLog.filter(t => t.studentId === selected).slice(0, 6);
+              const sLog = (txLog||[]).filter(t => t.studentId === selected).slice(0, 6);
               return (
                 <div style={{ marginTop:22,padding:22,borderRadius:20,background:`linear-gradient(135deg,${selDino.colour}15,${bc.light})`,border:`3px solid ${selDino.colour}55` }}>
                   <div style={{ display:"flex",alignItems:"center",gap:16,marginBottom:16,flexWrap:"wrap" }}>
