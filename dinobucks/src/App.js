@@ -480,7 +480,7 @@ export default function App() {
                     <div style={{ flex:1 }}>
                       <div style={{ fontSize:26,color:"#1a1a2e",lineHeight:1 }}>{selStudent.name}</div>
                       <div style={{ color:"#666",fontSize:14,fontFamily:"'Nunito',sans-serif",fontWeight:700 }}>
-                        {selDino.name} · {jobs.find(j => j.id === assigned[selected])?.name || "No job assigned"}
+                         {selDino.name} · {(jobs||[]).find(j => j.id === (assigned||{})[selected])?.name || "No job assigned"}
                       </div>
                     </div>
                     <div style={{ background:bc.bg,color:"#fff",borderRadius:24,padding:"8px 24px",fontSize:30,fontWeight:800,boxShadow:`0 4px 14px ${bc.bg}77`,fontFamily:"'Fredoka One',sans-serif" }}>
