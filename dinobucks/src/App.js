@@ -387,7 +387,7 @@ export default function App() {
     update(prev => ({
       ...prev,
       jobs: prev.jobs.filter(j => j.id !== id),
-      assigned: Object.fromEntries(Object.entries(prev.assigned).map(([k,v]) => [k, v===id ? null : v])),
+      assigned: Object.fromEntries(Object.entries(prev.assigned||{}).map(([k,v]) => [k, v===id ? null : v])),
     }));
   };
 
