@@ -2,6 +2,18 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { saveToFirebase, subscribeToFirebase } from "./firebase";
 
+// — Sound effects
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let ctx;
+const getCtx = () => { if (!ctx) ctx = new AudioCtx(); return ctx; };
+
+const sounds = {
+  ching: () => { const c=getCtx(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.setValueAtTime(1200,c.currentTime); o.frequency.exponentialRampToValueAtTime(800,c.currentTime+0.1); g.gain.setValueAtTime(0.3,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.4); o.start(); o.stop(c.currentTime+0.4); },
+  deduct: () => { const c=getCtx(),o=c.createOscillator(),g=c.createGain(); o.type="sawtooth"; o.connect(g); g.connect(c.destination); o.frequency.setValueAtTime(300,c.currentTime); o.frequency.exponentialRampToValueAtTime(100,c.currentTime+0.2); g.gain.setValueAtTime(0.2,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.3); o.start(); o.stop(c.currentTime+0.3); },
+  pop: () => { const c=getCtx(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.setValueAtTime(600,c.currentTime); g.gain.setValueAtTime(0.2,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.1); o.start(); o.stop(c.currentTime+0.1); },
+  click: () => { const c=getCtx(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.setValueAtTime(400,c.currentTime); g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.05); },
+};
+
 // ── Canadian bill colours ─────────────────────────────────────────────────────
 const BILL = {
   5:   { bg:"#4A7FBF", light:"#daeaf8" },
