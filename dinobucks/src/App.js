@@ -35,12 +35,7 @@ const playSound = (type) => {
   } catch(e) {}
 };
 
-// Global click sound
-useEffect(() => {
-  const handleClick = () => playSound("pop");
-  window.addEventListener("click", handleClick);
-  return () => window.removeEventListener("click", handleClick);
-}, []);
+
 
 const sounds = {
   ching: () => playSound("ching"),
@@ -335,6 +330,11 @@ const handleLogin = () => {
   }, []);
 
   // ── Subscribe to Firebase on mount ────────────────────────────────────────
+  useEffect(() => {
+    const handleClick = () => playSound("pop");
+    window.addEventListener("click", handleClick);
+    return () => window.removeEventListener("click", handleClick);
+  }, []);
   useEffect(() => {
     const unsub = subscribeToFirebase((data) => {
       if (data) {
