@@ -331,11 +331,6 @@ const handleLogin = () => {
 
   // ── Subscribe to Firebase on mount ────────────────────────────────────────
   useEffect(() => {
-    const handleClick = () => playSound("pop");
-    window.addEventListener("click", handleClick);
-    return () => window.removeEventListener("click", handleClick);
-  }, []);
-  useEffect(() => {
     const unsub = subscribeToFirebase((data) => {
       if (data) {
         setAppState(data);
@@ -358,6 +353,11 @@ const handleLogin = () => {
       return next;
     });
   }, [scheduleSave]);
+    useEffect(() => {
+    const handleClick = () => playSound("pop");
+    window.addEventListener("click", handleClick);
+    return () => window.removeEventListener("click", handleClick);
+  }, []);
 
   const showToast = (msg, colour = "#27ae60") => {
     setToast({ msg, colour });
