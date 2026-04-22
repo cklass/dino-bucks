@@ -35,6 +35,13 @@ const playSound = (type) => {
   } catch(e) {}
 };
 
+// Global click sound
+useEffect(() => {
+  const handleClick = () => playSound("pop");
+  window.addEventListener("click", handleClick);
+  return () => window.removeEventListener("click", handleClick);
+}, []);
+
 const sounds = {
   ching: () => playSound("ching"),
   deduct: () => playSound("deduct"),
