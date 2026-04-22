@@ -456,6 +456,28 @@ const handleLogin = () => {
 
   // ── Loading screen ────────────────────────────────────────────────────────
   if (loading) return (
+     if (!isTeacher) return (
+    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)", fontFamily:"'Fredoka One',sans-serif" }}>
+      <div style={{ background:"#fff", borderRadius:24, padding:"40px 36px", boxShadow:"0 12px 48px #0006", width:"100%", maxWidth:380, textAlign:"center" }}>
+        <DinoSVG id="trex" c="#C0392B" size={80}/>
+        <h1 style={{ fontSize:28, color:"#1a472a", margin:"12px 0 4px", letterSpacing:2 }}>DINO BUCKS</h1>
+        <p style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13, marginBottom:24 }}>Teacher Login</p>
+        <input value={loginUser} onChange={e => setLoginUser(e.target.value)} placeholder="Username"
+          style={{ width:"100%", padding:"11px 14px", borderRadius:12, border:"2.5px solid #4B9B6E", fontSize:16, fontFamily:"'Nunito',sans-serif", outline:"none", marginBottom:10 }}/>
+        <input type="password" value={loginPass} onChange={e => setLoginPass(e.target.value)} placeholder="Password"
+          onKeyDown={e => e.key === "Enter" && handleLogin()}
+          style={{ width:"100%", padding:"11px 14px", borderRadius:12, border:"2.5px solid #4B9B6E", fontSize:16, fontFamily:"'Nunito',sans-serif", outline:"none", marginBottom:10 }}/>
+        {loginError && <div style={{ color:"#e74c3c", fontFamily:"'Nunito',sans-serif", fontSize:13, marginBottom:8 }}>{loginError}</div>}
+        <button onClick={handleLogin} style={{ width:"100%", padding:"13px", background:"linear-gradient(135deg,#4B9B6E,#1e8449)", color:"#fff", border:"none", borderRadius:14, cursor:"pointer", fontSize:20, fontFamily:"'Fredoka One',sans-serif", boxShadow:"0 5px 18px #1e844966" }}>
+          🦕 Login
+        </button>
+        <p style={{ color:"#bbb", fontFamily:"'Nunito',sans-serif", fontSize:11, marginTop:16 }}>Students: view-only mode when not logged in</p>
+        <button onClick={() => setIsTeacher("readonly")} style={{ background:"none", border:"none", cursor:"pointer", color:"#4B9B6E", fontFamily:"'Nunito',sans-serif", fontSize:13, textDecoration:"underline" }}>
+          Enter as student (read-only)
+        </button>
+      </div>
+    </div>
+  );
     <div style={{ minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a472a",color:"#a8d8b5",fontSize:28,fontFamily:"'Fredoka One',sans-serif",gap:16,flexDirection:"column" }}>
       <DinoSVG id="trex" c="#C0392B" size={72}/>
       <div>Loading Dino Bucks...</div>
