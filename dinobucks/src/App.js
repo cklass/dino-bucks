@@ -304,6 +304,22 @@ export default function App() {
   const [newJobPay,  setNewJobPay]    = useState("10");
   const [newJobEmoji,setNewJobEmoji]  = useState("⭐");
   const [showReset,  setShowReset]    = useState(false);
+  const [isTeacher,  setIsTeacher]   = useState(false);
+const [loginUser,  setLoginUser]   = useState("");
+const [loginPass,  setLoginPass]   = useState("");
+const [loginError, setLoginError]  = useState("");
+
+const TEACHER_USER = "MrKlassen";
+const TEACHER_PASS = "DinoBucks2026";
+
+const handleLogin = () => {
+  if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
+    setIsTeacher(true);
+    setLoginError("");
+  } else {
+    setLoginError("Incorrect username or password.");
+  }
+};
 
   // Debounce Firebase writes so rapid clicks don't spam
   const saveTimer = useRef(null);
