@@ -3,15 +3,42 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { saveToFirebase, subscribeToFirebase } from "./firebase";
 
 // — Sound effects
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let ctx;
-const getCtx = () => { if (!ctx) ctx = new AudioCtx(); return ctx; };
+const playSound = (type) => {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const c = new AudioCtx();
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.connect(g);
+    g.connect(c.destination);
+
+    if (type === "ching") {
+      o.frequency.setValueAtTime(1200, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(800, c.currentTime + 0.1);
+      g.gain.setValueAtTime(0.3, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.4);
+      o.start(); o.stop(c.currentTime + 0.4);
+    } else if (type === "deduct") {
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(300, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(100, c.currentTime + 0.2);
+      g.gain.setValueAtTime(0.2, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.3);
+      o.start(); o.stop(c.currentTime + 0.3);
+    } else if (type === "pop") {
+      o.frequency.setValueAtTime(600, c.currentTime);
+      g.gain.setValueAtTime(0.2, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.1);
+      o.start(); o.stop(c.currentTime + 0.1);
+    }
+  } catch(e) {}
+};
 
 const sounds = {
-  ching: () => { const c=getCtx(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.setValueAtTime(1200,c.currentTime); o.frequency.exponentialRampToValueAtTime(800,c.currentTime+0.1); g.gain.setValueAtTime(0.3,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.4); o.start(); o.stop(c.currentTime+0.4); },
-  deduct: () => { const c=getCtx(),o=c.createOscillator(),g=c.createGain(); o.type="sawtooth"; o.connect(g); g.connect(c.destination); o.frequency.setValueAtTime(300,c.currentTime); o.frequency.exponentialRampToValueAtTime(100,c.currentTime+0.2); g.gain.setValueAtTime(0.2,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.3); o.start(); o.stop(c.currentTime+0.3); },
-  pop: () => { const c=getCtx(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.setValueAtTime(600,c.currentTime); g.gain.setValueAtTime(0.2,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.1); o.start(); o.stop(c.currentTime+0.1); },
-  click: () => { const c=getCtx(),o=c.createOscillator(),g=c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.setValueAtTime(400,c.currentTime); g.gain.setValueAtTime(0.1,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.05); o.start(); o.stop(c.currentTime+0.05); },
+  ching: () => playSound("ching"),
+  deduct: () => playSound("deduct"),
+  pop: () => playSound("pop"),
 };
 
 // ── Canadian bill colours ─────────────────────────────────────────────────────
@@ -281,7 +308,7 @@ export default function App() {
     saveTimer.current = setTimeout(() => {
       setSyncing(true);
       saveToFirebase(latestState.current).finally(() => setSyncing(false));
-    }, 600);
+        }, 600);
   }, []);
 
   // ── Subscribe to Firebase on mount ────────────────────────────────────────
@@ -317,6 +344,7 @@ export default function App() {
   // ── Actions ───────────────────────────────────────────────────────────────
   const addTx = (studentId, amount, reason) => {
     const tx = { id: uuid(), studentId, amount, reason, date: todayStr() };
+    if (amount > 0) sounds.ching(); else sounds.deduct();
     update(prev => ({
       ...prev,
       txLog: [tx, ...(prev.txLog || []).slice(0, 299)],
