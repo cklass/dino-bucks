@@ -569,9 +569,6 @@ const handleLogin = () => {
           <button onClick={handlePayDay} style={{ padding:"10px 20px",background:"linear-gradient(135deg,#f39c12,#d68910)",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:18,fontFamily:"'Fredoka One',sans-serif",boxShadow:"0 3px 14px #d6891066" }}>
             💰 Payday!
           </button>
-          <button onClick={handleInterest} style={{ padding:"10px 20px",background:"linear-gradient(135deg,#1abc9c,#148f77)",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:18,fontFamily:"'Fredoka One',sans-serif",boxShadow:"0 3px 14px #1abc9c66" }}>
-            💹 Interest
-          </button>
           <button onClick={() => { setIsTeacher(false); setLoginUser(""); setLoginPass(""); }}
             style={{ padding:"8px 16px",background:"rgba(255,255,255,0.2)",color:"#fff",border:"2px solid rgba(255,255,255,0.4)",borderRadius:10,cursor:"pointer",fontSize:14,fontFamily:"'Fredoka One',sans-serif" }}>
             🔒 Logout
