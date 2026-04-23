@@ -624,19 +624,14 @@ const handleLogin = () => {
                 <div style={{ fontFamily:"'Nunito',sans-serif",fontWeight:800,color:"#444",marginBottom:6 }}>Amount</div>
                 <input type="number" value={payAmt} onChange={e => setPayAmt(e.target.value)} min="1" placeholder="10"
                   style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #4B9B6E",fontSize:22,fontFamily:"'Fredoka One',sans-serif",outline:"none" }}/>
-                <div style={{ display:"flex",gap:7,marginTop:8,flexWrap:"wrap" }}>{[1,2,5,10,20,50,100].map(a => (
-                    <button key={a} onClick={() => setPayAmt(String(a))}
-                      style={{ padding:"5px 11px", background:billColour(a).bg, color:"#fff", border: a<=2 ? "3px solid rgba(255,255,255,0.4)" : "none", borderRadius: a<=2 ? "50%" : 8, width: a<=2 ? 44 : undefined, height: a<=2 ? 44 : undefined, cursor:"pointer", fontSize:13, fontFamily:"'Fredoka One',sans-serif", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                      {fmt(a)}
-                    </button>
-                  ))}
-                </div>
-                {[1,2,5,10,20,50,100].map(amt => (
+                <div style={{ display:"flex",gap:7,marginTop:8,flexWrap:"wrap" }}>
+                  {[1,2,5,10,20,50,100].map(amt => (
                     <button key={amt} onClick={() => setPayAmt(String(amt))}
-                      style={{ padding:"5px 11px", background:billColour(amt).bg, color:"#fff", border:"none", borderRadius: amt <= 2 ? "50%" : 8, width: amt <= 2 ? 44 : undefined, height: amt <= 2 ? 44 : undefined, cursor:"pointer", fontSize:13, fontFamily:"'Fredoka One',sans-serif" }}>
+                      style={{ padding:"5px 11px", background:billColour(amt).bg, color:"#fff", border: amt<=2 ? "3px solid rgba(255,255,255,0.4)" : "none", borderRadius: amt<=2 ? "50%" : 8, width: amt<=2 ? 44 : undefined, height: amt<=2 ? 44 : undefined, cursor:"pointer", fontSize:13, fontFamily:"'Fredoka One',sans-serif", display:"flex", alignItems:"center", justifyContent:"center" }}>
                       {fmt(amt)}
                     </button>
                   ))}
+                </div>
               </div>
               <div style={{ flex:2,minWidth:200 }}>
                 <div style={{ fontFamily:"'Nunito',sans-serif",fontWeight:800,color:"#444",marginBottom:6 }}>Reason</div>
@@ -644,10 +639,8 @@ const handleLogin = () => {
                   style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #4B9B6E",fontSize:15,fontFamily:"'Nunito',sans-serif",outline:"none" }}/>
                 <div style={{ display:"flex",gap:6,marginTop:8,flexWrap:"wrap" }}>
                   {["Job completed","Great work!","Bonus","Homework done","Helped a classmate","Class participation"].map(r => (
-                    <button key={r} onClick={() => setPayReason(r)} 
-                    style={{ padding: a<=2?"8px":"8px 18px", width:a<=2?48:undefined, height:a<=2?48:undefined, background:billColour(a).bg, color:"#fff", border: a<=2?"3px solid rgba(255,255,255,0.4)":"none", borderRadius:a<=2?"50%":10, cursor:"pointer", fontSize:a<=2?13:16, fontFamily:"'Fredoka One',sans-serif", boxShadow:`0 3px 10px ${billColour(a).bg}66`, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                    +{fmt(a)}
-                    </button>
+                    <button key={r} onClick={() => setPayReason(r)}
+                      style={{ padding:"4px 9px",background:"#e8f5e9",border:"1.5px solid #4B9B6E",borderRadius:7,cursor:"pointer",fontSize:11,fontFamily:"'Nunito',sans-serif",color:"#1a472a" }}>{r}</button>
                   ))}
                 </div>
               </div>
