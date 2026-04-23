@@ -412,7 +412,7 @@ const handleLogin = () => {
       const newBalances = { ...prev.balances };
       const newTxLog = [...(prev.txLog||[])];
       prev.students.forEach(s => {
-        const interest = Math.round((newBalances[s.id]||0) * 0.08);
+        const interest = Math.round((newBalances[s.id]||0) * 0.02);
         if (interest > 0) {
           newBalances[s.id] = (newBalances[s.id]||0) + interest;
           newTxLog.unshift({ id:uuid(), studentId:s.id, amount:interest, reason:"8% Interest", date:todayStr() });
@@ -475,7 +475,7 @@ const handleLogin = () => {
       const newBalances = { ...prev.balances };
       const newTxLog = [...(prev.txLog||[])];
       prev.students.forEach(s => {
-        const interest = Math.round((newBalances[s.id]||0) * 0.08);
+        const interest = Math.round((newBalances[s.id]||0) * 0.02);
         if (interest > 0) {
           newBalances[s.id] = (newBalances[s.id]||0) + interest;
           newTxLog.unshift({ id:uuid(), studentId:s.id, amount:interest, reason:"8% Interest", date:todayStr() });
