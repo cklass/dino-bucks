@@ -211,13 +211,31 @@ const CLASS_LIST = [
 ];
 
 const DEFAULT_STORE = [
-  { id:"s1", name:"No Homework Pass",   price:50,  emoji:"📝", type:"privilege" },
-  { id:"s2", name:"Sit Anywhere Day",   price:30,  emoji:"💺", type:"privilege" },
-  { id:"s3", name:"Extra Recess",       price:40,  emoji:"⚽", type:"privilege" },
-  { id:"s4", name:"Lunch with Teacher", price:100, emoji:"🍽️", type:"privilege" },
-  { id:"s5", name:"Pencil",             price:5,   emoji:"✏️", type:"physical"  },
-  { id:"s6", name:"Sticker Pack",       price:10,  emoji:"⭐", type:"physical"  },
-  { id:"s7", name:"Bookmark",           price:8,   emoji:"🔖", type:"physical"  },
+  // Privileges
+  { id:"s1",  name:"Sit Anywhere Day",         price:40,  emoji:"💺", type:"privilege" },
+  { id:"s2",  name:"Brain Break DJ",           price:60,  emoji:"🎵", type:"privilege" },
+  { id:"s3", name:"Show & Tell Wildcard",     price:45,  emoji:"🌟", type:"privilege" },
+  // Experiences
+  { id:"s4", name:"Be the Teacher 5min",      price:100, emoji:"🍎", type:"experience" },
+  { id:"s5", name:"Movie Clip Pick",          price:70,  emoji:"🎬", type:"experience" },
+  { id:"s6", name:"iPad Free Time 15min",     price:80,  emoji:"📱", type:"experience" },
+  { id:"s7", name:"Read to the Class",        price:65,  emoji:"🎤", type:"experience" },
+  { id:"s8", name:"Whiteboard Free Draw",     price:40,  emoji:"🖊️", type:"experience" },
+  { id:"s9", name:"Lunch with a Friend",      price:90,  emoji:"👫", type:"experience" },
+  // Physical
+  { id:"s10", name:"Mechanical Pencil",        price:15,  emoji:"✒️", type:"physical" },
+  { id:"s11", name:"Highlighter Set",          price:20,  emoji:"🖍️", type:"physical" },
+  { id:"s12", name:"Mini Notebook",            price:18,  emoji:"📓", type:"physical" },
+  { id:"s13", name:"Eraser Pack",              price:10,  emoji:"🧹", type:"physical" },
+  { id:"s14", name:"Fun Pen",                  price:12,  emoji:"🖊️", type:"physical" },
+  { id:"s15", name:"Sticker Sheet",            price:8,   emoji:"⭐", type:"physical" },
+  { id:"s16", name:"Bookmark",                 price:10,  emoji:"🔖", type:"physical" },
+  { id:"s17", name:"Stress Ball",              price:25,  emoji:"🔵", type:"physical" },
+  { id:"s18", name:"Fidget Toy",               price:30,  emoji:"🌀", type:"physical" },
+  // Social
+  { id:"s19", name:"Shoutout on the Board",    price:25,  emoji:"📢", type:"social" },
+  { id:"s20", name:"Compliment Jar Pull",      price:20,  emoji:"💌", type:"social" },
+  { id:"s21", name:"Buddy Read Pick",          price:30,  emoji:"👥", type:"social" },
 ];
 const DEFAULT_JOBS = [
   { id:"j1",  name:"Door Holder",      pay:5,  emoji:"🚪" },
@@ -846,7 +864,9 @@ const handleLogin = () => {
                   <input id="sPrice" type="number" placeholder="Price" style={{ width:80,padding:"7px",borderRadius:8,border:"2px solid #4B9B6E",fontSize:15,fontFamily:"'Fredoka One',sans-serif",outline:"none" }}/>
                   <select id="sType" style={{ padding:"7px",borderRadius:8,border:"2px solid #4B9B6E",fontSize:13,fontFamily:"'Nunito',sans-serif",outline:"none" }}>
                     <option value="privilege">Privilege</option>
+                    <option value="experience">Experience</option>
                     <option value="physical">Physical</option>
+                    <option value="social">Social</option>
                   </select>
                   <button onClick={() => {
                     const emoji = document.getElementById("sEmoji").value || "🎁";
