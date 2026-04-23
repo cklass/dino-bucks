@@ -210,6 +210,15 @@ const CLASS_LIST = [
   { name:"Umaima Jabbar",       dinoId:"herrerasaurus"      },
 ];
 
+const DEFAULT_STORE = [
+  { id:"s1", name:"No Homework Pass",   price:50,  emoji:"📝", type:"privilege" },
+  { id:"s2", name:"Sit Anywhere Day",   price:30,  emoji:"💺", type:"privilege" },
+  { id:"s3", name:"Extra Recess",       price:40,  emoji:"⚽", type:"privilege" },
+  { id:"s4", name:"Lunch with Teacher", price:100, emoji:"🍽️", type:"privilege" },
+  { id:"s5", name:"Pencil",             price:5,   emoji:"✏️", type:"physical"  },
+  { id:"s6", name:"Sticker Pack",       price:10,  emoji:"⭐", type:"physical"  },
+  { id:"s7", name:"Bookmark",           price:8,   emoji:"🔖", type:"physical"  },
+];
 const DEFAULT_JOBS = [
   { id:"j1",  name:"Door Holder",      pay:5,  emoji:"🚪" },
   { id:"j2",  name:"Board Cleaner",    pay:10, emoji:"🧹" },
@@ -231,7 +240,7 @@ const SEED_STATE = () => {
   const students = CLASS_LIST.map(s => ({ id: uuid(), name: s.name, dinoId: s.dinoId }));
   const balances = {};
   students.forEach(s => { balances[s.id] = 0; });
-  return { students, balances, jobs: DEFAULT_JOBS, assigned: {}, txLog: [], lastRotation: null, prevAssigned: {} };
+  return { students, balances, jobs: DEFAULT_JOBS, assigned: {}, txLog: [], lastRotation: null, prevAssigned: {}, storeItems: DEFAULT_STORE, purchases: [] };
 };
 
 // ── Student card ──────────────────────────────────────────────────────────────
@@ -541,6 +550,7 @@ const handleLogin = () => {
         {tabBtn("pay","💵 Pay")}
         {tabBtn("jobs","👷 Jobs")}
         {tabBtn("log","📋 History")}
+        {tabBtn("store","🏪 Store")}
         {tabBtn("settings","⚙️ Settings")}
       </div>
 
@@ -723,6 +733,111 @@ const handleLogin = () => {
           </div>
         )}
 
+{/* ═══ STORE ═══ */}
+        {tab==="store" && (
+          <div>
+            <h2 style={{ fontSize:26,color:"#1a472a",marginTop:0 }}>Dino Store 🏪</h2>
+
+            {/* Pending approvals — teacher only */}
+            {isTeacher === true && (appState.purchases||[]).filter(p => p.status==="pending").length > 0 && (
+              <div style={{ background:"#fffbf0",border:"2px solid #f39c1244",borderRadius:14,padding:16,marginBottom:20 }}>
+                <h3 style={{ fontSize:18,color:"#1a472a",margin:"0 0 12px" }}>⏳ Pending Approvals</h3>
+                {(appState.purchases||[]).filter(p => p.status==="pending").map(p => {
+                  const stu = students.find(s => s.id === p.studentId);
+                  const item = (appState.storeItems||[]).find(i => i.id === p.itemId);
+                  return (
+                    <div key={p.id} style={{ display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:"#fff",borderRadius:12,marginBottom:8,border:"1.5px solid #f39c1244" }}>
+                      <span style={{ fontSize:24 }}>{item?.emoji}</span>
+                      <div style={{ flex:1,fontFamily:"'Nunito',sans-serif" }}>
+                        <strong>{stu?.name}</strong> wants <strong>{item?.name}</strong>
+                        <span style={{ color:"#e74c3c",marginLeft:8,fontFamily:"'Fredoka One',sans-serif" }}>{fmt(item?.price)}</span>
+                      </div>
+                      <button onClick={() => {
+                        update(prev => ({
+                          ...prev,
+                          balances: { ...prev.balances, [p.studentId]: Math.max(0,(prev.balances[p.studentId]||0) - item.price) },
+                          txLog: [{ id:uuid(), studentId:p.studentId, amount:-item.price, reason:`Bought: ${item.name}`, date:todayStr() }, ...(prev.txLog||[])],
+                          purchases: prev.purchases.map(x => x.id===p.id ? {...x, status:"approved"} : x),
+                        }));
+                        showToast(`✅ Approved ${stu?.name}'s purchase!`);
+                      }} style={{ padding:"6px 14px",background:"#27ae60",color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontFamily:"'Fredoka One',sans-serif",fontSize:14 }}>✅ Approve</button>
+                      <button onClick={() => {
+                        update(prev => ({ ...prev, purchases: prev.purchases.map(x => x.id===p.id ? {...x, status:"rejected"} : x) }));
+                        showToast(`❌ Rejected`, "#e74c3c");
+                      }} style={{ padding:"6px 14px",background:"#e74c3c",color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontFamily:"'Fredoka One',sans-serif",fontSize:14 }}>❌ Reject</button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Store items grid */}
+            <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:14,marginBottom:24 }}>
+              {(appState.storeItems||[]).map(item => {
+                const alreadyPending = (appState.purchases||[]).some(p => p.itemId===item.id && p.studentId===selected && p.status==="pending");
+                const canAfford = selected && (balances[selected]||0) >= item.price;
+                return (
+                  <div key={item.id} style={{ background:"linear-gradient(135deg,#f9f9f9,#f0fbf4)",border:"2px solid #4B9B6E33",borderRadius:16,padding:16,textAlign:"center",position:"relative" }}>
+                    {isTeacher === true && (
+                      <button onClick={() => update(prev => ({ ...prev, storeItems: prev.storeItems.filter(i => i.id !== item.id) }))}
+                        style={{ position:"absolute",top:6,right:8,background:"none",border:"none",cursor:"pointer",fontSize:14,color:"#e74c3c" }}>✕</button>
+                    )}
+                    <div style={{ fontSize:36,marginBottom:6 }}>{item.emoji}</div>
+                    <div style={{ fontWeight:800,fontSize:14,color:"#1a1a2e",marginBottom:4 }}>{item.name}</div>
+                    <div style={{ fontSize:11,color:"#888",fontFamily:"'Nunito',sans-serif",marginBottom:8 }}>{item.type}</div>
+                    <div style={{ background:billColour(item.price).bg,color:"#fff",borderRadius:20,padding:"4px 12px",fontSize:15,fontFamily:"'Fredoka One',sans-serif",display:"inline-block",marginBottom:10 }}>{fmt(item.price)}</div>
+                    {isTeacher !== true && (
+                      <button onClick={() => {
+                        if (!selected) return showToast("Select a student first!", "#e74c3c");
+                        if (!canAfford) return showToast("Not enough Dino Bucks!", "#e74c3c");
+                        if (alreadyPending) return showToast("Already requested!", "#f39c12");
+                        update(prev => ({ ...prev, purchases: [...(prev.purchases||[]), { id:uuid(), studentId:selected, itemId:item.id, status:"pending", date:todayStr() }] }));
+                        showToast(`🛒 Request sent for ${item.name}!`, "#2471A3");
+                      }} style={{ width:"100%",padding:"7px",background: alreadyPending?"#f39c12":canAfford?"#4B9B6E":"#ccc",color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontFamily:"'Fredoka One',sans-serif",fontSize:13 }}>
+                        {alreadyPending ? "⏳ Pending" : canAfford ? "🛒 Buy" : "Can't afford"}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Add item — teacher only */}
+            {isTeacher === true && (
+              <div style={{ background:"#f9f9f9",border:"2px dashed #4B9B6E77",borderRadius:14,padding:16,maxWidth:500 }}>
+                <div style={{ fontSize:15,color:"#1a472a",marginBottom:10,fontWeight:700 }}>➕ Add Store Item</div>
+                <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+                  <input id="sEmoji" placeholder="🎁" maxLength={2} style={{ width:48,padding:"7px",borderRadius:8,border:"2px solid #4B9B6E",fontSize:20,textAlign:"center",outline:"none" }}/>
+                  <input id="sName" placeholder="Item name" style={{ flex:2,minWidth:120,padding:"7px 11px",borderRadius:8,border:"2px solid #4B9B6E",fontSize:14,fontFamily:"'Nunito',sans-serif",outline:"none" }}/>
+                  <input id="sPrice" type="number" placeholder="Price" style={{ width:80,padding:"7px",borderRadius:8,border:"2px solid #4B9B6E",fontSize:15,fontFamily:"'Fredoka One',sans-serif",outline:"none" }}/>
+                  <select id="sType" style={{ padding:"7px",borderRadius:8,border:"2px solid #4B9B6E",fontSize:13,fontFamily:"'Nunito',sans-serif",outline:"none" }}>
+                    <option value="privilege">Privilege</option>
+                    <option value="physical">Physical</option>
+                  </select>
+                  <button onClick={() => {
+                    const emoji = document.getElementById("sEmoji").value || "🎁";
+                    const name  = document.getElementById("sName").value.trim();
+                    const price = parseInt(document.getElementById("sPrice").value) || 10;
+                    const type  = document.getElementById("sType").value;
+                    if (!name) return showToast("Enter an item name!", "#e74c3c");
+                    update(prev => ({ ...prev, storeItems: [...(prev.storeItems||[]), { id:uuid(), name, price, emoji, type }] }));
+                    document.getElementById("sEmoji").value="";
+                    document.getElementById("sName").value="";
+                    document.getElementById("sPrice").value="";
+                    showToast("Item added to store!");
+                  }} style={{ padding:"7px 18px",background:"#4B9B6E",color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontSize:15,fontFamily:"'Fredoka One',sans-serif" }}>Add</button>
+                </div>
+              </div>
+            )}
+
+            {/* Student selector reminder */}
+            {isTeacher !== true && !selected && (
+              <div style={{ textAlign:"center",padding:"20px",background:"#f0fbf4",borderRadius:12,border:"2px solid #4B9B6E33",fontFamily:"'Nunito',sans-serif",color:"#666",fontSize:14 }}>
+                👆 Go to the Class tab and click your dinosaur first, then come back to buy!
+              </div>
+            )}
+          </div>
+        )}
         {/* ═══ SETTINGS ═══ */}
         {tab==="settings" && (
           <div style={{ maxWidth:540 }}>
