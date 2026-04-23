@@ -790,16 +790,6 @@ const handleLogin = () => {
             <h2 style={{ fontSize:26,color:"#1a472a",marginTop:0 }}>Dino Store 🏪</h2>
 
             {/* Pending approvals — teacher only */}
-            {isTeacher === true && (
-              <button onClick={() => {
-                if (window.confirm("Reset store to default items? This will remove all current items.")) {
-                  update(prev => ({ ...prev, storeItems: DEFAULT_STORE }));
-                  showToast("Store reset to defaults!");
-                }
-              }} style={{ padding:"8px 18px",background:"#8e44ad",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:14,fontFamily:"'Fredoka One',sans-serif",marginBottom:16 }}>
-                🔄 Reset Store to Defaults
-              </button>
-            )}
             {isTeacher === true && (appState.purchases||[]).filter(p => p.status==="pending").length > 0 && (
               <div style={{ background:"#fffbf0",border:"2px solid #f39c1244",borderRadius:14,padding:16,marginBottom:20 }}>
                 <h3 style={{ fontSize:18,color:"#1a472a",margin:"0 0 12px" }}>⏳ Pending Approvals</h3>
