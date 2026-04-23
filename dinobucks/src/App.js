@@ -389,6 +389,21 @@ const handleLogin = () => {
   };
 
   const handlePayDay = () => {
+    const handleInterest = () => {
+    update(prev => {
+      const newBalances = { ...prev.balances };
+      const newTxLog = [...(prev.txLog||[])];
+      prev.students.forEach(s => {
+        const interest = Math.round((newBalances[s.id]||0) * 0.08);
+        if (interest > 0) {
+          newBalances[s.id] = (newBalances[s.id]||0) + interest;
+          newTxLog.unshift({ id:uuid(), studentId:s.id, amount:interest, reason:"8% Interest", date:todayStr() });
+        }
+      });
+      return { ...prev, balances: newBalances, txLog: newTxLog };
+    });
+    showToast("💹 8% interest paid to all dinos!");
+  };
     if (!appState) return;
     let count = 0;
     const newBalances = { ...appState.balances };
@@ -539,6 +554,9 @@ const handleLogin = () => {
           </div>
           <button onClick={handlePayDay} style={{ padding:"10px 20px",background:"linear-gradient(135deg,#f39c12,#d68910)",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:18,fontFamily:"'Fredoka One',sans-serif",boxShadow:"0 3px 14px #d6891066" }}>
             💰 Payday!
+          </button>
+          <button onClick={handleInterest} style={{ padding:"10px 20px",background:"linear-gradient(135deg,#1abc9c,#148f77)",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:18,fontFamily:"'Fredoka One',sans-serif",boxShadow:"0 3px 14px #1abc9c66" }}>
+            💹 Interest
           </button>
           <button onClick={() => { setIsTeacher(false); setLoginUser(""); setLoginPass(""); }}
             style={{ padding:"8px 16px",background:"rgba(255,255,255,0.2)",color:"#fff",border:"2px solid rgba(255,255,255,0.4)",borderRadius:10,cursor:"pointer",fontSize:14,fontFamily:"'Fredoka One',sans-serif" }}>
@@ -759,8 +777,8 @@ const handleLogin = () => {
                       <button onClick={() => {
                         update(prev => ({
                           ...prev,
-                          balances: { ...prev.balances, [p.studentId]: Math.max(0,(prev.balances[p.studentId]||0) - item.price) },
-                          txLog: [{ id:uuid(), studentId:p.studentId, amount:-item.price, reason:`Bought: ${item.name}`, date:todayStr() }, ...(prev.txLog||[])],
+                          balances: { ...prev.balances, [p.studentId]: Math.max(0,(prev.balances[p.studentId]||0) - Math.round(item.price * 1.13)) },
+                          txLog: [{ id:uuid(), studentId:p.studentId, amount:-Math.round(item.price * 1.13), reason:`Bought: ${item.name} (incl. 13% tax)`, date:todayStr() }, ...(prev.txLog||[])],
                           purchases: prev.purchases.map(x => x.id===p.id ? {...x, status:"approved"} : x),
                         }));
                         showToast(`✅ Approved ${stu?.name}'s purchase!`);
@@ -789,7 +807,8 @@ const handleLogin = () => {
                     <div style={{ fontSize:36,marginBottom:6 }}>{item.emoji}</div>
                     <div style={{ fontWeight:800,fontSize:14,color:"#1a1a2e",marginBottom:4 }}>{item.name}</div>
                     <div style={{ fontSize:11,color:"#888",fontFamily:"'Nunito',sans-serif",marginBottom:8 }}>{item.type}</div>
-                    <div style={{ background:billColour(item.price).bg,color:"#fff",borderRadius:20,padding:"4px 12px",fontSize:15,fontFamily:"'Fredoka One',sans-serif",display:"inline-block",marginBottom:10 }}>{fmt(item.price)}</div>
+                    <div style={{ background:billColour(item.price).bg,color:"#fff",borderRadius:20,padding:"4px 12px",fontSize:15,fontFamily:"'Fredoka One',sans-serif",display:"inline-block",marginBottom:4 }}>{fmt(item.price)}</div>
+                    <div style={{ fontSize:10,color:"#888",fontFamily:"'Nunito',sans-serif",marginBottom:8 }}>+13% tax = {fmt(Math.round(item.price*1.13))}</div>
                     {isTeacher !== true && (
                       <button onClick={() => {
                         if (!selected) return showToast("Select a student first!", "#e74c3c");
