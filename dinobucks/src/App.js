@@ -45,14 +45,15 @@ const sounds = {
 
 // ── Canadian bill colours ─────────────────────────────────────────────────────
 const BILL = {
+  1:   { bg:"#A0785A", light:"#f5ede6" },
+  2:   { bg:"#8B9E6B", light:"#edf2e4" },
   5:   { bg:"#4A7FBF", light:"#daeaf8" },
   10:  { bg:"#7B68A8", light:"#e8e3f5" },
   20:  { bg:"#3A9A5C", light:"#d4f0e2" },
   50:  { bg:"#C0392B", light:"#fde8e8" },
   100: { bg:"#7D5A3C", light:"#f0e6d8" },
 };
-const billColour = n => n>=100?BILL[100]:n>=50?BILL[50]:n>=20?BILL[20]:n>=10?BILL[10]:BILL[5];
-
+const billColour = n => n>=100?BILL[100]:n>=50?BILL[50]:n>=20?BILL[20]:n>=10?BILL[10]:n>=2?BILL[2]:BILL[1];
 function shade(hex, amt) {
   const n = parseInt(hex.replace("#",""),16);
   const r = Math.min(255,Math.max(0,(n>>16)+amt));
