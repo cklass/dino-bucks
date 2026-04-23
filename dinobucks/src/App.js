@@ -309,6 +309,9 @@ export default function App() {
   const [newJobPay,  setNewJobPay]    = useState("10");
   const [newJobEmoji,setNewJobEmoji]  = useState("⭐");
   const [showReset,  setShowReset]    = useState(false);
+  const [deductModal, setDeductModal] = useState(false);
+  const [deductAmt,   setDeductAmt]   = useState("");
+  const [deductReason,setDeductReason]= useState("Deduction");
   const [isTeacher,  setIsTeacher]   = useState(false);
 const [loginUser,  setLoginUser]   = useState("");
 const [loginPass,  setLoginPass]   = useState("");
@@ -595,14 +598,15 @@ const handleLogin = () => {
                        style={{ padding:"5px 11px", background:billColour(a).bg, color:"#fff", border: a<=2 ? "3px solid rgba(255,255,255,0.4)" : "none", borderRadius: a<=2 ? "50%" : 8, width: a<=2 ? 44 : undefined, height: a<=2 ? 44 : undefined, cursor:"pointer", fontSize:13, fontFamily:"'Fredoka One',sans-serif", display:"flex", alignItems:"center", justifyContent:"center" }}>
                        {fmt(a)}
                        </button>
-   ))}
-                    <button onClick={() => {
-                      const raw = window.prompt(`Deduct how much from ${selStudent.name}?`, "5");
-                      const a = parseInt(raw||"0");
-                      if (a > 0) { addTx(selected, -a, "Deduction"); showToast(`-${fmt(a)} from ${selStudent.name}`, "#e74c3c"); }
-                    }} style={{ padding:"8px 18px",background:"#e74c3c",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>
-                      − Deduct
-                    </button>
+   ))}              
+                    <button onClick={() => { const raw = window.prompt(`Custom bonus for ${selStudent.name}?`,""); const a = parseInt(raw||"0"); if(a>0){addTx(selected,a,"Custom bonus");showToast(`+${fmt(a)} to ${selStudent.name}! 🦕`);}}}
+      style={{ padding:"8px 18px",background:"#8e44ad",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>
+      + Custom
+    </button>
+                    <button onClick={() => setDeductModal(true)}
+      style={{ padding:"8px 18px",background:"#e74c3c",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>
+      − Deduct
+    </button>
                   </div>
                   {sLog.length > 0 && <div>{sLog.map(tx => <TxRow key={tx.id} tx={tx} students={students}/>)}</div>}
                 </div>
@@ -874,6 +878,36 @@ const handleLogin = () => {
           </div>
         )}
       </div>
+
+      {/* DEDUCT MODAL */}
+      {deductModal && selStudent && (
+        <div style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9998 }}>
+          <div style={{ background:"#fff",borderRadius:20,padding:28,width:"100%",maxWidth:360,boxShadow:"0 12px 48px #0006",fontFamily:"'Fredoka One',sans-serif" }}>
+            <h3 style={{ fontSize:22,color:"#c0392b",margin:"0 0 16px" }}>− Deduct from {selStudent.name.split(" ")[0]}</h3>
+            <div style={{ fontFamily:"'Nunito',sans-serif",fontWeight:800,color:"#444",marginBottom:6 }}>Amount</div>
+            <input type="number" value={deductAmt} onChange={e => setDeductAmt(e.target.value)} placeholder="5" autoFocus
+              style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #e74c3c",fontSize:22,fontFamily:"'Fredoka One',sans-serif",outline:"none",marginBottom:12 }}/>
+            <div style={{ fontFamily:"'Nunito',sans-serif",fontWeight:800,color:"#444",marginBottom:6 }}>Reason</div>
+            <input value={deductReason} onChange={e => setDeductReason(e.target.value)} placeholder="Reason for deduction"
+              style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #e74c3c",fontSize:15,fontFamily:"'Nunito',sans-serif",outline:"none",marginBottom:10 }}/>
+            <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:16 }}>
+              {["Deduction","Late work","Lost materials","Disruptive behaviour","Fines"].map(r => (
+                <button key={r} onClick={() => setDeductReason(r)}
+                  style={{ padding:"4px 9px",background: deductReason===r?"#e74c3c":"#f5f5f5",color:deductReason===r?"#fff":"#333",border:"1.5px solid #e74c3c",borderRadius:7,cursor:"pointer",fontSize:11,fontFamily:"'Nunito',sans-serif" }}>{r}</button>
+              ))}
+            </div>
+            <div style={{ display:"flex",gap:10 }}>
+              <button onClick={() => {
+                const a = parseInt(deductAmt||"0");
+                if (a > 0) { addTx(selected, -a, deductReason); showToast(`-${fmt(a)} from ${selStudent.name}`, "#e74c3c"); }
+                setDeductModal(false); setDeductAmt(""); setDeductReason("Deduction");
+              }} style={{ flex:1,padding:"11px",background:"#e74c3c",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:18,fontFamily:"'Fredoka One',sans-serif" }}>− Deduct</button>
+              <button onClick={() => { setDeductModal(false); setDeductAmt(""); setDeductReason("Deduction"); }}
+                style={{ padding:"11px 18px",background:"#eee",color:"#333",border:"none",borderRadius:12,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* TOAST */}
       {toast && (
