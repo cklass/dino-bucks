@@ -454,9 +454,16 @@ const handleLogin = () => {
     }));
   };
 
-  // ── Loading screen ────────────────────────────────────────────────────────
+ // ── Loading screen ────────────────────────────────────────────────────────
   if (loading) return (
-     if (!isTeacher) return (
+    <div style={{ minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a472a",color:"#a8d8b5",fontSize:28,fontFamily:"'Fredoka One',sans-serif",gap:16,flexDirection:"column" }}>
+      <DinoSVG id="trex" c="#C0392B" size={72}/>
+      <div>Loading Dino Bucks...</div>
+      <div style={{ fontSize:13,color:"#6aad86",fontFamily:"'Nunito',sans-serif" }}>Connecting to Firebase...</div>
+    </div>
+  );
+
+  if (!isTeacher) return (
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)", fontFamily:"'Fredoka One',sans-serif" }}>
       <div style={{ background:"#fff", borderRadius:24, padding:"40px 36px", boxShadow:"0 12px 48px #0006", width:"100%", maxWidth:380, textAlign:"center" }}>
         <DinoSVG id="trex" c="#C0392B" size={80}/>
@@ -476,12 +483,6 @@ const handleLogin = () => {
           Enter as student (read-only)
         </button>
       </div>
-    </div>
-  );
-    <div style={{ minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a472a",color:"#a8d8b5",fontSize:28,fontFamily:"'Fredoka One',sans-serif",gap:16,flexDirection:"column" }}>
-      <DinoSVG id="trex" c="#C0392B" size={72}/>
-      <div>Loading Dino Bucks...</div>
-      <div style={{ fontSize:13,color:"#6aad86",fontFamily:"'Nunito',sans-serif" }}>Connecting to Firebase…</div>
     </div>
   );
 
