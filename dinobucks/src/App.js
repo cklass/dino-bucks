@@ -452,6 +452,20 @@ const handleLogin = () => {
   };
 
   const runRotation = () => {
+    // Pay interest first
+    update(prev => {
+      const newBalances = { ...prev.balances };
+      const newTxLog = [...(prev.txLog||[])];
+      prev.students.forEach(s => {
+        const interest = Math.round((newBalances[s.id]||0) * 0.08);
+        if (interest > 0) {
+          newBalances[s.id] = (newBalances[s.id]||0) + interest;
+          newTxLog.unshift({ id:uuid(), studentId:s.id, amount:interest, reason:"8% Interest", date:todayStr() });
+        }
+      });
+      return { ...prev, balances: newBalances, txLog: newTxLog };
+    });
+    showToast("💹 8% interest paid + new jobs assigned!");
     if (!appState) return;
     const newAssigned = buildRotation(appState.students, appState.jobs, appState.assigned || {});
     update(prev => ({ ...prev, prevAssigned: prev.assigned, assigned: newAssigned, lastRotation: todayStr() }));
