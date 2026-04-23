@@ -631,13 +631,12 @@ const handleLogin = () => {
                     </button>
                   ))}
                 </div>
-                 {[1,2,5,10,20,50,100].map(a => (
-                 <button key={a} onClick={() => setPayAmt(String(a))}
-                  style={{ padding:"5px 11px", background:billColour(a).bg, color:"#fff", border: a<=2 ? "3px solid rgba(255,255,255,0.4)" : "none", borderRadius: a<=2 ? "50%" : 8, width: a<=2 ? 44 : undefined, height: a<=2 ? 44 : undefined, cursor:"pointer", fontSize:13, fontFamily:"'Fredoka One',sans-serif", display:"flex", alignItems:"center", justifyContent:"center" }}>
-                  {fmt(a)}
-                  </button>
+                {[1,2,5,10,20,50,100].map(amt => (
+                    <button key={amt} onClick={() => setPayAmt(String(amt))}
+                      style={{ padding:"5px 11px", background:billColour(amt).bg, color:"#fff", border:"none", borderRadius: amt <= 2 ? "50%" : 8, width: amt <= 2 ? 44 : undefined, height: amt <= 2 ? 44 : undefined, cursor:"pointer", fontSize:13, fontFamily:"'Fredoka One',sans-serif" }}>
+                      {fmt(amt)}
+                    </button>
                   ))}
-                </div>
               </div>
               <div style={{ flex:2,minWidth:200 }}>
                 <div style={{ fontFamily:"'Nunito',sans-serif",fontWeight:800,color:"#444",marginBottom:6 }}>Reason</div>
