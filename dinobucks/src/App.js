@@ -578,7 +578,7 @@ const handleLogin = () => {
                   <div style={{ display:"flex",gap:9,flexWrap:"wrap",marginBottom:14 }}>
                     {[1,2,5,10,20,50,100].map(a => (
                       <button key={a} onClick={() => { addTx(selected, a, "Bonus"); showToast(`+${fmt(a)} to ${selStudent.name}! 🦕`); }}
-                        style={{ padding:"8px 18px",background:billColour(a).bg,color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif",boxShadow:`0 3px 10px ${billColour(a).bg}66` }}>
+                        style={{ padding: a<=2?"8px":"8px 18px", width:a<=2?48:undefined, height:a<=2?48:undefined, background:billColour(a).bg, color:"#fff", border: a<=2?"3px solid rgba(255,255,255,0.4)":"none", borderRadius:a<=2?"50%":10, cursor:"pointer", fontSize:a<=2?13:16, fontFamily:"'Fredoka One',sans-serif", boxShadow:`0 3px 10px ${billColour(a).bg}66`, display:"flex", alignItems:"center", justifyContent:"center" }}>
                         +{fmt(a)}
                       </button>
                     ))}
@@ -632,7 +632,10 @@ const handleLogin = () => {
                   style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #4B9B6E",fontSize:15,fontFamily:"'Nunito',sans-serif",outline:"none" }}/>
                 <div style={{ display:"flex",gap:6,marginTop:8,flexWrap:"wrap" }}>
                   {["Job completed","Great work!","Bonus","Homework done","Helped a classmate","Class participation"].map(r => (
-                    <button key={r} onClick={() => setPayReason(r)} style={{ padding:"4px 9px",background:"#e8f5e9",border:"1.5px solid #4B9B6E",borderRadius:7,cursor:"pointer",fontSize:11,fontFamily:"'Nunito',sans-serif",color:"#1a472a" }}>{r}</button>
+                    <button key={r} onClick={() => setPayReason(r)} 
+                    style={{ padding: a<=2?"8px":"8px 18px", width:a<=2?48:undefined, height:a<=2?48:undefined, background:billColour(a).bg, color:"#fff", border: a<=2?"3px solid rgba(255,255,255,0.4)":"none", borderRadius:a<=2?"50%":10, cursor:"pointer", fontSize:a<=2?13:16, fontFamily:"'Fredoka One',sans-serif", boxShadow:`0 3px 10px ${billColour(a).bg}66`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                    +{fmt(a)}
+                    </button>
                   ))}
                 </div>
               </div>
