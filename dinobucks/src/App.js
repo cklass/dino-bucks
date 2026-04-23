@@ -577,11 +577,11 @@ const handleLogin = () => {
                   <BadgeShowcase balance={balances[selected]||0}/>
                   <div style={{ display:"flex",gap:9,flexWrap:"wrap",marginBottom:14 }}>
                     {[1,2,5,10,20,50,100].map(a => (
-                      <button key={a} onClick={() => { addTx(selected, a, "Bonus"); showToast(`+${fmt(a)} to ${selStudent.name}! 🦕`); }}
-                        style={{ padding: a<=2?"8px":"8px 18px", width:a<=2?48:undefined, height:a<=2?48:undefined, background:billColour(a).bg, color:"#fff", border: a<=2?"3px solid rgba(255,255,255,0.4)":"none", borderRadius:a<=2?"50%":10, cursor:"pointer", fontSize:a<=2?13:16, fontFamily:"'Fredoka One',sans-serif", boxShadow:`0 3px 10px ${billColour(a).bg}66`, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                        +{fmt(a)}
-                      </button>
-                    ))}
+                       <button key={a} onClick={() => setPayAmt(String(a))}
+                       style={{ padding:"5px 11px", background:billColour(a).bg, color:"#fff", border: a<=2 ? "3px solid rgba(255,255,255,0.4)" : "none", borderRadius: a<=2 ? "50%" : 8, width: a<=2 ? 44 : undefined, height: a<=2 ? 44 : undefined, cursor:"pointer", fontSize:13, fontFamily:"'Fredoka One',sans-serif", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                       {fmt(a)}
+                       </button>
+   ))}
                     <button onClick={() => {
                       const raw = window.prompt(`Deduct how much from ${selStudent.name}?`, "5");
                       const a = parseInt(raw||"0");
@@ -621,8 +621,11 @@ const handleLogin = () => {
                 <input type="number" value={payAmt} onChange={e => setPayAmt(e.target.value)} min="1" placeholder="10"
                   style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #4B9B6E",fontSize:22,fontFamily:"'Fredoka One',sans-serif",outline:"none" }}/>
                 <div style={{ display:"flex",gap:7,marginTop:8,flexWrap:"wrap" }}>
-                  {[1,2,5,10,20,50,100].map(a => (
-                    <button key={a} onClick={() => setPayAmt(String(a))} style={{ padding:"5px 11px",background:billColour(a).bg,color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontSize:13,fontFamily:"'Fredoka One',sans-serif" }}>{fmt(a)}</button>
+                 {[1,2,5,10,20,50,100].map(a => (
+                 <button key={a} onClick={() => setPayAmt(String(a))}
+                  style={{ padding:"5px 11px", background:billColour(a).bg, color:"#fff", border: a<=2 ? "3px solid rgba(255,255,255,0.4)" : "none", borderRadius: a<=2 ? "50%" : 8, width: a<=2 ? 44 : undefined, height: a<=2 ? 44 : undefined, cursor:"pointer", fontSize:13, fontFamily:"'Fredoka One',sans-serif", display:"flex", alignItems:"center", justifyContent:"center" }}>
+                  {fmt(a)}
+                  </button>
                   ))}
                 </div>
               </div>
