@@ -575,7 +575,7 @@ const handleLogin = () => {
                   </div>
                   <BadgeShowcase balance={balances[selected]||0}/>
                   <div style={{ display:"flex",gap:9,flexWrap:"wrap",marginBottom:14 }}>
-                    {[5,10,20,50,100].map(a => (
+                    {[1,2,5,10,20,50,100].map(a => (
                       <button key={a} onClick={() => { addTx(selected, a, "Bonus"); showToast(`+${fmt(a)} to ${selStudent.name}! 🦕`); }}
                         style={{ padding:"8px 18px",background:billColour(a).bg,color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif",boxShadow:`0 3px 10px ${billColour(a).bg}66` }}>
                         +{fmt(a)}
@@ -620,7 +620,7 @@ const handleLogin = () => {
                 <input type="number" value={payAmt} onChange={e => setPayAmt(e.target.value)} min="1" placeholder="10"
                   style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #4B9B6E",fontSize:22,fontFamily:"'Fredoka One',sans-serif",outline:"none" }}/>
                 <div style={{ display:"flex",gap:7,marginTop:8,flexWrap:"wrap" }}>
-                  {[5,10,20,50,100].map(a => (
+                  {[1,2,5,10,20,50,100].map(a => (
                     <button key={a} onClick={() => setPayAmt(String(a))} style={{ padding:"5px 11px",background:billColour(a).bg,color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontSize:13,fontFamily:"'Fredoka One',sans-serif" }}>{fmt(a)}</button>
                   ))}
                 </div>
