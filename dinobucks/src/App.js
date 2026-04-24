@@ -348,6 +348,7 @@ const TEACHER_USER = "MrKlassen";
 const TEACHER_PASS = "DinoBucks2026";
 
 const handleLogin = () => {
+    };
   const handleStudentLogin = () => {
     const match = CLASS_LIST.find(s => s.username === stuLoginUser.trim().toLowerCase() && s.password === stuLoginPass);
     if (!match) { setStuLoginError("Wrong username or password!"); return; }
@@ -356,7 +357,7 @@ const handleLogin = () => {
     setStudentUser({ ...match, id: stuData.id });
     setSelected(stuData.id);
     setStuLoginError("");
-  };
+    };
   const handleStudentPasswordChange = () => {
     if (newPw1.length < 4) { setChangePwError("Password must be at least 4 characters!"); return; }
     if (newPw1 !== newPw2) { setChangePwError("Passwords don't match!"); return; }
