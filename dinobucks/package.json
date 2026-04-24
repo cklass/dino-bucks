@@ -1,7 +1,7 @@
 {
+  "homepage": "https://cklass.github.io/dino-bucks",
   "name": "dino-bucks",
   "version": "1.0.0",
-  "homepage": "https://cklass.github.io/dino-bucks",
   "private": true,
   "dependencies": {
     "firebase": "^10.7.0",
