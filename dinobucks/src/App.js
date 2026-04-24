@@ -348,7 +348,13 @@ const TEACHER_USER = "MrKlassen";
 const TEACHER_PASS = "DinoBucks2026";
 
 const handleLogin = () => {
-    };
+  if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
+    setIsTeacher(true);
+    setLoginError("");
+  } else {
+    setLoginError("Incorrect username or password.");
+  }
+};
   const handleStudentLogin = () => {
     const match = CLASS_LIST.find(s => s.username === stuLoginUser.trim().toLowerCase() && s.password === stuLoginPass);
     if (!match) { setStuLoginError("Wrong username or password!"); return; }
@@ -368,13 +374,6 @@ const handleLogin = () => {
     setNewPw1(""); setNewPw2(""); setChangePwError("");
     showToast("Password changed! 🦕");
   };
-  if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
-    setIsTeacher(true);
-    setLoginError("");
-  } else {
-    setLoginError("Incorrect username or password.");
-  }
-};
 
   // Debounce Firebase writes so rapid clicks don't spam
   const saveTimer = useRef(null);
