@@ -182,32 +182,32 @@ const DINOS = [
 ];
 
 const CLASS_LIST = [
-  { name:"Abdul Maalik Fouzan", dinoId:"trex"               },
-  { name:"Adrianna Safronii",   dinoId:"triceratops"        },
-  { name:"Alyvia Powers",       dinoId:"stegosaurus"        },
-  { name:"Arisha Haniff",       dinoId:"brachiosaurus"      },
-  { name:"Arvi Patel",          dinoId:"pterodactyl"        },
-  { name:"Avi Patel",           dinoId:"ankylosaurus"       },
-  { name:"Brandon Dobbs",       dinoId:"spinosaurus"        },
-  { name:"Edwin Providence",    dinoId:"velociraptor"       },
-  { name:"Graham Batten",       dinoId:"parasaurolophus"    },
-  { name:"Hope Olcay",          dinoId:"diplodocus"         },
-  { name:"Iqra Ahmed",          dinoId:"iguanodon"          },
-  { name:"Issy McTiernan",      dinoId:"pachycephalosaurus" },
-  { name:"Juliet Perea",        dinoId:"allosaurus"         },
-  { name:"Kaelan Atkinson",     dinoId:"carnotaurus"        },
-  { name:"Liza Nefedov",        dinoId:"therizinosaurus"    },
-  { name:"Malika Bisultanova",  dinoId:"gallimimus"         },
-  { name:"Mark Andersen",       dinoId:"oviraptor"          },
-  { name:"Mauricio Zavala",     dinoId:"kentrosaurus"       },
-  { name:"McKayla Disher",      dinoId:"styracosaurus"      },
-  { name:"Myra Kathuria",       dinoId:"baryonyx"           },
-  { name:"Nevaeh Austin",       dinoId:"pachyrhinosaurus"   },
-  { name:"Riley Crane",         dinoId:"maiasaura"          },
-  { name:"Ryan Lester",         dinoId:"suchomimus"         },
-  { name:"Sabrina Milligan",    dinoId:"ceratosaurus"       },
-  { name:"Sasmit Mahindrakar",  dinoId:"dilophosaurus"      },
-  { name:"Umaima Jabbar",       dinoId:"herrerasaurus"      },
+  { name:"Abdul Maalik Fouzan", dinoId:"trex",               username:"abdulm",    password:"abdulm"    },
+  { name:"Adrianna Safronii",   dinoId:"triceratops",        username:"adriannas", password:"adriannas" },
+  { name:"Alyvia Powers",       dinoId:"stegosaurus",        username:"alyviap",   password:"alyviap"   },
+  { name:"Arisha Haniff",       dinoId:"brachiosaurus",      username:"arishab",   password:"arishab"   },
+  { name:"Arvi Patel",          dinoId:"pterodactyl",        username:"arvip",     password:"arvip"     },
+  { name:"Avi Patel",           dinoId:"ankylosaurus",       username:"avip",      password:"avip"      },
+  { name:"Brandon Dobbs",       dinoId:"spinosaurus",        username:"brandond",  password:"brandond"  },
+  { name:"Edwin Providence",    dinoId:"velociraptor",       username:"edwinp",    password:"edwinp"    },
+  { name:"Graham Batten",       dinoId:"parasaurolophus",    username:"grahamb",   password:"grahamb"   },
+  { name:"Hope Olcay",          dinoId:"diplodocus",         username:"hopeo",     password:"hopeo"     },
+  { name:"Iqra Ahmed",          dinoId:"iguanodon",          username:"iqraa",     password:"iqraa"     },
+  { name:"Issy McTiernan",      dinoId:"pachycephalosaurus", username:"issym",     password:"issym"     },
+  { name:"Juliet Perea",        dinoId:"allosaurus",         username:"julietp",   password:"julietp"   },
+  { name:"Kaelan Atkinson",     dinoId:"carnotaurus",        username:"kaelana",   password:"kaelana"   },
+  { name:"Liza Nefedov",        dinoId:"therizinosaurus",    username:"lizanr",    password:"lizanr"    },
+  { name:"Malika Bisultanova",  dinoId:"gallimimus",         username:"malikab",   password:"malikab"   },
+  { name:"Mark Andersen",       dinoId:"oviraptor",          username:"marka",     password:"marka"     },
+  { name:"Mauricio Zavala",     dinoId:"kentrosaurus",       username:"mauricioz", password:"mauricioz" },
+  { name:"McKayla Disher",      dinoId:"styracosaurus",      username:"mckaylad",  password:"mckaylad"  },
+  { name:"Myra Kathuria",       dinoId:"baryonyx",           username:"myrak",     password:"myrak"     },
+  { name:"Nevaeh Austin",       dinoId:"pachyrhinosaurus",   username:"nevaeha",   password:"nevaeha"   },
+  { name:"Riley Crane",         dinoId:"maiasaura",          username:"rileyc",    password:"rileyc"    },
+  { name:"Ryan Lester",         dinoId:"suchomimus",         username:"ryanl",     password:"ryanl"     },
+  { name:"Sabrina Milligan",    dinoId:"ceratosaurus",       username:"sabrinam",  password:"sabrinam"  },
+  { name:"Sasmit Mahindrakar",  dinoId:"dilophosaurus",      username:"sasmitm",   password:"sasmitm"   },
+  { name:"Umaima Jabbar",       dinoId:"herrerasaurus",      username:"umaimaj",   password:"umaimaj"   },
 ];
 
 const DEFAULT_STORE = [
@@ -328,6 +328,15 @@ export default function App() {
   const [newJobEmoji,setNewJobEmoji]  = useState("⭐");
   const [showReset,  setShowReset]    = useState(false);
   const [deductModal, setDeductModal] = useState(false);
+  const [studentUser, setStudentUser]       = useState(null);  // logged-in student object
+  const [showStudentLogin, setShowStudentLogin] = useState(false);
+  const [stuLoginUser, setStuLoginUser]     = useState("");
+  const [stuLoginPass, setStuLoginPass]     = useState("");
+  const [stuLoginError, setStuLoginError]   = useState("");
+  const [showChangePw, setShowChangePw]     = useState(false);
+  const [newPw1, setNewPw1]                 = useState("");
+  const [newPw2, setNewPw2]                 = useState("");
+  const [changePwError, setChangePwError]   = useState("");
   const [deductAmt,   setDeductAmt]   = useState("");
   const [deductReason,setDeductReason]= useState("Deduction");
   const [isTeacher,  setIsTeacher]   = useState(false);
@@ -339,6 +348,25 @@ const TEACHER_USER = "MrKlassen";
 const TEACHER_PASS = "DinoBucks2026";
 
 const handleLogin = () => {
+  const handleStudentLogin = () => {
+    const match = CLASS_LIST.find(s => s.username === stuLoginUser.trim().toLowerCase() && s.password === stuLoginPass);
+    if (!match) { setStuLoginError("Wrong username or password!"); return; }
+    const stuData = appState?.students?.find(s => s.name === match.name);
+    if (!stuData) { setStuLoginError("Student not found in class!"); return; }
+    setStudentUser({ ...match, id: stuData.id });
+    setSelected(stuData.id);
+    setStuLoginError("");
+  };
+  const handleStudentPasswordChange = () => {
+    if (newPw1.length < 4) { setChangePwError("Password must be at least 4 characters!"); return; }
+    if (newPw1 !== newPw2) { setChangePwError("Passwords don't match!"); return; }
+    const idx = CLASS_LIST.findIndex(s => s.username === studentUser.username);
+    if (idx !== -1) CLASS_LIST[idx].password = newPw1;
+    setStudentUser(prev => ({ ...prev, password: newPw1 }));
+    setShowChangePw(false);
+    setNewPw1(""); setNewPw2(""); setChangePwError("");
+    showToast("Password changed! 🦕");
+  };
   if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
     setIsTeacher(true);
     setLoginError("");
@@ -523,25 +551,52 @@ const handleLogin = () => {
     </div>
   );
 
-  if (!isTeacher) return (
+  if (!isTeacher && !studentUser) return (
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)", fontFamily:"'Fredoka One',sans-serif" }}>
       <div style={{ background:"#fff", borderRadius:24, padding:"40px 36px", boxShadow:"0 12px 48px #0006", width:"100%", maxWidth:380, textAlign:"center" }}>
         <DinoSVG id="trex" c="#C0392B" size={80}/>
         <h1 style={{ fontSize:28, color:"#1a472a", margin:"12px 0 4px", letterSpacing:2 }}>DINO BUCKS</h1>
-        <p style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13, marginBottom:24 }}>Teacher Login</p>
-        <input value={loginUser} onChange={e => setLoginUser(e.target.value)} placeholder="Username"
-          style={{ width:"100%", padding:"11px 14px", borderRadius:12, border:"2.5px solid #4B9B6E", fontSize:16, fontFamily:"'Nunito',sans-serif", outline:"none", marginBottom:10 }}/>
-        <input type="password" value={loginPass} onChange={e => setLoginPass(e.target.value)} placeholder="Password"
-          onKeyDown={e => e.key === "Enter" && handleLogin()}
-          style={{ width:"100%", padding:"11px 14px", borderRadius:12, border:"2.5px solid #4B9B6E", fontSize:16, fontFamily:"'Nunito',sans-serif", outline:"none", marginBottom:10 }}/>
-        {loginError && <div style={{ color:"#e74c3c", fontFamily:"'Nunito',sans-serif", fontSize:13, marginBottom:8 }}>{loginError}</div>}
-        <button onClick={handleLogin} style={{ width:"100%", padding:"13px", background:"linear-gradient(135deg,#4B9B6E,#1e8449)", color:"#fff", border:"none", borderRadius:14, cursor:"pointer", fontSize:20, fontFamily:"'Fredoka One',sans-serif", boxShadow:"0 5px 18px #1e844966" }}>
-          🦕 Login
-        </button>
-        <p style={{ color:"#bbb", fontFamily:"'Nunito',sans-serif", fontSize:11, marginTop:16 }}>Students: view-only mode when not logged in</p>
-        <button onClick={() => setIsTeacher("readonly")} style={{ background:"none", border:"none", cursor:"pointer", color:"#4B9B6E", fontFamily:"'Nunito',sans-serif", fontSize:13, textDecoration:"underline" }}>
-          Enter as student (read-only)
-        </button>
+
+        {!showStudentLogin ? (
+          <>
+            <p style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13, marginBottom:24 }}>Teacher Login</p>
+            <input value={loginUser} onChange={e => setLoginUser(e.target.value)} placeholder="Username"
+              style={{ width:"100%", padding:"11px 14px", borderRadius:12, border:"2.5px solid #4B9B6E", fontSize:16, fontFamily:"'Nunito',sans-serif", outline:"none", marginBottom:10, boxSizing:"border-box" }}/>
+            <input type="password" value={loginPass} onChange={e => setLoginPass(e.target.value)} placeholder="Password"
+              onKeyDown={e => e.key === "Enter" && handleLogin()}
+              style={{ width:"100%", padding:"11px 14px", borderRadius:12, border:"2.5px solid #4B9B6E", fontSize:16, fontFamily:"'Nunito',sans-serif", outline:"none", marginBottom:10, boxSizing:"border-box" }}/>
+            {loginError && <div style={{ color:"#e74c3c", fontFamily:"'Nunito',sans-serif", fontSize:13, marginBottom:8 }}>{loginError}</div>}
+            <button onClick={handleLogin} style={{ width:"100%", padding:"13px", background:"linear-gradient(135deg,#4B9B6E,#1e8449)", color:"#fff", border:"none", borderRadius:14, cursor:"pointer", fontSize:20, fontFamily:"'Fredoka One',sans-serif", boxShadow:"0 5px 18px #1e844966" }}>
+              🦕 Teacher Login
+            </button>
+            <div style={{ margin:"16px 0 8px", borderTop:"1px solid #eee", paddingTop:16 }}>
+              <button onClick={() => { setShowStudentLogin(true); setStuLoginError(""); }}
+                style={{ width:"100%", padding:"13px", background:"linear-gradient(135deg,#2471A3,#1A5276)", color:"#fff", border:"none", borderRadius:14, cursor:"pointer", fontSize:20, fontFamily:"'Fredoka One',sans-serif", boxShadow:"0 5px 18px #1A527666" }}>
+                🎒 Student Login
+              </button>
+            </div>
+            <button onClick={() => setIsTeacher("readonly")} style={{ background:"none", border:"none", cursor:"pointer", color:"#4B9B6E", fontFamily:"'Nunito',sans-serif", fontSize:13, textDecoration:"underline", marginTop:8 }}>
+              Enter as student (read-only)
+            </button>
+          </>
+        ) : (
+          <>
+            <p style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13, marginBottom:24 }}>Student Login</p>
+            <input value={stuLoginUser} onChange={e => setStuLoginUser(e.target.value)} placeholder="Username (e.g. emmab)"
+              style={{ width:"100%", padding:"11px 14px", borderRadius:12, border:"2.5px solid #2471A3", fontSize:16, fontFamily:"'Nunito',sans-serif", outline:"none", marginBottom:10, boxSizing:"border-box" }}/>
+            <input type="password" value={stuLoginPass} onChange={e => setStuLoginPass(e.target.value)} placeholder="Password"
+              onKeyDown={e => e.key === "Enter" && handleStudentLogin()}
+              style={{ width:"100%", padding:"11px 14px", borderRadius:12, border:"2.5px solid #2471A3", fontSize:16, fontFamily:"'Nunito',sans-serif", outline:"none", marginBottom:10, boxSizing:"border-box" }}/>
+            {stuLoginError && <div style={{ color:"#e74c3c", fontFamily:"'Nunito',sans-serif", fontSize:13, marginBottom:8 }}>{stuLoginError}</div>}
+            <button onClick={handleStudentLogin} style={{ width:"100%", padding:"13px", background:"linear-gradient(135deg,#2471A3,#1A5276)", color:"#fff", border:"none", borderRadius:14, cursor:"pointer", fontSize:20, fontFamily:"'Fredoka One',sans-serif", boxShadow:"0 5px 18px #1A527666" }}>
+              🎒 Log In
+            </button>
+            <button onClick={() => { setShowStudentLogin(false); setStuLoginUser(""); setStuLoginPass(""); setStuLoginError(""); }}
+              style={{ background:"none", border:"none", cursor:"pointer", color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13, textDecoration:"underline", marginTop:12 }}>
+              ← Back to Teacher Login
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -564,6 +619,22 @@ const handleLogin = () => {
   return (
     <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)", fontFamily:"'Fredoka One',sans-serif" }}>
       <style>{`* { box-sizing:border-box } button:active { opacity:.84 } select { cursor:pointer }`}</style>
+
+       {studentUser && (
+        <div style={{ background:"#1A5276", padding:"8px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", fontFamily:"'Fredoka One',sans-serif" }}>
+          <span style={{ color:"#fff", fontSize:15 }}>👋 Hi, {studentUser.name.split(" ")[0]}!</span>
+          <div style={{ display:"flex", gap:8 }}>
+            <button onClick={() => setShowChangePw(true)}
+              style={{ padding:"5px 12px", background:"rgba(255,255,255,0.2)", color:"#fff", border:"1.5px solid rgba(255,255,255,0.4)", borderRadius:8, cursor:"pointer", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>
+              🔑 Change Password
+            </button>
+            <button onClick={() => { setStudentUser(null); setSelected(null); setStuLoginUser(""); setStuLoginPass(""); }}
+              style={{ padding:"5px 12px", background:"rgba(255,255,255,0.2)", color:"#fff", border:"1.5px solid rgba(255,255,255,0.4)", borderRadius:8, cursor:"pointer", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>
+              🔒 Logout
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* HEADER */}
       <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 20px 10px",background:"rgba(0,0,0,0.22)",backdropFilter:"blur(10px)",flexWrap:"wrap",gap:10 }}>
