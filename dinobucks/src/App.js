@@ -616,6 +616,82 @@ const handleLogin = () => {
     }}>{label}</button>
   );
 
+    // ── Student view ────────────────────────────────────────────────────────
+  if (studentUser) {
+    const stuData = (appState?.students || []).find(s => s.id === studentUser.id);
+    const stuBalance = appState?.balances?.[studentUser.id] || 0;
+    const stuTx = (appState?.txLog || []).filter(t => t.studentId === studentUser.id);
+    return (
+      <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)", fontFamily:"'Fredoka One',sans-serif", padding:20 }}>
+        <style>{`* { box-sizing:border-box }`}</style>
+
+        {/* Header */}
+        <div style={{ background:"#1A5276", borderRadius:16, padding:"12px 20px", display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
+          <span style={{ color:"#fff", fontSize:18 }}>👋 Hi, {studentUser.name.split(" ")[0]}!</span>
+          <div style={{ display:"flex", gap:8 }}>
+            <button onClick={() => setShowChangePw(true)}
+              style={{ padding:"5px 12px", background:"rgba(255,255,255,0.2)", color:"#fff", border:"1.5px solid rgba(255,255,255,0.4)", borderRadius:8, cursor:"pointer", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>
+              🔑 Change Password
+            </button>
+            <button onClick={() => { setStudentUser(null); setStuLoginUser(""); setStuLoginPass(""); }}
+              style={{ padding:"5px 12px", background:"rgba(255,255,255,0.2)", color:"#fff", border:"1.5px solid rgba(255,255,255,0.4)", borderRadius:8, cursor:"pointer", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>
+              🔒 Logout
+            </button>
+          </div>
+        </div>
+
+        {/* Avatar + Balance */}
+        <div style={{ background:"#fff", borderRadius:20, padding:24, textAlign:"center", marginBottom:20, boxShadow:"0 4px 20px #0003" }}>
+          <DinoSVG id={stuData?.dinoId || "trex"} c="#1e8449" size={90}/>
+          <h2 style={{ fontSize:24, color:"#1a472a", margin:"12px 0 4px" }}>{stuData?.name}</h2>
+          <div style={{ fontSize:42, color:"#27ae60", fontFamily:"'Fredoka One',sans-serif", margin:"8px 0" }}>{fmt(stuBalance)}</div>
+          <div style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13 }}>Current Balance</div>
+        </div>
+
+        {/* Transaction History */}
+        <div style={{ background:"#fff", borderRadius:20, padding:24, boxShadow:"0 4px 20px #0003" }}>
+          <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 16px" }}>📜 Transaction History</h3>
+          {stuTx.length === 0 ? (
+            <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>No transactions yet!</div>
+          ) : (
+            stuTx.slice(0, 30).map(t => (
+              <div key={t.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid #f0f0f0", fontFamily:"'Nunito',sans-serif" }}>
+                <div>
+                  <div style={{ fontSize:14, color:"#333" }}>{t.reason}</div>
+                  <div style={{ fontSize:11, color:"#aaa" }}>{t.date}</div>
+                </div>
+                <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:18, color: t.amount >= 0 ? "#27ae60" : "#e74c3c" }}>
+                  {t.amount >= 0 ? "+" : ""}{fmt(t.amount)}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Change Password Modal */}
+        {showChangePw && (
+          <div style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9999 }}>
+            <div style={{ background:"#fff",borderRadius:20,padding:28,width:"100%",maxWidth:340,boxShadow:"0 12px 48px #0006" }}>
+              <h3 style={{ fontSize:22,color:"#1a472a",margin:"0 0 16px",fontFamily:"'Fredoka One',sans-serif" }}>🔑 Change Password</h3>
+              <input type="password" value={newPw1} onChange={e => setNewPw1(e.target.value)} placeholder="New password" autoFocus
+                style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #4B9B6E",fontSize:16,fontFamily:"'Nunito',sans-serif",outline:"none",marginBottom:10 }}/>
+              <input type="password" value={newPw2} onChange={e => setNewPw2(e.target.value)} placeholder="Confirm new password"
+                onKeyDown={e => e.key === "Enter" && handleStudentPasswordChange()}
+                style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #4B9B6E",fontSize:16,fontFamily:"'Nunito',sans-serif",outline:"none",marginBottom:10 }}/>
+              {changePwError && <div style={{ color:"#e74c3c",fontFamily:"'Nunito',sans-serif",fontSize:13,marginBottom:8 }}>{changePwError}</div>}
+              <div style={{ display:"flex",gap:10 }}>
+                <button onClick={handleStudentPasswordChange}
+                  style={{ flex:1,padding:"11px",background:"#4B9B6E",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:18,fontFamily:"'Fredoka One',sans-serif" }}>Save</button>
+                <button onClick={() => { setShowChangePw(false); setNewPw1(""); setNewPw2(""); setChangePwError(""); }}
+                  style={{ padding:"11px 18px",background:"#eee",color:"#333",border:"none",borderRadius:12,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)", fontFamily:"'Fredoka One',sans-serif" }}>
       <style>{`* { box-sizing:border-box } button:active { opacity:.84 } select { cursor:pointer }`}</style>
