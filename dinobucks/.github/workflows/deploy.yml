@@ -1,1 +1,9 @@
-name: disabled
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [ "disabled" ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "disabled"
