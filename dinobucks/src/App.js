@@ -650,8 +650,74 @@ const handleLogin = () => {
       </div>
     );
   }
-  
+
+  // ── Whiteboard display mode ──────────────────────────────────────────
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("display") === "true") {
+    const totalBalance = (appState?.students || []).reduce((sum, s) => sum + (appState?.balances?.[s.id] || 0), 0);
+    return (
+      <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)", fontFamily:"'Fredoka One',sans-serif", padding:24 }}>
+        <style>{`* { box-sizing:border-box }`}</style>
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+            <DinoSVG id="trex" c="#C0392B" size={52}/>
+            <h1 style={{ fontSize:42, color:"#fff", margin:0, letterSpacing:3, textShadow:"0 3px 12px #0005" }}>DINO BUCKS</h1>
+          </div>
+          <div style={{ background:"rgba(255,255,255,0.15)", borderRadius:16, padding:"10px 24px", textAlign:"center" }}>
+            <div style={{ color:"#a8d8b5", fontFamily:"'Nunito',sans-serif", fontSize:14 }}>Class Total</div>
+            <div style={{ color:"#fff", fontSize:32 }}>{fmt(totalBalance)}</div>
+          </div>
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(160px, 1fr))", gap:16 }}>
+          {(appState?.students || []).map(s => {
+            const balance = appState?.balances?.[s.id] || 0;
+            return (
+              <div key={s.id} style={{ background:"rgba(255,255,255,0.95)", borderRadius:20, padding:"16px 12px", textAlign:"center", boxShadow:"0 4px 16px #0003" }}>
+                <DinoSVG id={s.dinoId} c="#1e8449" size={56}/>
+                <div style={{ fontSize:15, color:"#1a472a", margin:"8px 0 4px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.name.split(" ")[0]}</div>
+                <div style={{ fontSize:24, color:"#27ae60" }}>{fmt(balance)}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
     // ── Student view ────────────────────────────────────────────────────────
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('display') === 'true') {
+    const totalBalance = (appState?.students || []).reduce((sum, s) => sum + (appState?.balances?.[s.id] || 0), 0);
+    return (
+      <div style={{ minHeight:'100vh', background:'linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)', fontFamily:"'Fredoka One',sans-serif", padding:24 }}>
+        <style>{`* { box-sizing:border-box }`}</style>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:24 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:16 }}>
+            <DinoSVG id='trex' c='#C0392B' size={52}/>
+            <h1 style={{ fontSize:42, color:'#fff', margin:0, letterSpacing:3 }}>DINO BUCKS</h1>
+          </div>
+          <div style={{ background:'rgba(255,255,255,0.15)', borderRadius:16, padding:'10px 24px', textAlign:'center' }}>
+            <div style={{ color:'#a8d8b5', fontFamily:"'Nunito',sans-serif", fontSize:14 }}>Class Total</div>
+            <div style={{ color:'#fff', fontSize:32 }}>{fmt(totalBalance)}</div>
+          </div>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(160px, 1fr))', gap:16 }}>
+          {(appState?.students || []).map(s => {
+            const balance = appState?.balances?.[s.id] || 0;
+            return (
+              <div key={s.id} style={{ background:'rgba(255,255,255,0.95)', borderRadius:20, padding:'16px 12px', textAlign:'center', boxShadow:'0 4px 16px #0003' }}>
+                <DinoSVG id={s.dinoId} c='#1e8449' size={56}/>
+                <div style={{ fontSize:15, color:'#1a472a', margin:'8px 0 4px' }}>{s.name.split(' ')[0]}</div>
+                <div style={{ fontSize:24, color:'#27ae60' }}>{fmt(balance)}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   if (studentUser) {
     const stuData = (appState?.students || []).find(s => s.id === studentUser.id);
     const stuBalance = appState?.balances?.[studentUser.id] || 0;
