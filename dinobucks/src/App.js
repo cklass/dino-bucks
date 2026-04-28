@@ -649,6 +649,28 @@ const handleLogin = () => {
     );
   }
 
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("display") === "true") {
+    const totalBalance = (appState?.students || []).reduce((sum, s) => sum + (appState?.balances?.[s.id] || 0), 0);
+    return (
+      <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)", padding:24 }}>
+        <h1 style={{ fontSize:42, color:"#fff", margin:"0 0 24px" }}>🦕 DINO BUCKS</h1>
+        <div style={{ color:"#a8d8b5", fontSize:18, marginBottom:24 }}>Class Total: {fmt(totalBalance)}</div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(160px, 1fr))", gap:16 }}>
+          {(appState?.students || []).map(s => {
+            const balance = appState?.balances?.[s.id] || 0;
+            return (
+              <div key={s.id} style={{ background:"rgba(255,255,255,0.95)", borderRadius:20, padding:"16px 12px", textAlign:"center" }}>
+                <DinoSVG id={s.dinoId} c="#1e8449" size={56}/>
+                <div style={{ fontSize:15, color:"#1a472a", margin:"8px 0 4px" }}>{s.name.split(" ")[0]}</div>
+                <div style={{ fontSize:24, color:"#27ae60" }}>{fmt(balance)}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
   if (studentUser) {
     const stuData = (appState?.students || []).find(s => s.id === studentUser.id);
     const stuBalance = appState?.balances?.[studentUser.id] || 0;
