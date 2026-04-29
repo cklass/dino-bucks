@@ -567,7 +567,8 @@ const handleLogin = () => {
               style={{ width:"100%", padding:"11px 14px", borderRadius:12, border:"2.5px solid #4B9B6E", fontSize:16, fontFamily:"'Nunito',sans-serif", outline:"none", marginBottom:10, boxSizing:"border-box" }}/>
             {loginError && <div style={{ color:"#e74c3c", fontFamily:"'Nunito',sans-serif", fontSize:13, marginBottom:8 }}>{loginError}</div>}
             <button onClick={handleLogin} style={{ width:"100%", padding:"13px", background:"linear-gradient(135deg,#4B9B6E,#1e8449)", color:"#fff", border:"none", borderRadius:14, cursor:"pointer", fontSize:20, fontFamily:"'Fredoka One',sans-serif", boxShadow:"0 5px 18px #1e844966" }}>
-              🦕 Teacher Login
+            
+🦕 Teacher Login
             </button>
             <div style={{ margin:"16px 0 8px", borderTop:"1px solid #eee", paddingTop:16 }}>
               <button onClick={() => { setShowStudentLogin(true); setStuLoginError(""); }}
@@ -578,7 +579,7 @@ const handleLogin = () => {
             <button onClick={() => setIsTeacher("readonly")} style={{ background:"none", border:"none", cursor:"pointer", color:"#4B9B6E", fontFamily:"'Nunito',sans-serif", fontSize:13, textDecoration:"underline", marginTop:8 }}>
               Enter as student (read-only)
             </button>
-            <button onClick={() => { window.location.hash = 'display'; }} style={{ background:"none", border:"none", cursor:"pointer", color:"#145a32", fontFamily:"'Nunito',sans-serif", fontSize:10, marginTop:4 }}>
+            <button onClick={() => setIsTeacher("display")} style={{ background:"none", border:"none", cursor:"pointer", color:"#145a32", fontFamily:"'Nunito',sans-serif", fontSize:10, marginTop:4 }}>
               📺
             </button>
           </>
@@ -620,7 +621,7 @@ const handleLogin = () => {
   );
 
     // ── Whiteboard display mode ──────────────────────────────────────────
-  if (window.location.hash === '#display') {
+  if (isTeacher === "display") {
     const totalBalance = (appState?.students || []).reduce((sum, s) => sum + (appState?.balances?.[s.id] || 0), 0);
     return (
       <div style={{ minHeight:'100vh', background:'linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)', fontFamily:"'Fredoka One',sans-serif", padding:24 }}>
@@ -673,6 +674,7 @@ const handleLogin = () => {
       </div>
     );
   }
+if (isTeacher === "display") { const totalBalance = (appState?.students || []).reduce((sum, s) => sum + (appState?.balances?.[s.id] || 0), 0); return (<div style={{minHeight:"100vh",background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)",padding:24}}><h1 style={{fontSize:42,color:"#fff",margin:"0 0 24px"}}>🦕 DINO BUCKS</h1><div style={{color:"#a8d8b5",fontSize:18,marginBottom:24}}>Class Total: {fmt(totalBalance)}</div><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(160px, 1fr))",gap:16}}>{(appState?.students||[]).map(s=>{const balance=appState?.balances?.[s.id]||0;return(<div key={s.id} style={{background:"rgba(255,255,255,0.95)",borderRadius:20,padding:"16px 12px",textAlign:"center"}}><DinoSVG id={s.dinoId} c="#1e8449" size={56}/><div style={{fontSize:15,color:"#1a472a",margin:"8px 0 4px"}}>{s.name.split(" ")[0]}</div><div style={{fontSize:24,color:"#27ae60"}}>{fmt(balance)}</div></div>);})}</div></div>);}
   if (studentUser) {
     const stuData = (appState?.students || []).find(s => s.id === studentUser.id);
     const stuBalance = appState?.balances?.[studentUser.id] || 0;
