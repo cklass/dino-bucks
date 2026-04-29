@@ -1112,6 +1112,71 @@ if (isTeacher === "display") { const totalBalance = (appState?.students || []).r
           </div>
         )}
         {/* ═══ SETTINGS ═══ */}
+        {tab==="invest" && (
+  <div style={{ padding:"0 20px 40px" }}>
+    <h2 style={{ fontSize:24, color:"#fff", margin:"20px 0 16px", fontFamily:"'Fredoka One',sans-serif" }}>📈 Dino Stock Market</h2>
+    <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))", gap:16 }}>
+      {DINO_STOCKS.map(stock => {
+        const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
+        const change = ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
+        const portfolio = appState?.portfolios?.[selected]?.[stock.id] || 0;
+        const portfolioValue = (portfolio * price).toFixed(2);
+        return (
+          <div key={stock.id} style={{ background:"rgba(255,255,255,0.95)", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0003" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+              <span style={{ fontSize:32 }}>{stock.emoji}</span>
+              <div>
+                <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:18, color:"#1a472a" }}>{stock.name}</div>
+                <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:12, color:"#888" }}>{stock.description}</div>
+              </div>
+            </div>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+              <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:28, color:stock.color }}>{fmt(price)}</div>
+              <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:14, color: change >= 0 ? "#27ae60" : "#e74c3c", fontWeight:700 }}>
+                {change >= 0 ? "▲" : "▼"} {Math.abs(change)}%
+              </div>
+            </div>
+            {portfolio > 0 && (
+              <div style={{ background:"#f0fbf4", borderRadius:10, padding:"8px 12px", marginBottom:12, fontFamily:"'Nunito',sans-serif", fontSize:13 }}>
+                You own {portfolio.toFixed(4)} shares = {fmt(portfolioValue)}
+              </div>
+            )}
+            <div style={{ display:"flex", gap:8 }}>
+              <input id={`buy-${stock.id}`} type="number" placeholder="$ amount" min="1"
+                style={{ flex:1, padding:"8px 10px", borderRadius:10, border:"2px solid #4B9B6E", fontFamily:"'Nunito',sans-serif", fontSize:14, outline:"none" }}/>
+              <button onClick={() => {
+                const amt = parseFloat(document.getElementById(`buy-${stock.id}`).value);
+                if (!amt || amt <= 0) return;
+                const bal = appState?.balances?.[selected] || 0;
+                if (amt > bal) { showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
+                const shares = amt / price;
+                update(prev => ({
+                  ...prev,
+                  balances: { ...prev.balances, [selected]: Math.round(bal - amt) },
+                  portfolios: { ...prev.portfolios, [selected]: { ...(prev.portfolios?.[selected] || {}), [stock.id]: (prev.portfolios?.[selected]?.[stock.id] || 0) + shares }},
+                  txLog: [{ id:uuid(), studentId:selected, amount:-Math.round(amt), reason:`Bought ${stock.emoji} ${stock.name} shares`, date:todayStr() }, ...(prev.txLog||[])],
+                }));
+                document.getElementById(`buy-${stock.id}`).value = "";
+                showToast(`Bought ${stock.emoji} ${stock.name} shares!`);
+              }} style={{ padding:"8px 14px", background:"#27ae60", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:14 }}>Buy</button>
+              <button onClick={() => {
+                if (!portfolio || portfolio <= 0) { showToast("No shares to sell!", "#e74c3c"); return; }
+                const value = Math.round(portfolio * price);
+                update(prev => ({
+                  ...prev,
+                  balances: { ...prev.balances, [selected]: (prev.balances?.[selected] || 0) + value },
+                  portfolios: { ...prev.portfolios, [selected]: { ...(prev.portfolios?.[selected] || {}), [stock.id]: 0 }},
+                  txLog: [{ id:uuid(), studentId:selected, amount:value, reason:`Sold ${stock.emoji} ${stock.name} shares`, date:todayStr() }, ...(prev.txLog||[])],
+                }));
+                showToast(`Sold ${stock.emoji} ${stock.name} shares!`);
+              }} style={{ padding:"8px 14px", background:"#e74c3c", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:14 }}>Sell</button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
         {tab==="settings" && (
           <div style={{ maxWidth:540 }}>
             <h2 style={{ fontSize:26,color:"#1a472a",marginTop:0 }}>Settings ⚙️</h2>
