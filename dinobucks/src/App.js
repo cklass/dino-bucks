@@ -271,7 +271,7 @@ const SEED_STATE = () => {
   const students = CLASS_LIST.map(s => ({ id: uuid(), name: s.name, dinoId: s.dinoId }));
   const balances = {};
   students.forEach(s => { balances[s.id] = 0; });
-  return { students, balances, jobs: DEFAULT_JOBS, assigned: {}, txLog: [], lastRotation: null, prevAssigned: {}, storeItems: DEFAULT_STORE, purchases: [] };
+  return { students, balances, jobs: DEFAULT_JOBS, assigned: {}, txLog: [], lastRotation: null, prevAssigned: {}, storeItems: DEFAULT_STORE, purchases: [], stockPrices: Object.fromEntries(DINO_STOCKS.map(s => [s.id, s.startPrice])), stockHistory: {}, portfolios: {} };
 };
 
 // ── Student card ──────────────────────────────────────────────────────────────
