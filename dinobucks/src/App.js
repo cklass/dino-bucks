@@ -819,6 +819,7 @@ if (isTeacher === "display") { const totalBalance = (appState?.students || []).r
         {tabBtn("jobs","👷 Jobs")}
         {tabBtn("log","📋 History")}
         {tabBtn("store","🏪 Store")}
+        {tabBtn("invest","📈 Invest")}
         {tabBtn("settings","⚙️ Settings")}
       </div>
 
