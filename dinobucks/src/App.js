@@ -347,6 +347,7 @@ export default function App() {
   const [stuLoginPass, setStuLoginPass]     = useState("");
   const [stuLoginError, setStuLoginError]   = useState("");
   const [showChangePw, setShowChangePw]     = useState(false);
+  const [investTab, setInvestTab]           = useState("market");
   const [newPw1, setNewPw1]                 = useState("");
   const [newPw2, setNewPw2]                 = useState("");
   const [changePwError, setChangePwError]   = useState("");
