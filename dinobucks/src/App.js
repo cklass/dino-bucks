@@ -578,6 +578,12 @@ const handleLogin = () => {
             <button onClick={() => setIsTeacher("readonly")} style={{ background:"none", border:"none", cursor:"pointer", color:"#4B9B6E", fontFamily:"'Nunito',sans-serif", fontSize:13, textDecoration:"underline", marginTop:8 }}>
               Enter as student (read-only)
             </button>
+            <button onClick={() => { window.location.hash = 'display'; }} style={{ background:"none", border:"none", cursor:"pointer", color:"#145a32", fontFamily:"'Nunito',sans-serif", fontSize:10, marginTop:4 }}>
+              📺
+            </button>
+            <button onClick={() => window.location.href='#display'} style={{ background:"none", border:"none", cursor:"pointer", color:"#145a32", fontFamily:"'Nunito',sans-serif", fontSize:10, marginTop:4 }}>
+              📺
+            </button>
           </>
         ) : (
           <>
@@ -617,7 +623,7 @@ const handleLogin = () => {
   );
 
     // ── Whiteboard display mode ──────────────────────────────────────────
-  if (window.location.href.includes('display')) {
+  if (window.location.hash === '#display') {
     const totalBalance = (appState?.students || []).reduce((sum, s) => sum + (appState?.balances?.[s.id] || 0), 0);
     return (
       <div style={{ minHeight:'100vh', background:'linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)', fontFamily:"'Fredoka One',sans-serif", padding:24 }}>
