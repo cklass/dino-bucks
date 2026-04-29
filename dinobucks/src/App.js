@@ -581,9 +581,6 @@ const handleLogin = () => {
             <button onClick={() => { window.location.hash = 'display'; }} style={{ background:"none", border:"none", cursor:"pointer", color:"#145a32", fontFamily:"'Nunito',sans-serif", fontSize:10, marginTop:4 }}>
               📺
             </button>
-            <button onClick={() => window.location.href='#display'} style={{ background:"none", border:"none", cursor:"pointer", color:"#145a32", fontFamily:"'Nunito',sans-serif", fontSize:10, marginTop:4 }}>
-              📺
-            </button>
           </>
         ) : (
           <>
