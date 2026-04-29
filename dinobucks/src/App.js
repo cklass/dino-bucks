@@ -617,8 +617,7 @@ const handleLogin = () => {
   );
 
     // ── Whiteboard display mode ──────────────────────────────────────────
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('display') === 'true') {
+  if (window.location.hash === '#display') {
     const totalBalance = (appState?.students || []).reduce((sum, s) => sum + (appState?.balances?.[s.id] || 0), 0);
     return (
       <div style={{ minHeight:'100vh', background:'linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)', fontFamily:"'Fredoka One',sans-serif", padding:24 }}>
