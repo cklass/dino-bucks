@@ -210,6 +210,19 @@ const CLASS_LIST = [
   { name:"Umaima Jabbar",       dinoId:"herrerasaurus",      username:"umaimaj",   password:"umaimaj"   },
 ];
 
+const DINO_STOCKS = [
+  { id:"bananas", name:"Brachiosaur Bananas", emoji:"🦕", color:"#27ae60", startPrice:20, volatility:0.03,
+    tickers:["L.TO","MRU.TO","ATD.TO"], description:"Staples & Grocery" },
+  { id:"trextech", name:"T-Rex Tech", emoji:"🦖", color:"#8e44ad", startPrice:50, volatility:0.10,
+    tickers:["SHOP.TO","CSU.TO","CLS.TO"], description:"Technology" },
+  { id:"airways", name:"Pterodactyl Airways", emoji:"🐉", color:"#2471A3", startPrice:35, volatility:0.07,
+    tickers:["AC.TO","DOO.TO","CJT.TO"], description:"Travel & Leisure" },
+  { id:"energy", name:"DinoEgg Energy", emoji:"🥚", color:"#e67e22", startPrice:15, volatility:0.02,
+    tickers:["ENB.TO","FTS.TO","TRP.TO"], description:"Energy & Utilities" },
+  { id:"steel", name:"Stegosaurus Steel", emoji:"💎", color:"#7f8c8d", startPrice:28, volatility:0.05,
+    tickers:["CNR.TO","CAE.TO","WSP.TO"], description:"Industrials" },
+];
+
 const DEFAULT_STORE = [
   // Privileges
   { id:"s1",  name:"Sit Anywhere Day",         price:40,  emoji:"💺", type:"privilege" },
