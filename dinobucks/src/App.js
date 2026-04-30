@@ -361,6 +361,18 @@ const [loginError, setLoginError]  = useState("");
 const TEACHER_USER = "MrKlassen";
 const TEACHER_PASS = "DinoBucks2026";
 
+const fetchStockChange = async (tickers) => {
+    const changes = await Promise.all(tickers.map(async ticker => {
+      const url = `https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const closes = data?.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(Boolean);
+      if (!closes || closes.length < 2) return 0;
+      return (closes[closes.length-1] - closes[closes.length-2]) / closes[closes.length-2];
+    }));
+    return changes.reduce((a, b) => a + b, 0) / changes.length;
+  };
+
 const handleLogin = () => {
   if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
     setIsTeacher(true);
@@ -539,6 +551,45 @@ const handleLogin = () => {
     if (isMonday && appState.lastRotation !== todayStr()) runRotation();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appState?.students]);
+
+  // Auto-fetch stock prices daily
+  useEffect(() => {
+    if (!appState) return;
+    const today = todayStr();
+    const lastFetch = appState?.lastStockFetch;
+    if (lastFetch === today) return;
+    const dayOfWeek = new Date().getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) return; // skip weekends
+
+    const fetchStocks = async () => {
+      const newPrices = { ...appState.stockPrices };
+      for (const stock of DINO_STOCKS) {
+        try {
+          const avgChange = await fetchStockChange(stock.tickers);
+          const currentPrice = appState.stockPrices?.[stock.id] ?? stock.startPrice;
+          const newPrice = Math.max(1, currentPrice * (1 + avgChange));
+          newPrices[stock.id] = Math.round(newPrice * 100) / 100;
+        } catch {
+          // fallback: simulate realistic move
+          const move = (Math.random() - 0.48) * stock.volatility;
+          const currentPrice = appState.stockPrices?.[stock.id] ?? stock.startPrice;
+          newPrices[stock.id] = Math.max(1, Math.round(currentPrice * (1 + move) * 100) / 100);
+        }
+      }
+      update(prev => ({
+        ...prev,
+        stockPrices: newPrices,
+        lastStockFetch: today,
+        stockHistory: {
+          ...prev.stockHistory,
+          [today]: newPrices,
+        }
+      }));
+    };
+
+    fetchStocks();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appState]);
 
   const handleAddJob = () => {
     if (!newJobName.trim()) return;
