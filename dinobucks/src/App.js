@@ -720,6 +720,32 @@ if (isTeacher === "display") { const totalBalance = (appState?.students || []).r
           <div style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13 }}>Current Balance</div>
         </div>
 
+{/* Student Investments */}
+        <div style={{ background:"#fff", borderRadius:20, padding:24, boxShadow:"0 4px 20px #0003", marginBottom:20 }}>
+          <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 16px", fontFamily:"'Fredoka One',sans-serif" }}>📈 My Investments</h3>
+          {DINO_STOCKS.map(stock => {
+            const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
+            const shares = appState?.portfolios?.[studentUser.id]?.[stock.id] || 0;
+            const value = shares * price;
+            if (shares === 0) return null;
+            return (
+              <div key={stock.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid #f0f0f0", fontFamily:"'Nunito',sans-serif" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                  <span style={{ fontSize:24 }}>{stock.emoji}</span>
+                  <div>
+                    <div style={{ fontSize:14, color:"#333", fontWeight:700 }}>{stock.name}</div>
+                    <div style={{ fontSize:11, color:"#aaa" }}>{shares.toFixed(4)} shares</div>
+                  </div>
+                </div>
+                <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:18, color:stock.color }}>{fmt(value)}</div>
+              </div>
+            );
+          })}
+          {DINO_STOCKS.every(stock => (appState?.portfolios?.[studentUser.id]?.[stock.id] || 0) === 0) && (
+            <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>No investments yet!</div>
+          )}
+        </div>
+
         {/* Transaction History */}
         <div style={{ background:"#fff", borderRadius:20, padding:24, boxShadow:"0 4px 20px #0003" }}>
           <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 16px" }}>📜 Transaction History</h3>
