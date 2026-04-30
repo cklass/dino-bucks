@@ -1254,6 +1254,72 @@ if (isTeacher === "display") { const totalBalance = (appState?.students || []).r
       })}
     </div>
   </div>
+  {/* Price History Chart */}
+    <h3 style={{ fontSize:20, color:"#fff", margin:"24px 0 12px", fontFamily:"'Fredoka One',sans-serif" }}>📊 Price History</h3>
+    <div style={{ background:"rgba(255,255,255,0.95)", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0003", marginBottom:24, overflowX:"auto" }}>
+      {(() => {
+        const history = appState?.stockHistory || {};
+        const dates = Object.keys(history).sort();
+        if (dates.length < 2) return <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>Price history will appear after a few days of trading!</div>;
+        const W = 600, H = 200, pad = 40;
+        const allPrices = DINO_STOCKS.flatMap(s => dates.map(d => history[d]?.[s.id] ?? s.startPrice));
+        const minP = Math.min(...allPrices) * 0.95;
+        const maxP = Math.max(...allPrices) * 1.05;
+        const x = i => pad + (i / (dates.length - 1)) * (W - pad * 2);
+        const y = p => H - pad - ((p - minP) / (maxP - minP)) * (H - pad * 2);
+        return (
+          <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", minWidth:300 }}>
+            {DINO_STOCKS.map(stock => {
+              const points = dates.map((d, i) => `${x(i)},${y(history[d]?.[stock.id] ?? stock.startPrice)}`).join(" ");
+              return <polyline key={stock.id} points={points} fill="none" stroke={stock.color} strokeWidth="2.5" strokeLinejoin="round"/>;
+            })}
+            {dates.map((d, i) => i % Math.ceil(dates.length / 5) === 0 && (
+              <text key={d} x={x(i)} y={H - 8} textAnchor="middle" fontSize="10" fill="#888">{d.slice(5)}</text>
+            ))}
+            {DINO_STOCKS.map((stock, i) => (
+              <g key={stock.id}>
+                <rect x={W - 130} y={10 + i * 22} width={12} height={12} fill={stock.color} rx={3}/>
+                <text x={W - 114} y={21 + i * 22} fontSize="11" fill="#333">{stock.emoji} {stock.name.split(" ")[0]}</text>
+              </g>
+            ))}
+          </svg>
+        );
+      })()}
+    </div>
+
+    {/* Investor Leaderboard */}
+    <h3 style={{ fontSize:20, color:"#fff", margin:"24px 0 12px", fontFamily:"'Fredoka One',sans-serif" }}>🏆 Investor Leaderboard</h3>
+    <div style={{ background:"rgba(255,255,255,0.95)", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0003" }}>
+      {(appState?.students || []).map(s => {
+        const portfolio = appState?.portfolios?.[s.id] || {};
+        const totalInvested = (appState?.txLog || []).filter(t => t.studentId === s.id && t.reason?.includes("Bought")).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+        const currentValue = DINO_STOCKS.reduce((sum, stock) => {
+          const shares = portfolio[stock.id] || 0;
+          const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
+          return sum + shares * price;
+        }, 0);
+        const gain = totalInvested > 0 ? ((currentValue - totalInvested) / totalInvested * 100).toFixed(1) : null;
+        return { ...s, gain, currentValue, totalInvested };
+      }).filter(s => s.totalInvested > 0).sort((a, b) => b.gain - a.gain).map((s, i) => {
+        const dino = DINOS.find(d => d.id === s.dinoId) || DINOS[0];
+        return (
+          <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #f0f0f0" }}>
+            <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:20, color:"#1a472a", width:30 }}>#{i+1}</div>
+            <DinoSVG id={s.dinoId} c={dino.colour} size={36}/>
+            <div style={{ flex:1, fontFamily:"'Nunito',sans-serif" }}>
+              <div style={{ fontSize:14, fontWeight:700, color:"#333" }}>{s.name.split(" ")[0]}</div>
+              <div style={{ fontSize:12, color:"#888" }}>Invested: {fmt(s.totalInvested)} → {fmt(s.currentValue)}</div>
+            </div>
+            <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:20, color: s.gain >= 0 ? "#27ae60" : "#e74c3c" }}>
+              {s.gain >= 0 ? "▲" : "▼"}{Math.abs(s.gain)}%
+            </div>
+          </div>
+        );
+      })}
+      {!(appState?.students || []).some(s => (appState?.txLog || []).some(t => t.studentId === s.id && t.reason?.includes("Bought"))) && (
+        <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>No investors yet!</div>
+      )}
+    </div>
 )}
         {tab==="settings" && (
           <div style={{ maxWidth:540 }}>
