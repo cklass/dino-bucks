@@ -1253,8 +1253,8 @@ if (isTeacher === "display") { const totalBalance = (appState?.students || []).r
         );
       })}
     </div>
-  </div>
-  {/* Price History Chart */}
+
+    {/* Price History Chart */}
     <h3 style={{ fontSize:20, color:"#fff", margin:"24px 0 12px", fontFamily:"'Fredoka One',sans-serif" }}>📊 Price History</h3>
     <div style={{ background:"rgba(255,255,255,0.95)", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0003", marginBottom:24, overflowX:"auto" }}>
       {(() => {
@@ -1283,6 +1283,45 @@ if (isTeacher === "display") { const totalBalance = (appState?.students || []).r
               </g>
             ))}
           </svg>
+        );
+      })()}
+    </div>
+
+    {/* Investor Leaderboard */}
+    <h3 style={{ fontSize:20, color:"#fff", margin:"24px 0 12px", fontFamily:"'Fredoka One',sans-serif" }}>🏆 Investor Leaderboard</h3>
+    <div style={{ background:"rgba(255,255,255,0.95)", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0003" }}>
+      {(appState?.students || []).map(s => {
+        const portfolio = appState?.portfolios?.[s.id] || {};
+        const totalInvested = (appState?.txLog || []).filter(t => t.studentId === s.id && t.reason?.includes("Bought")).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+        const currentValue = DINO_STOCKS.reduce((sum, stock) => {
+          const shares = portfolio[stock.id] || 0;
+          const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
+          return sum + shares * price;
+        }, 0);
+        const gain = totalInvested > 0 ? ((currentValue - totalInvested) / totalInvested * 100).toFixed(1) : null;
+        return { ...s, gain, currentValue, totalInvested };
+      }).filter(s => s.totalInvested > 0).sort((a, b) => b.gain - a.gain).map((s, i) => {
+        const dino = DINOS.find(d => d.id === s.dinoId) || DINOS[0];
+        return (
+          <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #f0f0f0" }}>
+            <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:20, color:"#1a472a", width:30 }}>#{i+1}</div>
+            <DinoSVG id={s.dinoId} c={dino.colour} size={36}/>
+            <div style={{ flex:1, fontFamily:"'Nunito',sans-serif" }}>
+              <div style={{ fontSize:14, fontWeight:700, color:"#333" }}>{s.name.split(" ")[0]}</div>
+              <div style={{ fontSize:12, color:"#888" }}>Invested: {fmt(s.totalInvested)} → {fmt(s.currentValue)}</div>
+            </div>
+            <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:20, color: s.gain >= 0 ? "#27ae60" : "#e74c3c" }}>
+              {s.gain >= 0 ? "▲" : "▼"}{Math.abs(s.gain)}%
+            </div>
+          </div>
+        );
+      })}
+      {!(appState?.students || []).some(s => (appState?.txLog || []).some(t => t.studentId === s.id && t.reason?.includes("Bought"))) && (
+        <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>No investors yet!</div>
+      )}
+    </div>
+  </div>
+  
         );
       })()}
     </div>
