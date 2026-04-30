@@ -1321,10 +1321,6 @@ if (isTeacher === "display") { const totalBalance = (appState?.students || []).r
       )}
     </div>
   </div>
-  
-        );
-      })()}
-    </div>
 
     {/* Investor Leaderboard */}
     <h3 style={{ fontSize:20, color:"#fff", margin:"24px 0 12px", fontFamily:"'Fredoka One',sans-serif" }}>🏆 Investor Leaderboard</h3>
