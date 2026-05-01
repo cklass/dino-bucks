@@ -1224,7 +1224,6 @@ const handleLogin = () => {
             </div>
           </div>
         )}
-      </div>
 
         {/* ═══ INVEST ═══ */}
         {tab==="invest" && (
