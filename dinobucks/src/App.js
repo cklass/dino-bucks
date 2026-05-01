@@ -381,42 +381,6 @@ export default function App() {
   const [newJobEmoji,setNewJobEmoji]  = useState("⭐");
   const [showReset,  setShowReset]    = useState(false);
   const [deductModal, setDeductModal] = useState(false);
-export default function App() {
-  const [appState, setAppState]   = useState(null);   // full synced state
-  const [loading,  setLoading]    = useState(true);
-  const [syncing,  setSyncing]    = useState(false);  // brief write indicator
-  const [tab,      setTab]        = useState("dashboard");
-  const [selected, setSelected]   = useState(null);
-  const [toast,    setToast]      = useState(null);
-  const [payAmt,   setPayAmt]     = useState("");
-  const [payReason,setPayReason]  = useState("Job completed");
-  const [payAll,   setPayAll]     = useState(false);
-  const [newJobName, setNewJobName]   = useState("");
-  const [newJobPay,  setNewJobPay]    = useState("10");
-  const [newJobEmoji,setNewJobEmoji]  = useState("⭐");
-  const [showReset,  setShowReset]    = useState(false);
-  const [deductModal, setDeductModal] = useState(false);
-  const [studentUser, setStudentUser]       = useState(null);  // logged-in student object
-  const [showStudentLogin, setShowStudentLogin] = useState(false);
-  const [stuLoginUser, setStuLoginUser]     = useState("");
-  const [stuLoginPass, setStuLoginPass]     = useState("");
-  const [stuLoginError, setStuLoginError]   = useState("");
-  const [showChangePw, setShowChangePw]     = useState(false);
-  const [newPw1, setNewPw1]                 = useState("");
-  const [newPw2, setNewPw2]                 = useState("");
-  const [changePwError, setChangePwError]   = useState("");
-  const [deductAmt,   setDeductAmt]   = useState("");
-  const [deductReason,setDeductReason]= useState("Deduction");
-  const [payMulti, setPayMulti]           = useState(false);
-  const [multiSelected, setMultiSelected] = useState([]);
-  const [isTeacher,  setIsTeacher]   = useState(false);
-const [loginUser,  setLoginUser]   = useState("");
-const [loginPass,  setLoginPass]   = useState("");
-const [loginError, setLoginError]  = useState("");
-
-const TEACHER_USER = "MrKlassen";
-const TEACHER_PASS = "DinoBucks2026";
-
 const handleLogin = () => {
   if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
     setIsTeacher(true);
