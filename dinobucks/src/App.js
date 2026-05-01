@@ -1361,7 +1361,6 @@ const handleLogin = () => {
                 <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>No investors yet — buy some shares!</div>
               )}
             </div>
-          </div>
         )}
 
       </div>
