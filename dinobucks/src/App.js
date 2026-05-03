@@ -1,4 +1,6 @@
 /* eslint-disable */
+const TEACHER_USER = "teacher";
+const TEACHER_PASS = "dinobucks";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { saveToFirebase, subscribeToFirebase } from "./firebase";
 
@@ -381,7 +383,24 @@ export default function App() {
   const [newJobEmoji,setNewJobEmoji]  = useState("⭐");
   const [showReset,  setShowReset]    = useState(false);
   const [deductModal, setDeductModal] = useState(false);
-const handleLogin = () => {
+  const [isTeacher,    setIsTeacher]    = useState(false);
+  const [studentUser,  setStudentUser]  = useState(null);
+  const [loginUser,    setLoginUser]    = useState("");
+  const [loginPass,    setLoginPass]    = useState("");
+  const [loginError,   setLoginError]   = useState("");
+  const [stuLoginUser, setStuLoginUser] = useState("");
+  const [stuLoginPass, setStuLoginPass] = useState("");
+  const [stuLoginError,setStuLoginError]= useState("");
+  const [showChangePw, setShowChangePw] = useState(false);
+  const [newPw1,       setNewPw1]       = useState("");
+  const [newPw2,       setNewPw2]       = useState("");
+  const [changePwError,setChangePwError]= useState("");
+  const [showStudentLogin, setShowStudentLogin] = useState(false);
+  const [payMulti, setPayMulti] = useState({});
+  const [multiSelected, setMultiSelected] = useState([]);
+  const [deductAmt, setDeductAmt] = useState("5");
+  const [deductReason, setDeductReason] = useState("Deduction");
+  const handleLogin = () => {
   if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
     setIsTeacher(true);
     setLoginError("");
@@ -935,7 +954,7 @@ const handleLogin = () => {
       style={{ padding:"8px 18px",background:"#8e44ad",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>
       + Custom
     </button>
-                    <button onClick={() => setDeductModal(true)}
+                    <button onClick={() => { setDeductModal(true); setDeductAmt(payAmt||""); }}
       style={{ padding:"8px 18px",background:"#e74c3c",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>
       − Deduct
     </button>
@@ -996,7 +1015,7 @@ const handleLogin = () => {
                 <input value={payReason} onChange={e => setPayReason(e.target.value)} placeholder="Job completed, bonus…"
                   style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #4B9B6E",fontSize:15,fontFamily:"'Nunito',sans-serif",outline:"none" }}/>
                 <div style={{ display:"flex",gap:6,marginTop:8,flexWrap:"wrap" }}>
-                  {["Job completed","Great work!","Bonus","Homework done","Helped a classmate","Class participation"].map(r => (
+                  {["Job completed","Great work!","Reading quietly","Respectful","Helped a classmate","Class participation"].map(r => (
                     <button key={r} onClick={() => setPayReason(r)}
                       style={{ padding:"4px 9px",background:"#e8f5e9",border:"1.5px solid #4B9B6E",borderRadius:7,cursor:"pointer",fontSize:11,fontFamily:"'Nunito',sans-serif",color:"#1a472a" }}>{r}</button>
                   ))}
@@ -1017,7 +1036,7 @@ const handleLogin = () => {
         {/* ═══ JOBS ═══ */}
         {tab==="jobs" && (
           <div>
-            <h2 style={{ fontSize:26,color:"#1a472a",marginTop:0 }}>Classroom Jobs 👷</h2>
+            <h2 style={{ fontSize:22,color:"#1a472a",marginTop:0 }}>Classroom Jobs 👷</h2>
             <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10,marginBottom:18,padding:"12px 16px",background:"linear-gradient(135deg,#eaf4ff,#daeaf8)",borderRadius:14,border:"2px solid #4A7FBF44" }}>
               <div style={{ fontFamily:"'Nunito',sans-serif",fontSize:13,color:"#1A5276" }}>
                 <strong>🔄 Weekly Rotation</strong>
@@ -1031,11 +1050,11 @@ const handleLogin = () => {
                 const dino = DINOS.find(d => d.id === s.dinoId) || DINOS[0];
                 const job = (jobs||[]).find(j => j.id === (assigned||{})[s.id]);
                 return (
-                  <div key={s.id} style={{ background:job?`linear-gradient(135deg,${dino.colour}14,#f0fbf4)`:"#fafafa",border:`2.5px solid ${job?dino.colour+"44":"#e0e0e0"}`,borderRadius:16,padding:"12px 14px",display:"flex",alignItems:"center",gap:10 }}>
+                  <div key={s.id} style={{ background:job?`linear-gradient(135deg,${dino.colour}14,#f0fbf4)`:"#fafafa",border:`2.5px solid ${job?dino.colour+"44":"#e0e0e0"}`,borderRadius:16,padding:"7px 10px",display:"flex",alignItems:"center",gap:10 }}>
                     <DinoSVG id={s.dinoId} c={dino.colour} size={44}/>
                     <div style={{ flex:1 }}>
-                      <div style={{ fontWeight:800,fontSize:14,color:"#1a1a2e" }}>{s.name}</div>
-                      <div style={{ fontSize:12,color:"#666",fontFamily:"'Nunito',sans-serif",marginTop:2 }}>{job ? `${job.emoji} ${job.name} · ${fmt(job.pay)}/payday` : "No job yet"}</div>
+                      <div style={{ fontWeight:800,fontSize:16,color:"#1a1a2e" }}>{s.name.split(" ")[0]}</div>
+                      <div style={{ fontSize:16,color:"#444",fontFamily:"'Nunito',sans-serif",fontWeight:700,marginTop:2 }}>{job ? `${job.emoji} ${job.name} · ${fmt(job.pay)}/payday` : "No job yet"}</div>
                     </div>
                     <select value={(assigned||{})[s.id]||""} onChange={e => update(prev => ({ ...prev, assigned: { ...prev.assigned, [s.id]: e.target.value||null } }))}
                       style={{ padding:"5px 7px",borderRadius:8,border:"2px solid #4B9B6E",fontSize:12,fontFamily:"'Nunito',sans-serif",background:"#fff",outline:"none",maxWidth:130 }}>
@@ -1229,7 +1248,7 @@ const handleLogin = () => {
         {tab==="invest" && (
           <div style={{ padding:"0 0 40px" }}>
             <h2 style={{ fontSize:24, color:"#1a472a", margin:"0 0 16px", fontFamily:"'Fredoka One',sans-serif" }}>📈 Dino Stock Market</h2>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))", gap:16, marginBottom:32 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(200px, 1fr))", gap:16, marginBottom:32 }}>
               {DINO_STOCKS.map(stock => {
                 const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
                 const change = ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
@@ -1240,7 +1259,7 @@ const handleLogin = () => {
                   <div key={stock.id} style={{ background:"#fff", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0003", border:"1.5px solid #f0f0f0" }}>
                     <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
                       <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                        <span style={{ fontSize:28 }}>{stock.emoji}</span>
+                        <span style={{ fontSize:20 }}>{stock.emoji}</span>
                         <div>
                           <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a" }}>{stock.name}</div>
                           <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:11, color:"#888" }}>{stock.description}</div>
@@ -1265,7 +1284,7 @@ const handleLogin = () => {
                     )}
                     <div style={{ display:"flex", gap:8 }}>
                       <input id={`buy-${stock.id}`} type="number" placeholder="$ amount" min="1"
-                        style={{ flex:1, padding:"8px 10px", borderRadius:10, border:"2px solid #4B9B6E", fontFamily:"'Nunito',sans-serif", fontSize:14, outline:"none" }}/>
+                        style={{ width:"70px", padding:"8px 10px", borderRadius:10, border:"2px solid #4B9B6E", fontFamily:"'Nunito',sans-serif", fontSize:14, outline:"none" }}/>
                       <button onClick={() => {
                         const amt = parseFloat(document.getElementById(`buy-${stock.id}`).value);
                         if (!amt || amt <= 0) return;
@@ -1360,6 +1379,7 @@ const handleLogin = () => {
                 <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>No investors yet — buy some shares!</div>
               )}
             </div>
+          </div>
         )}
 
       </div>
