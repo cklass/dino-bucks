@@ -446,127 +446,118 @@ function TriviaGame({ earnBucks }) {
   );
 }
 
-function MemoryGame({ earnBucks }) {
-  const emojis = ["🦕","🦖","🦴","🥚","🌿","🏔️","🦷","🌋"];
-  const [cards, setCards] = React.useState(() => {
-    const deck = [...emojis, ...emojis].map((e, i) => ({ id:i, emoji:e, flipped:false, matched:false }));
-    for (let i = deck.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
-    return deck;
-  });
-  const [selected, setSelected] = React.useState([]);
-  const [moves, setMoves] = React.useState(0);
-  const [won, setWon] = React.useState(false);
-  const flip = (id) => {
-    if (selected.length === 2) return;
-    const card = cards.find(c => c.id === id);
-    if (card.flipped || card.matched) return;
-    const newCards = cards.map(c => c.id === id ? { ...c, flipped:true } : c);
-    const newSel = [...selected, id];
-    setCards(newCards);
-    setSelected(newSel);
-    if (newSel.length === 2) {
-      setMoves(m => m+1);
-      const [a, b] = newSel.map(id => newCards.find(c => c.id === id));
-      if (a.emoji === b.emoji) {
-        const matched = newCards.map(c => newSel.includes(c.id) ? { ...c, matched:true } : c);
-        setCards(matched);
-        setSelected([]);
-        if (matched.every(c => c.matched)) { setWon(true); earnBucks(moves < 15 ? 5 : 3); }
-      } else {
-        setTimeout(() => {
-          setCards(prev => prev.map(c => newSel.includes(c.id) ? { ...c, flipped:false } : c));
-          setSelected([]);
-        }, 800);
-      }
-    }
-  };
-  if (won) return (
-    <div style={{ textAlign:"center", padding:24 }}>
-      <div style={{ fontSize:48 }}>🎉</div>
-      <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:24, color:"#1a472a", margin:"12px 0" }}>You won in {moves} moves!</div>
-      <button onClick={() => { setCards(() => { const deck = [...emojis,...emojis].map((e,i)=>({id:i,emoji:e,flipped:false,matched:false})); for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}return deck;}); setMoves(0); setWon(false); setSelected([]); }} style={{ padding:"10px 24px", background:"#27ae60", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>Play Again</button>
-    </div>
-  );
-  return (
-    <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:10, maxWidth:360, margin:"0 auto" }}>
-      {cards.map(c => (
-        <div key={c.id} onClick={() => flip(c.id)} style={{
-          height:70, borderRadius:12, display:"flex", alignItems:"center", justifyContent:"center",
-          fontSize:32, cursor:"pointer", transition:"all 0.2s",
-          background: c.flipped||c.matched ? "#f0fbf4" : "#1a472a",
-          border: c.matched ? "3px solid #27ae60" : "3px solid #145a32",
-          boxShadow:"0 2px 8px #0002"
-        }}>{c.flipped||c.matched ? c.emoji : "🌿"}</div>
-      ))}
-    </div>
-  );
-}
-
 function RunnerGame({ earnBucks }) {
+  const OBSTACLES = ["🌵","🌵","🌵","🦴","🪨","🌿","🦖","🌴"];
+  const BIRDS = ["🦅","🦜","🐦"];
   const [running, setRunning] = React.useState(false);
   const [score, setScore] = React.useState(0);
   const [dead, setDead] = React.useState(false);
   const [dinoY, setDinoY] = React.useState(0);
-  const [jumping, setJumping] = React.useState(false);
   const [obstacles, setObstacles] = React.useState([]);
+  const [clouds, setClouds] = React.useState([
+    {id:1,x:100,y:20},{id:2,x:300,y:40},{id:3,x:500,y:15}
+  ]);
+  const [speed, setSpeed] = React.useState(6);
   const jumpRef = React.useRef(false);
   const frameRef = React.useRef();
   const obstRef = React.useRef([]);
   const scoreRef = React.useRef(0);
   const dinoYRef = React.useRef(0);
+  const speedRef = React.useRef(6);
+  const cloudsRef = React.useRef([{id:1,x:100,y:20},{id:2,x:300,y:40},{id:3,x:500,y:15}]);
+
   const jump = React.useCallback(() => {
     if (jumpRef.current) return;
     jumpRef.current = true;
-    setJumping(true);
-    setDinoY(90);
-    dinoYRef.current = 90;
+    setDinoY(110);
+    dinoYRef.current = 110;
     setTimeout(() => {
       setDinoY(0);
       dinoYRef.current = 0;
-      setTimeout(() => { jumpRef.current = false; setJumping(false); }, 100);
-    }, 400);
+      setTimeout(() => { jumpRef.current = false; }, 100);
+    }, 500);
   }, []);
+
   React.useEffect(() => {
     if (!running) return;
     const handleKey = (e) => { if (e.code === "Space" || e.code === "ArrowUp") jump(); };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [running, jump]);
+
   React.useEffect(() => {
     if (!running) return;
     let lastObst = 0;
     const tick = (ts) => {
       scoreRef.current += 1;
+      // Speed increases every 200 points
+      const newSpeed = 6 + Math.floor(scoreRef.current / 200);
+      if (newSpeed !== speedRef.current) { speedRef.current = newSpeed; setSpeed(newSpeed); }
       if (scoreRef.current % 10 === 0) setScore(scoreRef.current);
-      if (ts - lastObst > 1200 + Math.random()*800) {
+      // Add obstacles
+      if (ts - lastObst > Math.max(600, 1400 - scoreRef.current/2) + Math.random()*600) {
         lastObst = ts;
-        const id = Math.random();
-        obstRef.current = [...obstRef.current, { id, x:500 }];
+        const isDouble = Math.random() < 0.2 && scoreRef.current > 300;
+        const isBird = Math.random() < 0.25 && scoreRef.current > 150;
+        const emoji = isBird ? BIRDS[Math.floor(Math.random()*BIRDS.length)] : OBSTACLES[Math.floor(Math.random()*OBSTACLES.length)];
+        const birdHeight = isBird ? 50 + Math.random()*40 : 0;
+        obstRef.current = [...obstRef.current, { id:Math.random(), x:520, emoji, birdHeight, isDouble }];
+        if (isDouble) obstRef.current = [...obstRef.current, { id:Math.random(), x:560, emoji:OBSTACLES[Math.floor(Math.random()*OBSTACLES.length)], birdHeight:0, isDouble:false }];
       }
-      obstRef.current = obstRef.current.map(o => ({ ...o, x: o.x - 6 })).filter(o => o.x > -30);
+      obstRef.current = obstRef.current.map(o => ({ ...o, x: o.x - speedRef.current })).filter(o => o.x > -40);
       setObstacles([...obstRef.current]);
-      const hit = obstRef.current.some(o => o.x < 80 && o.x > 30 && dinoYRef.current < 40);
+      // Move clouds
+      cloudsRef.current = cloudsRef.current.map(c => ({ ...c, x: c.x - 1 < -50 ? 550 : c.x - 1 }));
+      setClouds([...cloudsRef.current]);
+      // Collision detection
+      const hit = obstRef.current.some(o => {
+        if (o.x < 90 && o.x > 25) {
+          if (o.birdHeight > 0) return dinoYRef.current < o.birdHeight + 30 && dinoYRef.current > o.birdHeight - 30;
+          return dinoYRef.current < 45;
+        }
+        return false;
+      });
       if (hit) { setRunning(false); setDead(true); earnBucks(Math.floor(scoreRef.current / 50)); return; }
       frameRef.current = requestAnimationFrame(tick);
     };
     frameRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameRef.current);
   }, [running]);
-  const start = () => { setDead(false); setScore(0); scoreRef.current=0; obstRef.current=[]; setObstacles([]); setRunning(true); };
+
+  const start = () => {
+    setDead(false); setScore(0); scoreRef.current=0;
+    obstRef.current=[]; setObstacles([]);
+    speedRef.current=6; setSpeed(6);
+    setRunning(true);
+  };
+
   return (
     <div style={{ textAlign:"center" }}>
-      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>Press SPACE or tap to jump! Score: {score}</div>
-      <div onClick={jump} style={{ position:"relative", width:"100%", maxWidth:500, height:120, background:"linear-gradient(180deg,#87CEEB 0%,#87CEEB 70%,#8B6914 70%,#8B6914 100%)", borderRadius:12, overflow:"hidden", cursor:"pointer", margin:"0 auto", border:"3px solid #4B9B6E" }}>
-        <div style={{ position:"absolute", bottom:20+dinoY, left:50, fontSize:36, transition:"bottom 0.1s" }}>🦕</div>
-        {obstacles.map(o => (
-          <div key={o.id} style={{ position:"absolute", bottom:20, left:o.x, fontSize:28 }}>🌵</div>
+      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>
+        Press SPACE or tap to jump! Score: {score} {speed > 6 ? `⚡ Speed x${speed-4}` : ""}
+      </div>
+      <div onClick={jump} style={{ position:"relative", width:"100%", maxWidth:560, height:200, background:"linear-gradient(180deg,#87CEEB 0%,#c8e6f5 55%,#98c87a 55%,#7aaa55 65%,#8B6914 65%,#7a5c10 100%)", borderRadius:14, overflow:"hidden", cursor:"pointer", margin:"0 auto", border:"3px solid #4B9B6E", userSelect:"none" }}>
+        {/* Clouds */}
+        {clouds.map(c => (
+          <div key={c.id} style={{ position:"absolute", top:c.y, left:c.x, fontSize:22, opacity:0.7 }}>☁️</div>
         ))}
+        {/* Ground line */}
+        <div style={{ position:"absolute", bottom:44, left:0, right:0, height:2, background:"rgba(0,0,0,0.1)" }}/>
+        {/* Dino - flipped to face right */}
+        <div style={{ position:"absolute", bottom:44+dinoY, left:55, fontSize:40, transition:"bottom 0.08s", transform:"scaleX(-1)" }}>🦕</div>
+        {/* Obstacles */}
+        {obstacles.map(o => (
+          <div key={o.id} style={{ position:"absolute", bottom: o.birdHeight > 0 ? 44+o.birdHeight : 44, left:o.x, fontSize:o.birdHeight > 0 ? 24 : 30, transform: o.birdHeight > 0 ? "scaleX(-1)" : "none" }}>{o.emoji}</div>
+        ))}
+        {/* Score overlay */}
+        <div style={{ position:"absolute", top:8, right:12, fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"rgba(0,0,0,0.4)" }}>{score}</div>
       </div>
       {!running && (
         <button onClick={start} style={{ marginTop:16, padding:"10px 24px", background:"#27ae60", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>
-          {dead ? `Game Over! Score: ${score} — Play Again` : "Start Running! 🦕"}
+          {dead ? `💀 Game Over! Score: ${score} — Play Again` : "Start Running! 🦕"}
         </button>
       )}
+      {running && <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:11, color:"#aaa", marginTop:6 }}>Watch out for birds 🦅 — they fly at different heights!</div>}
     </div>
   );
 }
