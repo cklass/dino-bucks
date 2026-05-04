@@ -10,35 +10,98 @@ const playSound = (type) => {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     const c = new AudioCtx();
-    const o = c.createOscillator();
-    const g = c.createGain();
-    o.connect(g);
-    g.connect(c.destination);
-
+    const makeNode = (type="sine") => {
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.type = type;
+      o.connect(g);
+      g.connect(c.destination);
+      return { o, g };
+    };
     if (type === "ching") {
-      o.frequency.setValueAtTime(1200, c.currentTime);
-      o.frequency.exponentialRampToValueAtTime(800, c.currentTime + 0.1);
-      g.gain.setValueAtTime(0.3, c.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.4);
-      o.start(); o.stop(c.currentTime + 0.4);
+      // Loud coin cha-ching with two tones
+      [1400, 1800].forEach((freq, i) => {
+        const { o, g } = makeNode("sine");
+        o.frequency.setValueAtTime(freq, c.currentTime + i*0.08);
+        o.frequency.exponentialRampToValueAtTime(freq*0.7, c.currentTime + i*0.08 + 0.3);
+        g.gain.setValueAtTime(0.6, c.currentTime + i*0.08);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.08 + 0.5);
+        o.start(c.currentTime + i*0.08);
+        o.stop(c.currentTime + i*0.08 + 0.5);
+      });
     } else if (type === "deduct") {
-      o.type = "sawtooth";
-      o.frequency.setValueAtTime(300, c.currentTime);
-      o.frequency.exponentialRampToValueAtTime(100, c.currentTime + 0.2);
-      g.gain.setValueAtTime(0.2, c.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.3);
-      o.start(); o.stop(c.currentTime + 0.3);
-    } else if (type === "pop") {
+      // Dino screech — descending roar
+      const { o, g } = makeNode("sawtooth");
+      const { o:o2, g:g2 } = makeNode("square");
       o.frequency.setValueAtTime(600, c.currentTime);
-      g.gain.setValueAtTime(0.2, c.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.1);
-      o.start(); o.stop(c.currentTime + 0.1);
+      o.frequency.exponentialRampToValueAtTime(80, c.currentTime + 0.5);
+      g.gain.setValueAtTime(0.5, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.5);
+      o.start(); o.stop(c.currentTime + 0.5);
+      o2.frequency.setValueAtTime(300, c.currentTime);
+      o2.frequency.exponentialRampToValueAtTime(60, c.currentTime + 0.4);
+      g2.gain.setValueAtTime(0.3, c.currentTime);
+      g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.4);
+      o2.start(); o2.stop(c.currentTime + 0.4);
+    } else if (type === "roar") {
+      // Big T-Rex roar for payday
+      [80, 120, 200].forEach((freq, i) => {
+        const { o, g } = makeNode("sawtooth");
+        o.frequency.setValueAtTime(freq * 2, c.currentTime);
+        o.frequency.exponentialRampToValueAtTime(freq, c.currentTime + 0.6);
+        g.gain.setValueAtTime(0.4, c.currentTime + i*0.05);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.7);
+        o.start(c.currentTime + i*0.05);
+        o.stop(c.currentTime + 0.8);
+      });
+    } else if (type === "pop") {
+      // Happy dino chirp
+      const { o, g } = makeNode("sine");
+      o.frequency.setValueAtTime(800, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(1200, c.currentTime + 0.05);
+      o.frequency.exponentialRampToValueAtTime(600, c.currentTime + 0.15);
+      g.gain.setValueAtTime(0.4, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.2);
+      o.start(); o.stop(c.currentTime + 0.2);
+    } else if (type === "click") {
+      // Quick dino tap
+      const { o, g } = makeNode("sine");
+      o.frequency.setValueAtTime(500, c.currentTime);
+      g.gain.setValueAtTime(0.15, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.06);
+      o.start(); o.stop(c.currentTime + 0.06);
+    } else if (type === "gameover") {
+      // Sad trombone dino
+      const { o, g } = makeNode("sawtooth");
+      o.frequency.setValueAtTime(400, c.currentTime);
+      o.frequency.setValueAtTime(350, c.currentTime + 0.15);
+      o.frequency.setValueAtTime(300, c.currentTime + 0.3);
+      o.frequency.setValueAtTime(200, c.currentTime + 0.45);
+      g.gain.setValueAtTime(0.4, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.7);
+      o.start(); o.stop(c.currentTime + 0.7);
+    } else if (type === "levelup") {
+      // Victory screech
+      [500, 700, 900, 1200].forEach((freq, i) => {
+        const { o, g } = makeNode("sine");
+        o.frequency.setValueAtTime(freq, c.currentTime + i*0.1);
+        g.gain.setValueAtTime(0.4, c.currentTime + i*0.1);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.1 + 0.15);
+        o.start(c.currentTime + i*0.1);
+        o.stop(c.currentTime + i*0.1 + 0.15);
+      });
     }
   } catch(e) {}
 };
-
-
-
+const sounds = {
+  ching:    () => playSound("ching"),
+  deduct:   () => playSound("deduct"),
+  roar:     () => playSound("roar"),
+  pop:      () => playSound("pop"),
+  click:    () => playSound("click"),
+  gameover: () => playSound("gameover"),
+  levelup:  () => playSound("levelup"),
+};
 const sounds = {
   ching: () => playSound("ching"),
   deduct: () => playSound("deduct"),
