@@ -381,6 +381,21 @@ export default function App() {
   const [newJobEmoji,setNewJobEmoji]  = useState("⭐");
   const [showReset,  setShowReset]    = useState(false);
   const [deductModal, setDeductModal] = useState(false);
+  const [isTeacher,  setIsTeacher]   = useState(false);
+  const [loginUser,  setLoginUser]   = useState("");
+  const [loginPass,  setLoginPass]   = useState("");
+  const [loginError, setLoginError]  = useState("");
+  const [studentUser, setStudentUser]       = useState(null);
+  const [showStudentLogin, setShowStudentLogin] = useState(false);
+  const [stuLoginUser, setStuLoginUser]     = useState("");
+  const [stuLoginPass, setStuLoginPass]     = useState("");
+  const [stuLoginError, setStuLoginError]   = useState("");
+  const [showChangePw, setShowChangePw]     = useState(false);
+  const [newPw1, setNewPw1]                 = useState("");
+  const [newPw2, setNewPw2]                 = useState("");
+  const [changePwError, setChangePwError]   = useState("");
+  const [payMulti, setPayMulti]             = useState(false);
+  const [multiSelected, setMultiSelected]   = useState([]);
 const handleLogin = () => {
   if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
     setIsTeacher(true);
