@@ -3,92 +3,99 @@ const TEACHER_USER = "teacher";
 const TEACHER_PASS = "dinobucks";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { saveToFirebase, subscribeToFirebase } from "./firebase";
-
 // — Sound effects
 const playSound = (type) => {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     const c = new AudioCtx();
-    const makeNode = (type="sine") => {
+    if (type === "ching") {
+      // Bright metallic cha-ching - two rising tones
+      for (let i = 0; i < 2; i++) {
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.connect(g); g.connect(c.destination);
+        o.type = "triangle";
+        o.frequency.setValueAtTime(i===0?1047:1568, c.currentTime + i*0.1);
+        g.gain.setValueAtTime(0.8, c.currentTime + i*0.1);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.1 + 0.6);
+        o.start(c.currentTime + i*0.1);
+        o.stop(c.currentTime + i*0.1 + 0.6);
+      }
+    } else if (type === "deduct") {
+      // Deep descending growl - very different from ching
       const o = c.createOscillator();
       const g = c.createGain();
-      o.type = type;
-      o.connect(g);
-      g.connect(c.destination);
-      return { o, g };
-    };
-    if (type === "ching") {
-      // Loud coin cha-ching with two tones
-      [1400, 1800].forEach((freq, i) => {
-        const { o, g } = makeNode("sine");
-        o.frequency.setValueAtTime(freq, c.currentTime + i*0.08);
-        o.frequency.exponentialRampToValueAtTime(freq*0.7, c.currentTime + i*0.08 + 0.3);
-        g.gain.setValueAtTime(0.6, c.currentTime + i*0.08);
-        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.08 + 0.5);
-        o.start(c.currentTime + i*0.08);
-        o.stop(c.currentTime + i*0.08 + 0.5);
-      });
-    } else if (type === "deduct") {
-      // Dino screech — descending roar
-      const { o, g } = makeNode("sawtooth");
-      const { o:o2, g:g2 } = makeNode("square");
-      o.frequency.setValueAtTime(600, c.currentTime);
-      o.frequency.exponentialRampToValueAtTime(80, c.currentTime + 0.5);
-      g.gain.setValueAtTime(0.5, c.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.5);
-      o.start(); o.stop(c.currentTime + 0.5);
-      o2.frequency.setValueAtTime(300, c.currentTime);
-      o2.frequency.exponentialRampToValueAtTime(60, c.currentTime + 0.4);
-      g2.gain.setValueAtTime(0.3, c.currentTime);
-      g2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.4);
-      o2.start(); o2.stop(c.currentTime + 0.4);
+      const distortion = c.createWaveShaper();
+      const curve = new Float32Array(256);
+      for (let i=0;i<256;i++) curve[i] = (i<128?-1:1)*Math.pow(Math.abs((i-128)/128),0.5)*0.8;
+      distortion.curve = curve;
+      o.connect(distortion); distortion.connect(g); g.connect(c.destination);
+      o.type = "sawtooth";
+      o.frequency.setValueAtTime(220, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(55, c.currentTime + 0.6);
+      g.gain.setValueAtTime(0.7, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.6);
+      o.start(); o.stop(c.currentTime + 0.6);
     } else if (type === "roar") {
-      // Big T-Rex roar for payday
-      [80, 120, 200].forEach((freq, i) => {
-        const { o, g } = makeNode("sawtooth");
-        o.frequency.setValueAtTime(freq * 2, c.currentTime);
-        o.frequency.exponentialRampToValueAtTime(freq, c.currentTime + 0.6);
-        g.gain.setValueAtTime(0.4, c.currentTime + i*0.05);
-        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.7);
-        o.start(c.currentTime + i*0.05);
-        o.stop(c.currentTime + 0.8);
+      // Massive T-Rex roar - low rumble with harmonics
+      [55, 110, 165].forEach((freq, i) => {
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.connect(g); g.connect(c.destination);
+        o.type = "sawtooth";
+        o.frequency.setValueAtTime(freq*2.5, c.currentTime);
+        o.frequency.exponentialRampToValueAtTime(freq, c.currentTime + 0.8);
+        g.gain.setValueAtTime(0.5-i*0.1, c.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 1.0);
+        o.start(); o.stop(c.currentTime + 1.0);
       });
     } else if (type === "pop") {
-      // Happy dino chirp
-      const { o, g } = makeNode("sine");
-      o.frequency.setValueAtTime(800, c.currentTime);
-      o.frequency.exponentialRampToValueAtTime(1200, c.currentTime + 0.05);
-      o.frequency.exponentialRampToValueAtTime(600, c.currentTime + 0.15);
-      g.gain.setValueAtTime(0.4, c.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.2);
-      o.start(); o.stop(c.currentTime + 0.2);
-    } else if (type === "click") {
-      // Quick dino tap
-      const { o, g } = makeNode("sine");
-      o.frequency.setValueAtTime(500, c.currentTime);
-      g.gain.setValueAtTime(0.15, c.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.06);
-      o.start(); o.stop(c.currentTime + 0.06);
-    } else if (type === "gameover") {
-      // Sad trombone dino
-      const { o, g } = makeNode("sawtooth");
+      // Happy upward chirp
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.type = "sine";
       o.frequency.setValueAtTime(400, c.currentTime);
-      o.frequency.setValueAtTime(350, c.currentTime + 0.15);
-      o.frequency.setValueAtTime(300, c.currentTime + 0.3);
-      o.frequency.setValueAtTime(200, c.currentTime + 0.45);
-      g.gain.setValueAtTime(0.4, c.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.7);
-      o.start(); o.stop(c.currentTime + 0.7);
+      o.frequency.exponentialRampToValueAtTime(1600, c.currentTime + 0.12);
+      g.gain.setValueAtTime(0.5, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.15);
+      o.start(); o.stop(c.currentTime + 0.15);
+    } else if (type === "click") {
+      // Short tick
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.type = "square";
+      o.frequency.setValueAtTime(200, c.currentTime);
+      g.gain.setValueAtTime(0.2, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.04);
+      o.start(); o.stop(c.currentTime + 0.04);
+    } else if (type === "gameover") {
+      // Dramatic falling notes
+      [392, 330, 294, 220].forEach((freq, i) => {
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.connect(g); g.connect(c.destination);
+        o.type = "sawtooth";
+        o.frequency.setValueAtTime(freq, c.currentTime + i*0.18);
+        g.gain.setValueAtTime(0.5, c.currentTime + i*0.18);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.18 + 0.25);
+        o.start(c.currentTime + i*0.18);
+        o.stop(c.currentTime + i*0.18 + 0.25);
+      });
     } else if (type === "levelup") {
-      // Victory screech
-      [500, 700, 900, 1200].forEach((freq, i) => {
-        const { o, g } = makeNode("sine");
-        o.frequency.setValueAtTime(freq, c.currentTime + i*0.1);
-        g.gain.setValueAtTime(0.4, c.currentTime + i*0.1);
-        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.1 + 0.15);
-        o.start(c.currentTime + i*0.1);
-        o.stop(c.currentTime + i*0.1 + 0.15);
+      // Rising victory fanfare
+      [523, 659, 784, 1047].forEach((freq, i) => {
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.connect(g); g.connect(c.destination);
+        o.type = "triangle";
+        o.frequency.setValueAtTime(freq, c.currentTime + i*0.12);
+        g.gain.setValueAtTime(0.5, c.currentTime + i*0.12);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.12 + 0.2);
+        o.start(c.currentTime + i*0.12);
+        o.stop(c.currentTime + i*0.12 + 0.2);
       });
     }
   } catch(e) {}
@@ -102,12 +109,6 @@ const sounds = {
   gameover: () => playSound("gameover"),
   levelup:  () => playSound("levelup"),
 };
-const sounds = {
-  ching: () => playSound("ching"),
-  deduct: () => playSound("deduct"),
-  pop: () => playSound("pop"),
-};
-
 // ── Canadian bill colours ─────────────────────────────────────────────────────
 const BILL = {
   1:   { bg:"#A0785A", light:"#f5ede6" },
@@ -508,7 +509,61 @@ function TriviaGame({ earnBucks }) {
     </div>
   );
 }
-
+function MemoryGame({ earnBucks }) {
+  const emojis = ["🦕","🦖","🦴","🥚","🌿","🏔️","🦷","🌋"];
+  const [cards, setCards] = React.useState(() => {
+    const deck = [...emojis, ...emojis].map((e, i) => ({ id:i, emoji:e, flipped:false, matched:false }));
+    for (let i = deck.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+    return deck;
+  });
+  const [selected, setSelected] = React.useState([]);
+  const [moves, setMoves] = React.useState(0);
+  const [won, setWon] = React.useState(false);
+  const flip = (id) => {
+    if (selected.length === 2) return;
+    const card = cards.find(c => c.id === id);
+    if (card.flipped || card.matched) return;
+    const newCards = cards.map(c => c.id === id ? { ...c, flipped:true } : c);
+    const newSel = [...selected, id];
+    setCards(newCards);
+    setSelected(newSel);
+    if (newSel.length === 2) {
+      setMoves(m => m+1);
+      const [a, b] = newSel.map(id => newCards.find(c => c.id === id));
+      if (a.emoji === b.emoji) {
+        const matched = newCards.map(c => newSel.includes(c.id) ? { ...c, matched:true } : c);
+        setCards(matched);
+        setSelected([]);
+        if (matched.every(c => c.matched)) { setWon(true); earnBucks(moves < 15 ? 5 : 3); }
+      } else {
+        setTimeout(() => {
+          setCards(prev => prev.map(c => newSel.includes(c.id) ? { ...c, flipped:false } : c));
+          setSelected([]);
+        }, 800);
+      }
+    }
+  };
+  if (won) return (
+    <div style={{ textAlign:"center", padding:24 }}>
+      <div style={{ fontSize:48 }}>🎉</div>
+      <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:24, color:"#1a472a", margin:"12px 0" }}>You won in {moves} moves!</div>
+      <button onClick={() => { setCards(() => { const deck = [...emojis,...emojis].map((e,i)=>({id:i,emoji:e,flipped:false,matched:false})); for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}return deck;}); setMoves(0); setWon(false); setSelected([]); }} style={{ padding:"10px 24px", background:"#27ae60", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>Play Again</button>
+    </div>
+  );
+  return (
+    <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:10, maxWidth:360, margin:"0 auto" }}>
+      {cards.map(c => (
+        <div key={c.id} onClick={() => flip(c.id)} style={{
+          height:70, borderRadius:12, display:"flex", alignItems:"center", justifyContent:"center",
+          fontSize:32, cursor:"pointer", transition:"all 0.2s",
+          background: c.flipped||c.matched ? "#f0fbf4" : "#1a472a",
+          border: c.matched ? "3px solid #27ae60" : "3px solid #145a32",
+          boxShadow:"0 2px 8px #0002"
+        }}>{c.flipped||c.matched ? c.emoji : "🌿"}</div>
+      ))}
+    </div>
+  );
+}
 function RunnerGame({ earnBucks }) {
   const OBSTACLES = ["🌵","🌵","🌵","🦴","🪨","🌿","🦖","🌴"];
   const BIRDS = ["🦅","🦜","🐦"];
