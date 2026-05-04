@@ -1,114 +1,48 @@
 /* eslint-disable */
-const TEACHER_USER = "teacher";
-const TEACHER_PASS = "dinobucks";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { saveToFirebase, subscribeToFirebase } from "./firebase";
+
 // — Sound effects
 const playSound = (type) => {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     const c = new AudioCtx();
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.connect(g);
+    g.connect(c.destination);
+
     if (type === "ching") {
-      // Bright metallic cha-ching - two rising tones
-      for (let i = 0; i < 2; i++) {
-        const o = c.createOscillator();
-        const g = c.createGain();
-        o.connect(g); g.connect(c.destination);
-        o.type = "triangle";
-        o.frequency.setValueAtTime(i===0?1047:1568, c.currentTime + i*0.1);
-        g.gain.setValueAtTime(0.8, c.currentTime + i*0.1);
-        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.1 + 0.6);
-        o.start(c.currentTime + i*0.1);
-        o.stop(c.currentTime + i*0.1 + 0.6);
-      }
+      o.frequency.setValueAtTime(1200, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(800, c.currentTime + 0.1);
+      g.gain.setValueAtTime(0.3, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.4);
+      o.start(); o.stop(c.currentTime + 0.4);
     } else if (type === "deduct") {
-      // Deep descending growl - very different from ching
-      const o = c.createOscillator();
-      const g = c.createGain();
-      const distortion = c.createWaveShaper();
-      const curve = new Float32Array(256);
-      for (let i=0;i<256;i++) curve[i] = (i<128?-1:1)*Math.pow(Math.abs((i-128)/128),0.5)*0.8;
-      distortion.curve = curve;
-      o.connect(distortion); distortion.connect(g); g.connect(c.destination);
       o.type = "sawtooth";
-      o.frequency.setValueAtTime(220, c.currentTime);
-      o.frequency.exponentialRampToValueAtTime(55, c.currentTime + 0.6);
-      g.gain.setValueAtTime(0.7, c.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.6);
-      o.start(); o.stop(c.currentTime + 0.6);
-    } else if (type === "roar") {
-      // Massive T-Rex roar - low rumble with harmonics
-      [55, 110, 165].forEach((freq, i) => {
-        const o = c.createOscillator();
-        const g = c.createGain();
-        o.connect(g); g.connect(c.destination);
-        o.type = "sawtooth";
-        o.frequency.setValueAtTime(freq*2.5, c.currentTime);
-        o.frequency.exponentialRampToValueAtTime(freq, c.currentTime + 0.8);
-        g.gain.setValueAtTime(0.5-i*0.1, c.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 1.0);
-        o.start(); o.stop(c.currentTime + 1.0);
-      });
-    } else if (type === "pop") {
-      // Happy upward chirp
-      const o = c.createOscillator();
-      const g = c.createGain();
-      o.connect(g); g.connect(c.destination);
-      o.type = "sine";
-      o.frequency.setValueAtTime(400, c.currentTime);
-      o.frequency.exponentialRampToValueAtTime(1600, c.currentTime + 0.12);
-      g.gain.setValueAtTime(0.5, c.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.15);
-      o.start(); o.stop(c.currentTime + 0.15);
-    } else if (type === "click") {
-      // Short tick
-      const o = c.createOscillator();
-      const g = c.createGain();
-      o.connect(g); g.connect(c.destination);
-      o.type = "square";
-      o.frequency.setValueAtTime(200, c.currentTime);
+      o.frequency.setValueAtTime(300, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(100, c.currentTime + 0.2);
       g.gain.setValueAtTime(0.2, c.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.04);
-      o.start(); o.stop(c.currentTime + 0.04);
-    } else if (type === "gameover") {
-      // Dramatic falling notes
-      [392, 330, 294, 220].forEach((freq, i) => {
-        const o = c.createOscillator();
-        const g = c.createGain();
-        o.connect(g); g.connect(c.destination);
-        o.type = "sawtooth";
-        o.frequency.setValueAtTime(freq, c.currentTime + i*0.18);
-        g.gain.setValueAtTime(0.5, c.currentTime + i*0.18);
-        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.18 + 0.25);
-        o.start(c.currentTime + i*0.18);
-        o.stop(c.currentTime + i*0.18 + 0.25);
-      });
-    } else if (type === "levelup") {
-      // Rising victory fanfare
-      [523, 659, 784, 1047].forEach((freq, i) => {
-        const o = c.createOscillator();
-        const g = c.createGain();
-        o.connect(g); g.connect(c.destination);
-        o.type = "triangle";
-        o.frequency.setValueAtTime(freq, c.currentTime + i*0.12);
-        g.gain.setValueAtTime(0.5, c.currentTime + i*0.12);
-        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i*0.12 + 0.2);
-        o.start(c.currentTime + i*0.12);
-        o.stop(c.currentTime + i*0.12 + 0.2);
-      });
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.3);
+      o.start(); o.stop(c.currentTime + 0.3);
+    } else if (type === "pop") {
+      o.frequency.setValueAtTime(600, c.currentTime);
+      g.gain.setValueAtTime(0.2, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.1);
+      o.start(); o.stop(c.currentTime + 0.1);
     }
   } catch(e) {}
 };
+
+
+
 const sounds = {
-  ching:    () => playSound("ching"),
-  deduct:   () => playSound("deduct"),
-  roar:     () => playSound("roar"),
-  pop:      () => playSound("pop"),
-  click:    () => playSound("click"),
-  gameover: () => playSound("gameover"),
-  levelup:  () => playSound("levelup"),
+  ching: () => playSound("ching"),
+  deduct: () => playSound("deduct"),
+  pop: () => playSound("pop"),
 };
+
 // ── Canadian bill colours ─────────────────────────────────────────────────────
 const BILL = {
   1:   { bg:"#A0785A", light:"#f5ede6" },
@@ -431,444 +365,7 @@ function TxRow({ tx, students }) {
   );
 }
 
-// ── Game Area Component ───────────────────────────────────────────────────────
-function GameArea({ game, studentUser, appState, update, todayStr, showToast, fmt }) {
-  const earnBucks = (amt) => {
-    if (!studentUser) return;
-    const today = todayStr();
-    const earned = appState?.gameEarnings?.[studentUser.id]?.[today] || 0;
-    const canEarn = Math.min(amt, 10 - earned);
-    if (canEarn <= 0) { showToast("Daily $10 limit reached! 🦕", "#e67e22"); return; }
-    update(prev => ({
-      ...prev,
-      balances: { ...prev.balances, [studentUser.id]: (prev.balances?.[studentUser.id] || 0) + canEarn },
-      gameEarnings: { ...prev.gameEarnings, [studentUser.id]: { ...(prev.gameEarnings?.[studentUser.id] || {}), [today]: earned + canEarn }},
-      txLog: [{ id:Math.random().toString(36).slice(2), studentId:studentUser.id, amount:canEarn, reason:`🎮 Game earnings`, date:today }, ...(prev.txLog||[])],
-    }));
-    showToast(`+${fmt(canEarn)} Dino Bucks! 🎮`);
-  };
-  if (game === "trivia") return <TriviaGame earnBucks={earnBucks} />;
-  if (game === "memory") return <MemoryGame earnBucks={earnBucks} />;
-  if (game === "runner") return <RunnerGame earnBucks={earnBucks} />;
-  if (game === "egg")    return <EggDropGame earnBucks={earnBucks} />;
-  if (game === "digger") return <DiggerGame earnBucks={earnBucks} />;
-  return null;
-}
-
-function TriviaGame({ earnBucks }) {
-  const questions = [
-    { q:"What is the largest dinosaur ever discovered?", a:"Argentinosaurus", choices:["T-Rex","Argentinosaurus","Brachiosaurus","Diplodocus"] },
-    { q:"What did T-Rex eat?", a:"Meat", choices:["Plants","Meat","Both","Fish only"] },
-    { q:"What period did most dinosaurs live in?", a:"Jurassic", choices:["Triassic","Jurassic","Cretaceous","Permian"] },
-    { q:"What does 'dinosaur' mean?", a:"Terrible lizard", choices:["Giant reptile","Terrible lizard","Big beast","Stone bone"] },
-    { q:"Which dinosaur had 3 horns?", a:"Triceratops", choices:["Stegosaurus","Ankylosaurus","Triceratops","Spinosaurus"] },
-    { q:"What group of animals are dinosaurs most related to?", a:"Birds", choices:["Lizards","Crocodiles","Birds","Snakes"] },
-    { q:"Which dinosaur had plates on its back?", a:"Stegosaurus", choices:["Stegosaurus","Diplodocus","T-Rex","Raptor"] },
-    { q:"How did most dinosaurs go extinct?", a:"Asteroid impact", choices:["Ice age","Volcano only","Asteroid impact","Flood"] },
-    { q:"What is a fossil?", a:"Preserved remains of ancient life", choices:["A rock","Preserved remains of ancient life","A dinosaur egg","A bone replica"] },
-    { q:"Which was the fastest dinosaur?", a:"Compsognathus", choices:["T-Rex","Velociraptor","Compsognathus","Gallimimus"] },
-  ];
-  const [idx, setIdx] = React.useState(0);
-  const [score, setScore] = React.useState(0);
-  const [done, setDone] = React.useState(false);
-  const [feedback, setFeedback] = React.useState(null);
-  const answer = (choice) => {
-    if (feedback) return;
-    const correct = choice === questions[idx].a;
-    setFeedback(correct ? "correct" : "wrong");
-    if (correct) setScore(s => s + 1);
-    setTimeout(() => {
-      setFeedback(null);
-      if (idx + 1 >= questions.length) { setDone(true); earnBucks(score + (correct ? 1 : 0)); }
-      else setIdx(i => i + 1);
-    }, 900);
-  };
-  if (done) return (
-    <div style={{ textAlign:"center", padding:24 }}>
-      <div style={{ fontSize:48 }}>🏆</div>
-      <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:24, color:"#1a472a", margin:"12px 0" }}>You scored {score}/{questions.length}!</div>
-      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:14, color:"#555", marginBottom:16 }}>You earned ${score} Dino Bucks!</div>
-      <button onClick={() => { setIdx(0); setScore(0); setDone(false); }} style={{ padding:"10px 24px", background:"#27ae60", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>Play Again</button>
-    </div>
-  );
-  const q = questions[idx];
-  return (
-    <div style={{ maxWidth:500, margin:"0 auto" }}>
-      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>Question {idx+1} of {questions.length} · Score: {score}</div>
-      <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:18, color:"#1a472a", marginBottom:16, background:"#f0fbf4", padding:16, borderRadius:12 }}>{q.q}</div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-        {q.choices.map(c => (
-          <button key={c} onClick={() => answer(c)} style={{
-            padding:"12px 16px", border:"2px solid #4B9B6E", borderRadius:12, cursor:"pointer",
-            fontFamily:"'Nunito',sans-serif", fontSize:14, fontWeight:700,
-            background: feedback && c === q.a ? "#27ae60" : feedback && c !== q.a ? "#fee" : "#fff",
-            color: feedback && c === q.a ? "#fff" : "#333", transition:"all 0.2s"
-          }}>{c}</button>
-        ))}
-      </div>
-    </div>
-  );
-}
-function MemoryGame({ earnBucks }) {
-  const emojis = ["🦕","🦖","🦴","🥚","🌿","🏔️","🦷","🌋"];
-  const [cards, setCards] = React.useState(() => {
-    const deck = [...emojis, ...emojis].map((e, i) => ({ id:i, emoji:e, flipped:false, matched:false }));
-    for (let i = deck.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
-    return deck;
-  });
-  const [selected, setSelected] = React.useState([]);
-  const [moves, setMoves] = React.useState(0);
-  const [won, setWon] = React.useState(false);
-  const flip = (id) => {
-    if (selected.length === 2) return;
-    const card = cards.find(c => c.id === id);
-    if (card.flipped || card.matched) return;
-    const newCards = cards.map(c => c.id === id ? { ...c, flipped:true } : c);
-    const newSel = [...selected, id];
-    setCards(newCards);
-    setSelected(newSel);
-    if (newSel.length === 2) {
-      setMoves(m => m+1);
-      const [a, b] = newSel.map(id => newCards.find(c => c.id === id));
-      if (a.emoji === b.emoji) {
-        const matched = newCards.map(c => newSel.includes(c.id) ? { ...c, matched:true } : c);
-        setCards(matched);
-        setSelected([]);
-        if (matched.every(c => c.matched)) { setWon(true); earnBucks(moves < 15 ? 5 : 3); }
-      } else {
-        setTimeout(() => {
-          setCards(prev => prev.map(c => newSel.includes(c.id) ? { ...c, flipped:false } : c));
-          setSelected([]);
-        }, 800);
-      }
-    }
-  };
-  if (won) return (
-    <div style={{ textAlign:"center", padding:24 }}>
-      <div style={{ fontSize:48 }}>🎉</div>
-      <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:24, color:"#1a472a", margin:"12px 0" }}>You won in {moves} moves!</div>
-      <button onClick={() => { setCards(() => { const deck = [...emojis,...emojis].map((e,i)=>({id:i,emoji:e,flipped:false,matched:false})); for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}return deck;}); setMoves(0); setWon(false); setSelected([]); }} style={{ padding:"10px 24px", background:"#27ae60", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>Play Again</button>
-    </div>
-  );
-  return (
-    <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:10, maxWidth:360, margin:"0 auto" }}>
-      {cards.map(c => (
-        <div key={c.id} onClick={() => flip(c.id)} style={{
-          height:70, borderRadius:12, display:"flex", alignItems:"center", justifyContent:"center",
-          fontSize:32, cursor:"pointer", transition:"all 0.2s",
-          background: c.flipped||c.matched ? "#f0fbf4" : "#1a472a",
-          border: c.matched ? "3px solid #27ae60" : "3px solid #145a32",
-          boxShadow:"0 2px 8px #0002"
-        }}>{c.flipped||c.matched ? c.emoji : "🌿"}</div>
-      ))}
-    </div>
-  );
-}
-function RunnerGame({ earnBucks }) {
-  const OBSTACLES = ["🌵","🌵","🌵","🦴","🪨","🌿","🦖","🌴"];
-  const BIRDS = ["🦅","🦜","🐦"];
-  const [running, setRunning] = React.useState(false);
-  const [score, setScore] = React.useState(0);
-  const [dead, setDead] = React.useState(false);
-  const [dinoY, setDinoY] = React.useState(0);
-  const [obstacles, setObstacles] = React.useState([]);
-  const [clouds, setClouds] = React.useState([
-    {id:1,x:100,y:20},{id:2,x:300,y:40},{id:3,x:500,y:15}
-  ]);
-  const [speed, setSpeed] = React.useState(6);
-  const jumpRef = React.useRef(false);
-  const frameRef = React.useRef();
-  const obstRef = React.useRef([]);
-  const scoreRef = React.useRef(0);
-  const dinoYRef = React.useRef(0);
-  const speedRef = React.useRef(6);
-  const cloudsRef = React.useRef([{id:1,x:100,y:20},{id:2,x:300,y:40},{id:3,x:500,y:15}]);
-
-  const jump = React.useCallback(() => {
-    if (jumpRef.current) return;
-    jumpRef.current = true;
-    setDinoY(110);
-    dinoYRef.current = 110;
-    setTimeout(() => {
-      setDinoY(0);
-      dinoYRef.current = 0;
-      setTimeout(() => { jumpRef.current = false; }, 100);
-    }, 500);
-  }, []);
-
-  React.useEffect(() => {
-    if (!running) return;
-    const handleKey = (e) => { if (e.code === "Space" || e.code === "ArrowUp") jump(); };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [running, jump]);
-
-  React.useEffect(() => {
-    if (!running) return;
-    let lastObst = 0;
-    const tick = (ts) => {
-      scoreRef.current += 1;
-      // Speed increases every 200 points
-      const newSpeed = 6 + Math.floor(scoreRef.current / 200);
-      if (newSpeed !== speedRef.current) { speedRef.current = newSpeed; setSpeed(newSpeed); }
-      if (scoreRef.current % 10 === 0) setScore(scoreRef.current);
-      // Add obstacles
-      if (ts - lastObst > Math.max(600, 1400 - scoreRef.current/2) + Math.random()*600) {
-        lastObst = ts;
-        const isDouble = Math.random() < 0.2 && scoreRef.current > 300;
-        const isBird = Math.random() < 0.25 && scoreRef.current > 150;
-        const emoji = isBird ? BIRDS[Math.floor(Math.random()*BIRDS.length)] : OBSTACLES[Math.floor(Math.random()*OBSTACLES.length)];
-        const birdHeight = isBird ? 50 + Math.random()*40 : 0;
-        obstRef.current = [...obstRef.current, { id:Math.random(), x:520, emoji, birdHeight, isDouble }];
-        if (isDouble) obstRef.current = [...obstRef.current, { id:Math.random(), x:560, emoji:OBSTACLES[Math.floor(Math.random()*OBSTACLES.length)], birdHeight:0, isDouble:false }];
-      }
-      obstRef.current = obstRef.current.map(o => ({ ...o, x: o.x - speedRef.current })).filter(o => o.x > -40);
-      setObstacles([...obstRef.current]);
-      // Move clouds
-      cloudsRef.current = cloudsRef.current.map(c => ({ ...c, x: c.x - 1 < -50 ? 550 : c.x - 1 }));
-      setClouds([...cloudsRef.current]);
-      // Collision detection
-      const hit = obstRef.current.some(o => {
-        if (o.x < 90 && o.x > 25) {
-          if (o.birdHeight > 0) return dinoYRef.current < o.birdHeight + 30 && dinoYRef.current > o.birdHeight - 30;
-          return dinoYRef.current < 45;
-        }
-        return false;
-      });
-      if (hit) { setRunning(false); setDead(true); earnBucks(Math.floor(scoreRef.current / 50)); return; }
-      frameRef.current = requestAnimationFrame(tick);
-    };
-    frameRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, [running]);
-
-  const start = () => {
-    setDead(false); setScore(0); scoreRef.current=0;
-    obstRef.current=[]; setObstacles([]);
-    speedRef.current=6; setSpeed(6);
-    setRunning(true);
-  };
-
-  return (
-    <div style={{ textAlign:"center" }}>
-      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>
-        Press SPACE or tap to jump! Score: {score} {speed > 6 ? `⚡ Speed x${speed-4}` : ""}
-      </div>
-      <div onClick={jump} style={{ position:"relative", width:"100%", maxWidth:560, height:200, background:"linear-gradient(180deg,#87CEEB 0%,#c8e6f5 55%,#98c87a 55%,#7aaa55 65%,#8B6914 65%,#7a5c10 100%)", borderRadius:14, overflow:"hidden", cursor:"pointer", margin:"0 auto", border:"3px solid #4B9B6E", userSelect:"none" }}>
-        {/* Clouds */}
-        {clouds.map(c => (
-          <div key={c.id} style={{ position:"absolute", top:c.y, left:c.x, fontSize:22, opacity:0.7 }}>☁️</div>
-        ))}
-        {/* Ground line */}
-        <div style={{ position:"absolute", bottom:44, left:0, right:0, height:2, background:"rgba(0,0,0,0.1)" }}/>
-        {/* Dino - flipped to face right */}
-        <div style={{ position:"absolute", bottom:44+dinoY, left:55, fontSize:40, transition:"bottom 0.08s", transform:"scaleX(-1)" }}>🦕</div>
-        {/* Obstacles */}
-        {obstacles.map(o => (
-          <div key={o.id} style={{ position:"absolute", bottom: o.birdHeight > 0 ? 44+o.birdHeight : 44, left:o.x, fontSize:o.birdHeight > 0 ? 24 : 30, transform: o.birdHeight > 0 ? "scaleX(-1)" : "none" }}>{o.emoji}</div>
-        ))}
-        {/* Score overlay */}
-        <div style={{ position:"absolute", top:8, right:12, fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"rgba(0,0,0,0.4)" }}>{score}</div>
-      </div>
-      {!running && (
-        <button onClick={start} style={{ marginTop:16, padding:"10px 24px", background:"#27ae60", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>
-          {dead ? `💀 Game Over! Score: ${score} — Play Again` : "Start Running! 🦕"}
-        </button>
-      )}
-      {running && <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:11, color:"#aaa", marginTop:6 }}>Watch out for birds 🦅 — they fly at different heights!</div>}
-    </div>
-  );
-}
-
-function EggDropGame({ earnBucks }) {
-  const EGG_TYPES = [
-    { emoji:"🥚", points:1, speed:1 },
-    { emoji:"🥚", points:1, speed:1 },
-    { emoji:"🥚", points:1, speed:1 },
-    { emoji:"💎", points:3, speed:1.5 },
-    { emoji:"⭐", points:2, speed:1.2 },
-    { emoji:"🦴", points:-1, speed:1.3 },
-  ];
-  const [playing, setPlaying] = React.useState(false);
-  const [basketX, setBasketX] = React.useState(250);
-  const [eggs, setEggs] = React.useState([]);
-  const [score, setScore] = React.useState(0);
-  const [missed, setMissed] = React.useState(0);
-  const [done, setDone] = React.useState(false);
-  const [caught, setCaught] = React.useState([]);
-  const [hearts, setHearts] = React.useState(5);
-  const frameRef = React.useRef();
-  const eggsRef = React.useRef([]);
-  const caughtRef = React.useRef([]);
-  const scoreRef = React.useRef(0);
-  const missedRef = React.useRef(0);
-  const basketRef = React.useRef(250);
-  const heartsRef = React.useRef(5);
-
-  React.useEffect(() => {
-    const move = (e) => {
-      const rect = document.getElementById("eggcanvas2")?.getBoundingClientRect();
-      const basket = document.getElementById("basket2");
-      if (rect && basket) { 
-        const newX = Math.max(50, Math.min(rect.width-50, e.clientX - rect.left)); 
-        basketRef.current = newX; 
-        basket.style.left = newX + "px";
-      }
-    };
-    const touch = (e) => {
-      const rect = document.getElementById("eggcanvas2")?.getBoundingClientRect();
-      if (rect && e.touches[0]) { basketRef.current = Math.max(50, Math.min(rect.width-50, e.touches[0].clientX - rect.left)); setBasketX(basketRef.current); }
-    };
-    window.addEventListener("mousemove", move);
-    window.addEventListener("touchmove", touch);
-    return () => { window.removeEventListener("mousemove", move); window.removeEventListener("touchmove", touch); };
-  }, []);
-
-  React.useEffect(() => {
-    if (!playing) return;
-    let last = 0;
-    let frameCount = 0;
-    const tick = (ts) => {
-      frameCount++;
-      const speed = 1 + Math.floor(scoreRef.current / 10) * 0.15;
-      const interval = Math.max(500, 900 - scoreRef.current * 5);
-      if (ts - last > interval) {
-        last = ts;
-        const type = EGG_TYPES[Math.floor(Math.random() * EGG_TYPES.length)];
-        eggsRef.current = [...eggsRef.current, { id:Math.random(), x:Math.random()*440+30, y:-20, ...type }];
-      }
-      eggsRef.current = eggsRef.current.map(e => ({ ...e, y: e.y + (3.5 * speed * e.speed) }));
-      const newCaught = eggsRef.current.filter(e => e.y > 230 && e.y < 270 && Math.abs(e.x - basketRef.current) < 55);
-      const newMissed = eggsRef.current.filter(e => e.y > 310 && Math.abs(e.x - basketRef.current) >= 55);
-      if (newCaught.length) {
-        newCaught.forEach(e => {
-          scoreRef.current = Math.max(0, scoreRef.current + e.points);
-          if (e.points < 0) { heartsRef.current = Math.max(0, heartsRef.current - 1); setHearts(heartsRef.current); }
-        });
-        setScore(scoreRef.current);
-        caughtRef.current = [...caughtRef.current, ...newCaught.map(e => ({ ...e, opacity:1, vy:-3 }))];
-      }
-      if (newMissed.length) {
-        newMissed.forEach(e => { if (e.points > 0) { missedRef.current++; heartsRef.current = Math.max(0, heartsRef.current-1); } });
-        setMissed(missedRef.current);
-        setHearts(heartsRef.current);
-      }
-      caughtRef.current = caughtRef.current.map(e => ({ ...e, y: e.y + e.vy, opacity: e.opacity - 0.05 })).filter(e => e.opacity > 0);
-      setCaught([...caughtRef.current]);
-      eggsRef.current = eggsRef.current.filter(e => e.y <= 310);
-      setEggs([...eggsRef.current]);
-      if (heartsRef.current <= 0) { setPlaying(false); setDone(true); earnBucks(Math.floor(scoreRef.current/3)); return; }
-      frameRef.current = requestAnimationFrame(tick);
-    };
-    frameRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, [playing]);
-
-  const start = () => {
-    setDone(false); setScore(0); setMissed(0); setHearts(5);
-    scoreRef.current=0; missedRef.current=0; heartsRef.current=5;
-    eggsRef.current=[]; caughtRef.current=[];
-    setEggs([]); setCaught([]);
-    setPlaying(true);
-  };
-
-  return (
-    <div style={{ textAlign:"center" }}>
-      <div style={{ display:"flex", justifyContent:"center", alignItems:"center", gap:20, fontFamily:"'Nunito',sans-serif", fontSize:14, color:"#555", marginBottom:8 }}>
-        <span>🥚 Caught: <strong>{score}</strong></span>
-        <span>{Array(5).fill(0).map((_,i) => <span key={i} style={{ fontSize:18, opacity: i < hearts ? 1 : 0.2 }}>❤️</span>)}</span>
-        <span style={{ fontSize:12, color:"#aaa" }}>💎=3pts ⭐=2pts 🦴=lose heart</span>
-      </div>
-      <div id="eggcanvas2" style={{
-        position:"relative", width:"100%", maxWidth:540, height:300,
-        background:"linear-gradient(180deg, #1a1a4e 0%, #2d1b69 30%, #1a472a 70%, #145a32 100%)",
-        borderRadius:16, overflow:"hidden", margin:"0 auto", border:"3px solid #4B9B6E",
-        cursor:"none"
-      }}>
-        {/* Stars */}
-        {[{x:10,y:15},{x:25,y:8},{x:50,y:20},{x:70,y:5},{x:85,y:18},{x:95,y:10},{x:40,y:12},{x:60,y:25}].map((s,i) => (
-          <div key={i} style={{ position:"absolute", left:`${s.x}%`, top:`${s.y}%`, fontSize:10, opacity:0.7 }}>⭐</div>
-        ))}
-        {/* Moon */}
-        <div style={{ position:"absolute", top:10, right:20, fontSize:28 }}>🌙</div>
-        {/* Dino nest at top center */}
-        <div style={{ position:"absolute", top:8, left:"50%", transform:"translateX(-50%)", fontSize:20 }}>🦕</div>
-        {/* Ground */}
-        <div style={{ position:"absolute", bottom:0, left:0, right:0, height:40, background:"linear-gradient(180deg,#1a5c2a,#0d3d1a)", borderTop:"2px solid #27ae60" }}/>
-        {/* Trees */}
-        <div style={{ position:"absolute", bottom:35, left:10, fontSize:28 }}>🌲</div>
-        <div style={{ position:"absolute", bottom:35, right:10, fontSize:28 }}>🌲</div>
-        {/* Eggs */}
-        {eggs.map(e => (
-          <div key={e.id} style={{ position:"absolute", left:e.x, top:e.y, fontSize:22, transform:"translateX(-50%)", filter: e.points===3?"drop-shadow(0 0 6px cyan)":e.points===2?"drop-shadow(0 0 4px gold)":e.points<0?"drop-shadow(0 0 4px red)":"none" }}>{e.emoji}</div>
-        ))}
-        {/* Floating score popups */}
-        {caught.map(e => (
-          <div key={e.id+"c"} style={{ position:"absolute", left:e.x, top:e.y, fontSize:16, fontFamily:"'Fredoka One',sans-serif", color: e.points>1?"#FFD700":e.points<0?"#ff4444":"#fff", opacity:e.opacity, transform:"translateX(-50%)", pointerEvents:"none" }}>{e.points>0?`+${e.points}`:`${e.points}`}</div>
-        ))}
-        {/* Basket */}
-        <div id="basket2" style={{ position:"absolute", bottom:42, left:basketRef.current, transform:"translateX(-50%)", fontSize:44, filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.5))" }}>🧺</div>
-      </div>
-      {!playing && (
-        <button onClick={start} style={{ marginTop:16, padding:"10px 28px", background:"linear-gradient(135deg,#e67e22,#d35400)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16, boxShadow:"0 4px 12px rgba(230,126,34,0.4)" }}>
-          {done ? `🎉 Game Over! Score: ${score} — Play Again` : "Start Catching! 🥚"}
-        </button>
-      )}
-    </div>
-  );
-}
-
-function DiggerGame({ earnBucks }) {
-  const GRID = 16;
-  const [cells, setCells] = React.useState(() => Array(GRID).fill(null).map((_,i) => ({ id:i, dug:false, hasBone:Math.random()<0.35, hasRock:Math.random()<0.2 })));
-  const [timeLeft, setTimeLeft] = React.useState(20);
-  const [score, setScore] = React.useState(0);
-  const [playing, setPlaying] = React.useState(false);
-  const [done, setDone] = React.useState(false);
-  const timerRef = React.useRef();
-  React.useEffect(() => {
-    if (!playing) return;
-    timerRef.current = setInterval(() => {
-      setTimeLeft(t => {
-        if (t <= 1) { clearInterval(timerRef.current); setPlaying(false); setDone(true); return 0; }
-        return t-1;
-      });
-    }, 1000);
-    return () => clearInterval(timerRef.current);
-  }, [playing]);
-  const dig = (id) => {
-    if (!playing) return;
-    const cell = cells.find(c => c.id === id);
-    if (cell.dug) return;
-    setCells(prev => prev.map(c => c.id === id ? { ...c, dug:true } : c));
-    if (cell.hasBone) setScore(s => s+1);
-  };
-  const start = () => {
-    setCells(Array(GRID).fill(null).map((_,i) => ({ id:i, dug:false, hasBone:Math.random()<0.35, hasRock:Math.random()<0.2 })));
-    setTimeLeft(20); setScore(0); setDone(false); setPlaying(true);
-  };
-  React.useEffect(() => { if (done) earnBucks(score); }, [done]);
-  return (
-    <div style={{ textAlign:"center" }}>
-      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>Click to dig! Time: {timeLeft}s | Bones: {score}</div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8, maxWidth:320, margin:"0 auto 16px" }}>
-        {cells.map(c => (
-          <div key={c.id} onClick={() => dig(c.id)} style={{
-            height:64, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center",
-            fontSize:28, cursor:playing?"pointer":"default", transition:"all 0.15s",
-            background: c.dug ? "#f5e6c8" : "#8B6914",
-            border:"3px solid #6b4f10", boxShadow:"0 2px 6px #0002"
-          }}>{c.dug ? (c.hasBone ? "🦴" : c.hasRock ? "🪨" : "💨") : "🟫"}</div>
-        ))}
-      </div>
-      {!playing && (
-        <button onClick={start} style={{ padding:"10px 24px", background:"#c0392b", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>
-          {done ? `Found ${score} bones! Play Again` : "Start Digging! 🦴"}
-        </button>
-      )}
-    </div>
-  );
-}
+// ── Main App ──────────────────────────────────────────────────────────────────
 export default function App() {
   const [appState, setAppState]   = useState(null);   // full synced state
   const [loading,  setLoading]    = useState(true);
@@ -884,25 +381,7 @@ export default function App() {
   const [newJobEmoji,setNewJobEmoji]  = useState("⭐");
   const [showReset,  setShowReset]    = useState(false);
   const [deductModal, setDeductModal] = useState(false);
-  const [isTeacher,    setIsTeacher]    = useState(false);
-  const [studentUser,  setStudentUser]  = useState(null);
-  const [loginUser,    setLoginUser]    = useState("");
-  const [loginPass,    setLoginPass]    = useState("");
-  const [loginError,   setLoginError]   = useState("");
-  const [stuLoginUser, setStuLoginUser] = useState("");
-  const [stuLoginPass, setStuLoginPass] = useState("");
-  const [stuLoginError,setStuLoginError]= useState("");
-  const [showChangePw, setShowChangePw] = useState(false);
-  const [newPw1,       setNewPw1]       = useState("");
-  const [newPw2,       setNewPw2]       = useState("");
-  const [changePwError,setChangePwError]= useState("");
-  const [showStudentLogin, setShowStudentLogin] = useState(false);
-  const [activeGame, setActiveGame] = useState(null);
-  const [payMulti, setPayMulti] = useState({});
-  const [multiSelected, setMultiSelected] = useState([]);
-  const [deductAmt, setDeductAmt] = useState("5");
-  const [deductReason, setDeductReason] = useState("Deduction");
-  const handleLogin = () => {
+const handleLogin = () => {
   if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
     setIsTeacher(true);
     setLoginError("");
@@ -1407,7 +886,6 @@ export default function App() {
         {tabBtn("log","📋 History")}
         {tabBtn("store","🏪 Store")}
         {tabBtn("invest","📈 Invest")}
-        {tabBtn("play","🎮 Play")}
         {tabBtn("settings","⚙️ Settings")}
       </div>
 
@@ -1457,7 +935,7 @@ export default function App() {
       style={{ padding:"8px 18px",background:"#8e44ad",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>
       + Custom
     </button>
-                    <button onClick={() => { setDeductModal(true); setDeductAmt(payAmt||""); }}
+                    <button onClick={() => setDeductModal(true)}
       style={{ padding:"8px 18px",background:"#e74c3c",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>
       − Deduct
     </button>
@@ -1518,7 +996,7 @@ export default function App() {
                 <input value={payReason} onChange={e => setPayReason(e.target.value)} placeholder="Job completed, bonus…"
                   style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #4B9B6E",fontSize:15,fontFamily:"'Nunito',sans-serif",outline:"none" }}/>
                 <div style={{ display:"flex",gap:6,marginTop:8,flexWrap:"wrap" }}>
-                  {["Job completed","Great work!","Reading quietly","Respectful","Helped a classmate","Class participation"].map(r => (
+                  {["Job completed","Great work!","Bonus","Homework done","Helped a classmate","Class participation"].map(r => (
                     <button key={r} onClick={() => setPayReason(r)}
                       style={{ padding:"4px 9px",background:"#e8f5e9",border:"1.5px solid #4B9B6E",borderRadius:7,cursor:"pointer",fontSize:11,fontFamily:"'Nunito',sans-serif",color:"#1a472a" }}>{r}</button>
                   ))}
@@ -1539,7 +1017,7 @@ export default function App() {
         {/* ═══ JOBS ═══ */}
         {tab==="jobs" && (
           <div>
-            <h2 style={{ fontSize:22,color:"#1a472a",marginTop:0 }}>Classroom Jobs 👷</h2>
+            <h2 style={{ fontSize:26,color:"#1a472a",marginTop:0 }}>Classroom Jobs 👷</h2>
             <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10,marginBottom:18,padding:"12px 16px",background:"linear-gradient(135deg,#eaf4ff,#daeaf8)",borderRadius:14,border:"2px solid #4A7FBF44" }}>
               <div style={{ fontFamily:"'Nunito',sans-serif",fontSize:13,color:"#1A5276" }}>
                 <strong>🔄 Weekly Rotation</strong>
@@ -1553,11 +1031,11 @@ export default function App() {
                 const dino = DINOS.find(d => d.id === s.dinoId) || DINOS[0];
                 const job = (jobs||[]).find(j => j.id === (assigned||{})[s.id]);
                 return (
-                  <div key={s.id} style={{ background:job?`linear-gradient(135deg,${dino.colour}14,#f0fbf4)`:"#fafafa",border:`2.5px solid ${job?dino.colour+"44":"#e0e0e0"}`,borderRadius:16,padding:"7px 10px",display:"flex",alignItems:"center",gap:10 }}>
+                  <div key={s.id} style={{ background:job?`linear-gradient(135deg,${dino.colour}14,#f0fbf4)`:"#fafafa",border:`2.5px solid ${job?dino.colour+"44":"#e0e0e0"}`,borderRadius:16,padding:"12px 14px",display:"flex",alignItems:"center",gap:10 }}>
                     <DinoSVG id={s.dinoId} c={dino.colour} size={44}/>
                     <div style={{ flex:1 }}>
-                      <div style={{ fontWeight:800,fontSize:16,color:"#1a1a2e" }}>{s.name.split(" ")[0]}</div>
-                      <div style={{ fontSize:16,color:"#444",fontFamily:"'Nunito',sans-serif",fontWeight:700,marginTop:2 }}>{job ? `${job.emoji} ${job.name} · ${fmt(job.pay)}/payday` : "No job yet"}</div>
+                      <div style={{ fontWeight:800,fontSize:14,color:"#1a1a2e" }}>{s.name}</div>
+                      <div style={{ fontSize:12,color:"#666",fontFamily:"'Nunito',sans-serif",marginTop:2 }}>{job ? `${job.emoji} ${job.name} · ${fmt(job.pay)}/payday` : "No job yet"}</div>
                     </div>
                     <select value={(assigned||{})[s.id]||""} onChange={e => update(prev => ({ ...prev, assigned: { ...prev.assigned, [s.id]: e.target.value||null } }))}
                       style={{ padding:"5px 7px",borderRadius:8,border:"2px solid #4B9B6E",fontSize:12,fontFamily:"'Nunito',sans-serif",background:"#fff",outline:"none",maxWidth:130 }}>
@@ -1711,46 +1189,6 @@ export default function App() {
             )}
           </div>
         )}
-        {/* ═══ PLAY ═══ */}
-        {tab==="play" && (
-          <div style={{ padding:"0 0 40px" }}>
-            <h2 style={{ fontSize:24, color:"#1a472a", margin:"0 0 8px", fontFamily:"'Fredoka One',sans-serif" }}>🎮 Dino Game Zone</h2>
-            <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#555", marginBottom:20 }}>
-              {studentUser ? `Daily earnings: ${fmt(appState?.gameEarnings?.[studentUser.id]?.[todayStr()] || 0)} / $10.00` : "Log in as a student to earn Dino Bucks!"}
-            </div>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(200px, 1fr))", gap:16 }}>
-              {[
-                { id:"runner",  name:"Dino Runner",  emoji:"🦕", desc:"Jump over obstacles!",  color:"#27ae60" },
-                { id:"egg",     name:"Egg Drop",      emoji:"🥚", desc:"Catch falling eggs!",    color:"#e67e22" },
-                { id:"memory",  name:"Memory Match",  emoji:"🧠", desc:"Match the dino pairs!",  color:"#8e44ad" },
-                { id:"trivia",  name:"Dino Trivia",   emoji:"🦖", desc:"Answer dino questions!", color:"#2980b9" },
-                { id:"digger",  name:"Bone Digger",   emoji:"🦴", desc:"Dig up bones in time!",  color:"#c0392b" },
-              ].map(game => (
-                <div key={game.id} onClick={() => setActiveGame(game.id)}
-                  style={{ background:"#fff", borderRadius:20, padding:24, textAlign:"center", cursor:"pointer",
-                    boxShadow:"0 4px 16px #0002", border:`2.5px solid ${game.color}33`,
-                    transition:"transform 0.15s, box-shadow 0.15s" }}
-                  onMouseEnter={e => { e.currentTarget.style.transform="scale(1.04)"; e.currentTarget.style.boxShadow="0 8px 24px #0003"; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform="scale(1)"; e.currentTarget.style.boxShadow="0 4px 16px #0002"; }}>
-                  <div style={{ fontSize:48, marginBottom:10 }}>{game.emoji}</div>
-                  <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:18, color:game.color, marginBottom:6 }}>{game.name}</div>
-                  <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#777" }}>{game.desc}</div>
-                </div>
-              ))}
-            </div>
-            {activeGame && (
-              <div style={{ marginTop:24, background:"#fff", borderRadius:20, padding:24, boxShadow:"0 4px 16px #0002" }}>
-                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
-                  <h3 style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:20, color:"#1a472a", margin:0 }}>
-                    {activeGame==="runner"?"🦕 Dino Runner":activeGame==="egg"?"🥚 Egg Drop":activeGame==="memory"?"🧠 Memory Match":activeGame==="trivia"?"🦖 Dino Trivia":"🦴 Bone Digger"}
-                  </h3>
-                  <button onClick={() => setActiveGame(null)} style={{ padding:"6px 14px", background:"#eee", border:"none", borderRadius:8, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:14 }}>✕ Close</button>
-                </div>
-                <GameArea game={activeGame} studentUser={studentUser} appState={appState} update={update} todayStr={todayStr} showToast={showToast} fmt={fmt}/>
-              </div>
-            )}
-          </div>
-        )}
         {/* ═══ SETTINGS ═══ */}
         {tab==="settings" && (
           <div style={{ maxWidth:540 }}>
@@ -1791,7 +1229,7 @@ export default function App() {
         {tab==="invest" && (
           <div style={{ padding:"0 0 40px" }}>
             <h2 style={{ fontSize:24, color:"#1a472a", margin:"0 0 16px", fontFamily:"'Fredoka One',sans-serif" }}>📈 Dino Stock Market</h2>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(200px, 1fr))", gap:16, marginBottom:32 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))", gap:16, marginBottom:32 }}>
               {DINO_STOCKS.map(stock => {
                 const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
                 const change = ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
@@ -1802,7 +1240,7 @@ export default function App() {
                   <div key={stock.id} style={{ background:"#fff", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0003", border:"1.5px solid #f0f0f0" }}>
                     <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
                       <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                        <span style={{ fontSize:20 }}>{stock.emoji}</span>
+                        <span style={{ fontSize:28 }}>{stock.emoji}</span>
                         <div>
                           <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a" }}>{stock.name}</div>
                           <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:11, color:"#888" }}>{stock.description}</div>
@@ -1827,7 +1265,7 @@ export default function App() {
                     )}
                     <div style={{ display:"flex", gap:8 }}>
                       <input id={`buy-${stock.id}`} type="number" placeholder="$ amount" min="1"
-                        style={{ width:"70px", padding:"8px 10px", borderRadius:10, border:"2px solid #4B9B6E", fontFamily:"'Nunito',sans-serif", fontSize:14, outline:"none" }}/>
+                        style={{ flex:1, padding:"8px 10px", borderRadius:10, border:"2px solid #4B9B6E", fontFamily:"'Nunito',sans-serif", fontSize:14, outline:"none" }}/>
                       <button onClick={() => {
                         const amt = parseFloat(document.getElementById(`buy-${stock.id}`).value);
                         if (!amt || amt <= 0) return;
@@ -1922,7 +1360,7 @@ export default function App() {
                 <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>No investors yet — buy some shares!</div>
               )}
             </div>
-          </div>
+        </div>
         )}
 
       </div>
