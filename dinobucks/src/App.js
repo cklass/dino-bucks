@@ -708,7 +708,12 @@ function EggDropGame({ earnBucks }) {
   React.useEffect(() => {
     const move = (e) => {
       const rect = document.getElementById("eggcanvas2")?.getBoundingClientRect();
-      if (rect) { const newX = Math.max(50, Math.min(rect.width-50, e.clientX - rect.left)); basketRef.current = newX; requestAnimationFrame(() => setBasketX(newX)); }
+      const basket = document.getElementById("basket2");
+      if (rect && basket) { 
+        const newX = Math.max(50, Math.min(rect.width-50, e.clientX - rect.left)); 
+        basketRef.current = newX; 
+        basket.style.left = newX + "px";
+      }
     };
     const touch = (e) => {
       const rect = document.getElementById("eggcanvas2")?.getBoundingClientRect();
@@ -802,7 +807,7 @@ function EggDropGame({ earnBucks }) {
           <div key={e.id+"c"} style={{ position:"absolute", left:e.x, top:e.y, fontSize:16, fontFamily:"'Fredoka One',sans-serif", color: e.points>1?"#FFD700":e.points<0?"#ff4444":"#fff", opacity:e.opacity, transform:"translateX(-50%)", pointerEvents:"none" }}>{e.points>0?`+${e.points}`:`${e.points}`}</div>
         ))}
         {/* Basket */}
-        <div style={{ position:"absolute", bottom:42, left:basketX, transform:"translateX(-50%)", fontSize:44, filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.5))" }}>🧺</div>
+        <div id="basket2" style={{ position:"absolute", bottom:42, left:basketRef.current, transform:"translateX(-50%)", fontSize:44, filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.5))" }}>🧺</div>
       </div>
       {!playing && (
         <button onClick={start} style={{ marginTop:16, padding:"10px 28px", background:"linear-gradient(135deg,#e67e22,#d35400)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16, boxShadow:"0 4px 12px rgba(230,126,34,0.4)" }}>
