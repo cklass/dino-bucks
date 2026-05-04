@@ -681,54 +681,132 @@ function RunnerGame({ earnBucks }) {
 }
 
 function EggDropGame({ earnBucks }) {
+  const EGG_TYPES = [
+    { emoji:"🥚", points:1, speed:1 },
+    { emoji:"🥚", points:1, speed:1 },
+    { emoji:"🥚", points:1, speed:1 },
+    { emoji:"💎", points:3, speed:1.5 },
+    { emoji:"⭐", points:2, speed:1.2 },
+    { emoji:"🦴", points:-1, speed:1.3 },
+  ];
   const [playing, setPlaying] = React.useState(false);
-  const [basketX, setBasketX] = React.useState(200);
+  const [basketX, setBasketX] = React.useState(250);
   const [eggs, setEggs] = React.useState([]);
   const [score, setScore] = React.useState(0);
   const [missed, setMissed] = React.useState(0);
   const [done, setDone] = React.useState(false);
+  const [caught, setCaught] = React.useState([]);
+  const [hearts, setHearts] = React.useState(5);
   const frameRef = React.useRef();
   const eggsRef = React.useRef([]);
+  const caughtRef = React.useRef([]);
   const scoreRef = React.useRef(0);
   const missedRef = React.useRef(0);
-  const basketRef = React.useRef(200);
+  const basketRef = React.useRef(250);
+  const heartsRef = React.useRef(5);
+
   React.useEffect(() => {
     const move = (e) => {
-      const rect = document.getElementById("eggcanvas")?.getBoundingClientRect();
-      if (rect) { basketRef.current = Math.max(40, Math.min(rect.width-40, e.clientX - rect.left)); setBasketX(basketRef.current); }
+      const rect = document.getElementById("eggcanvas2")?.getBoundingClientRect();
+      if (rect) { basketRef.current = Math.max(50, Math.min(rect.width-50, e.clientX - rect.left)); setBasketX(basketRef.current); }
+    };
+    const touch = (e) => {
+      const rect = document.getElementById("eggcanvas2")?.getBoundingClientRect();
+      if (rect && e.touches[0]) { basketRef.current = Math.max(50, Math.min(rect.width-50, e.touches[0].clientX - rect.left)); setBasketX(basketRef.current); }
     };
     window.addEventListener("mousemove", move);
-    return () => window.removeEventListener("mousemove", move);
+    window.addEventListener("touchmove", touch);
+    return () => { window.removeEventListener("mousemove", move); window.removeEventListener("touchmove", touch); };
   }, []);
+
   React.useEffect(() => {
     if (!playing) return;
     let last = 0;
+    let frameCount = 0;
     const tick = (ts) => {
-      if (ts - last > 800) { last = ts; eggsRef.current = [...eggsRef.current, { id:Math.random(), x:Math.random()*400+20, y:0 }]; }
-      eggsRef.current = eggsRef.current.map(e => ({ ...e, y: e.y+4 }));
-      const caught = eggsRef.current.filter(e => e.y > 220 && Math.abs(e.x - basketRef.current) < 50);
-      const fell = eggsRef.current.filter(e => e.y > 280 && Math.abs(e.x - basketRef.current) >= 50);
-      if (caught.length) { scoreRef.current += caught.length; setScore(scoreRef.current); }
-      if (fell.length) { missedRef.current += fell.length; setMissed(missedRef.current); }
-      eggsRef.current = eggsRef.current.filter(e => e.y <= 280);
+      frameCount++;
+      const speed = 1 + Math.floor(scoreRef.current / 10) * 0.15;
+      const interval = Math.max(500, 900 - scoreRef.current * 5);
+      if (ts - last > interval) {
+        last = ts;
+        const type = EGG_TYPES[Math.floor(Math.random() * EGG_TYPES.length)];
+        eggsRef.current = [...eggsRef.current, { id:Math.random(), x:Math.random()*440+30, y:-20, ...type }];
+      }
+      eggsRef.current = eggsRef.current.map(e => ({ ...e, y: e.y + (3.5 * speed * e.speed) }));
+      const newCaught = eggsRef.current.filter(e => e.y > 230 && e.y < 270 && Math.abs(e.x - basketRef.current) < 55);
+      const newMissed = eggsRef.current.filter(e => e.y > 310 && Math.abs(e.x - basketRef.current) >= 55);
+      if (newCaught.length) {
+        newCaught.forEach(e => {
+          scoreRef.current = Math.max(0, scoreRef.current + e.points);
+          if (e.points < 0) { heartsRef.current = Math.max(0, heartsRef.current - 1); setHearts(heartsRef.current); }
+        });
+        setScore(scoreRef.current);
+        caughtRef.current = [...caughtRef.current, ...newCaught.map(e => ({ ...e, opacity:1, vy:-3 }))];
+      }
+      if (newMissed.length) {
+        newMissed.forEach(e => { if (e.points > 0) { missedRef.current++; heartsRef.current = Math.max(0, heartsRef.current-1); } });
+        setMissed(missedRef.current);
+        setHearts(heartsRef.current);
+      }
+      caughtRef.current = caughtRef.current.map(e => ({ ...e, y: e.y + e.vy, opacity: e.opacity - 0.05 })).filter(e => e.opacity > 0);
+      setCaught([...caughtRef.current]);
+      eggsRef.current = eggsRef.current.filter(e => e.y <= 310);
       setEggs([...eggsRef.current]);
-      if (missedRef.current >= 5) { setPlaying(false); setDone(true); earnBucks(Math.floor(scoreRef.current/3)); return; }
+      if (heartsRef.current <= 0) { setPlaying(false); setDone(true); earnBucks(Math.floor(scoreRef.current/3)); return; }
       frameRef.current = requestAnimationFrame(tick);
     };
     frameRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameRef.current);
   }, [playing]);
-  const start = () => { setDone(false); setScore(0); setMissed(0); scoreRef.current=0; missedRef.current=0; eggsRef.current=[]; setEggs([]); setPlaying(true); };
+
+  const start = () => {
+    setDone(false); setScore(0); setMissed(0); setHearts(5);
+    scoreRef.current=0; missedRef.current=0; heartsRef.current=5;
+    eggsRef.current=[]; caughtRef.current=[];
+    setEggs([]); setCaught([]);
+    setPlaying(true);
+  };
+
   return (
     <div style={{ textAlign:"center" }}>
-      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>Move your mouse to catch eggs! Caught: {score} | Missed: {missed}/5</div>
-      <div id="eggcanvas" style={{ position:"relative", width:"100%", maxWidth:500, height:280, background:"linear-gradient(180deg,#87CEEB,#98FB98)", borderRadius:12, overflow:"hidden", margin:"0 auto", border:"3px solid #4B9B6E" }}>
-        {eggs.map(e => <div key={e.id} style={{ position:"absolute", left:e.x, top:e.y, fontSize:24, transform:"translateX(-50%)" }}>🥚</div>)}
-        <div style={{ position:"absolute", bottom:10, left:basketX, transform:"translateX(-50%)", fontSize:36 }}>🧺</div>
+      <div style={{ display:"flex", justifyContent:"center", alignItems:"center", gap:20, fontFamily:"'Nunito',sans-serif", fontSize:14, color:"#555", marginBottom:8 }}>
+        <span>🥚 Caught: <strong>{score}</strong></span>
+        <span>{Array(5).fill(0).map((_,i) => <span key={i} style={{ fontSize:18, opacity: i < hearts ? 1 : 0.2 }}>❤️</span>)}</span>
+        <span style={{ fontSize:12, color:"#aaa" }}>💎=3pts ⭐=2pts 🦴=lose heart</span>
+      </div>
+      <div id="eggcanvas2" style={{
+        position:"relative", width:"100%", maxWidth:540, height:300,
+        background:"linear-gradient(180deg, #1a1a4e 0%, #2d1b69 30%, #1a472a 70%, #145a32 100%)",
+        borderRadius:16, overflow:"hidden", margin:"0 auto", border:"3px solid #4B9B6E",
+        cursor:"none"
+      }}>
+        {/* Stars */}
+        {[{x:10,y:15},{x:25,y:8},{x:50,y:20},{x:70,y:5},{x:85,y:18},{x:95,y:10},{x:40,y:12},{x:60,y:25}].map((s,i) => (
+          <div key={i} style={{ position:"absolute", left:`${s.x}%`, top:`${s.y}%`, fontSize:10, opacity:0.7 }}>⭐</div>
+        ))}
+        {/* Moon */}
+        <div style={{ position:"absolute", top:10, right:20, fontSize:28 }}>🌙</div>
+        {/* Dino nest at top center */}
+        <div style={{ position:"absolute", top:8, left:"50%", transform:"translateX(-50%)", fontSize:20 }}>🦕</div>
+        {/* Ground */}
+        <div style={{ position:"absolute", bottom:0, left:0, right:0, height:40, background:"linear-gradient(180deg,#1a5c2a,#0d3d1a)", borderTop:"2px solid #27ae60" }}/>
+        {/* Trees */}
+        <div style={{ position:"absolute", bottom:35, left:10, fontSize:28 }}>🌲</div>
+        <div style={{ position:"absolute", bottom:35, right:10, fontSize:28 }}>🌲</div>
+        {/* Eggs */}
+        {eggs.map(e => (
+          <div key={e.id} style={{ position:"absolute", left:e.x, top:e.y, fontSize:22, transform:"translateX(-50%)", filter: e.points===3?"drop-shadow(0 0 6px cyan)":e.points===2?"drop-shadow(0 0 4px gold)":e.points<0?"drop-shadow(0 0 4px red)":"none" }}>{e.emoji}</div>
+        ))}
+        {/* Floating score popups */}
+        {caught.map(e => (
+          <div key={e.id+"c"} style={{ position:"absolute", left:e.x, top:e.y, fontSize:16, fontFamily:"'Fredoka One',sans-serif", color: e.points>1?"#FFD700":e.points<0?"#ff4444":"#fff", opacity:e.opacity, transform:"translateX(-50%)", pointerEvents:"none" }}>{e.points>0?`+${e.points}`:`${e.points}`}</div>
+        ))}
+        {/* Basket */}
+        <div style={{ position:"absolute", bottom:42, left:basketX, transform:"translateX(-50%)", fontSize:44, filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.5))", transition:"left 0.02s" }}>🧺</div>
       </div>
       {!playing && (
-        <button onClick={start} style={{ marginTop:16, padding:"10px 24px", background:"#e67e22", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>
-          {done ? `Game Over! Caught ${score} — Play Again` : "Start Catching! 🥚"}
+        <button onClick={start} style={{ marginTop:16, padding:"10px 28px", background:"linear-gradient(135deg,#e67e22,#d35400)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16, boxShadow:"0 4px 12px rgba(230,126,34,0.4)" }}>
+          {done ? `🎉 Game Over! Score: ${score} — Play Again` : "Start Catching! 🥚"}
         </button>
       )}
     </div>
