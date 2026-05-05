@@ -209,28 +209,28 @@ const CLASS_LIST = [
   { name:"Sasmit Mahindrakar",  dinoId:"dilophosaurus",      username:"sasmitm",   password:"sasmitm"   },
   { name:"Umaima Jabbar",       dinoId:"herrerasaurus",      username:"umaimaj",   password:"umaimaj"   },
 ];
-// DINO_STOCKS and DINO_NEWS added here
+
 
 const DINO_STOCKS = [
-  { id:"bananas",  name:"Brachiosaur Bananas",   emoji:"🦕", color:"#27ae60", startPrice:20, volatility:0.03, tickers:["L.TO","MRU.TO","ATD.TO"],   description:"Staples & Grocery"   },
-  { id:"trextech", name:"T-Rex Tech",            emoji:"🦖", color:"#8e44ad", startPrice:50, volatility:0.10, tickers:["SHOP.TO","CSU.TO","CLS.TO"], description:"Technology"          },
-  { id:"airways",  name:"Pterodactyl Airways",   emoji:"🐉", color:"#2471A3", startPrice:35, volatility:0.07, tickers:["AC.TO","DOO.TO","CJT.TO"],   description:"Travel & Leisure"    },
-  { id:"energy",   name:"DinoEgg Energy",        emoji:"🥚", color:"#e67e22", startPrice:15, volatility:0.02, tickers:["ENB.TO","FTS.TO","TRP.TO"],  description:"Energy & Utilities"  },
-  { id:"steel",    name:"Stegosaurus Steel",     emoji:"💎", color:"#7f8c8d", startPrice:28, volatility:0.05, tickers:["CNR.TO","CAE.TO","WSP.TO"],  description:"Industrials"         },
+  { id:"bananas",  name:"Brachiosaur Bananas",   emoji:"🦕", color:"#27ae60", startPrice:20, volatility:0.03, tickers:["L.TO","MRU.TO","ATD.TO"],   description:"Staples & Grocery"  },
+  { id:"trextech", name:"T-Rex Tech",            emoji:"🦖", color:"#8e44ad", startPrice:50, volatility:0.10, tickers:["SHOP.TO","CSU.TO","CLS.TO"], description:"Technology"         },
+  { id:"airways",  name:"Pterodactyl Airways",   emoji:"🐉", color:"#2471A3", startPrice:35, volatility:0.07, tickers:["AC.TO","DOO.TO","CJT.TO"],   description:"Travel & Leisure"   },
+  { id:"energy",   name:"DinoEgg Energy",        emoji:"🥚", color:"#e67e22", startPrice:15, volatility:0.02, tickers:["ENB.TO","FTS.TO","TRP.TO"],  description:"Energy & Utilities" },
+  { id:"steel",    name:"Stegosaurus Steel",     emoji:"💎", color:"#7f8c8d", startPrice:28, volatility:0.05, tickers:["CNR.TO","CAE.TO","WSP.TO"],  description:"Industrials"        },
 ];
 
 const DINO_NEWS = {
   bananas: {
-    upBig:    ["Brachiosaur Bananas crushes quarterly earnings as prehistoric grocery demand surges","Brachiosaur Bananas posts record profits — analysts say the herd is buying","Brachiosaur Bananas up sharply after new fern-based product line exceeds expectations"],
+    upBig:    ["Brachiosaur Bananas crushes quarterly earnings as prehistoric grocery demand surges","Brachiosaur Bananas posts record profits as the herd keeps buying","Brachiosaur Bananas surges after new fern-based product line exceeds expectations"],
     upSmall:  ["Brachiosaur Bananas edges higher amid steady leaf supply chain","Brachiosaur Bananas ticks up on resilient consumer staples demand","Brachiosaur Bananas inches forward — slow and steady wins the race"],
     downSmall:["Brachiosaur Bananas slips on mild consumer spending concerns","Brachiosaur Bananas dips slightly as rival herbivores enter the market","Brachiosaur Bananas retreats modestly on mixed economic signals"],
-    downBig:  ["Brachiosaur Bananas tumbles after meteor weather disrupts harvest season","Brachiosaur Bananas sinks on supply chain chaos — too many long necks, not enough leaves","Brachiosaur Bananas falls sharply as drought hits the Jurassic valley"],
+    downBig:  ["Brachiosaur Bananas tumbles after meteor weather disrupts harvest season","Brachiosaur Bananas sinks — too many long necks, not enough leaves","Brachiosaur Bananas falls sharply as drought hits the Jurassic valley"],
   },
   trextech: {
     upBig:    ["T-Rex Tech soars after surprise earnings beat — analysts call it extinction-proof","T-Rex Tech surges on blockbuster product launch, short-sellers flee","T-Rex Tech rockets higher after signing deal with every dinosaur on the continent"],
     upSmall:  ["T-Rex Tech gains modestly on strong mobile app downloads","T-Rex Tech edges up as developer community expands","T-Rex Tech ticks higher — tiny arms, big returns"],
-    downSmall:["T-Rex Tech dips as investors question new product launch timeline","T-Rex Tech slips on light trading volume ahead of earnings","T-Rex Tech retreats slightly — market awaits next big announcement"],
-    downBig:  ["T-Rex Tech plunges after CEO accidentally deletes server with one swipe of tiny arm","T-Rex Tech crashes on disappointing quarterly results — extinction event for shareholders","T-Rex Tech sinks after major product recall — customers unhappy with claw-proof keyboard"],
+    downSmall:["T-Rex Tech dips as investors question new product launch timeline","T-Rex Tech slips on light trading volume ahead of earnings","T-Rex Tech retreats — market awaits next big announcement"],
+    downBig:  ["T-Rex Tech plunges after CEO accidentally deletes server with one swipe of tiny arm","T-Rex Tech crashes on disappointing results — extinction event for shareholders","T-Rex Tech sinks after major product recall — customers unhappy with claw-proof keyboard"],
   },
   airways: {
     upBig:    ["Pterodactyl Airways surges after record passenger numbers over the volcano corridor","Pterodactyl Airways soars on fuel cost savings — tailwinds literally","Pterodactyl Airways posts best quarter ever as prehistoric tourism booms"],
@@ -312,8 +312,9 @@ const SEED_STATE = () => {
   const students = CLASS_LIST.map(s => ({ id: uuid(), name: s.name, dinoId: s.dinoId }));
   const balances = {};
   students.forEach(s => { balances[s.id] = 0; });
-  return { students, balances, jobs: DEFAULT_JOBS, assigned: {}, txLog: [], lastRotation: null, prevAssigned: {}, storeItems: DEFAULT_STORE, purchases: [], stockPrices: Object.fromEntries(DINO_STOCKS.map(s => [s.id, s.startPrice])), stockHistory: {}, portfolios: {}, stockNews: {} };
+  return { students, balances, jobs: DEFAULT_JOBS, assigned: {}, txLog: [], lastRotation: null, prevAssigned: {}, storeItems: DEFAULT_STORE, purchases: [], stockPrices: Object.fromEntries(DINO_STOCKS.map(s => [s.id, s.startPrice])), stockHistory: {}, portfolios: {}, stockNews: {}, lastStockFetch: null };
 };
+
 // ── Student card ──────────────────────────────────────────────────────────────
 function DinoCard({ student, balance, job, onClick, selected }) {
   const dino = DINOS.find(d => d.id === student.dinoId) || DINOS[0];
@@ -381,11 +382,7 @@ export default function App() {
   const [newJobEmoji,setNewJobEmoji]  = useState("⭐");
   const [showReset,  setShowReset]    = useState(false);
   const [deductModal, setDeductModal] = useState(false);
-  const [isTeacher,  setIsTeacher]   = useState(false);
-  const [loginUser,  setLoginUser]   = useState("");
-  const [loginPass,  setLoginPass]   = useState("");
-  const [loginError, setLoginError]  = useState("");
-  const [studentUser, setStudentUser]       = useState(null);
+  const [studentUser, setStudentUser]       = useState(null);  // logged-in student object
   const [showStudentLogin, setShowStudentLogin] = useState(false);
   const [stuLoginUser, setStuLoginUser]     = useState("");
   const [stuLoginPass, setStuLoginPass]     = useState("");
@@ -394,8 +391,18 @@ export default function App() {
   const [newPw1, setNewPw1]                 = useState("");
   const [newPw2, setNewPw2]                 = useState("");
   const [changePwError, setChangePwError]   = useState("");
-  const [payMulti, setPayMulti]             = useState(false);
-  const [multiSelected, setMultiSelected]   = useState([]);
+  const [deductAmt,   setDeductAmt]   = useState("");
+  const [deductReason,setDeductReason]= useState("Deduction");
+  const [isTeacher,  setIsTeacher]   = useState(false);
+  const [payMulti,   setPayMulti]    = useState(false);
+  const [multiSelected, setMultiSelected] = useState([]);
+const [loginUser,  setLoginUser]   = useState("");
+const [loginPass,  setLoginPass]   = useState("");
+const [loginError, setLoginError]  = useState("");
+
+const TEACHER_USER = "MrKlassen";
+const TEACHER_PASS = "DinoBucks2026";
+
 const handleLogin = () => {
   if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
     setIsTeacher(true);
@@ -565,27 +572,10 @@ const handleLogin = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appState?.students]);
 
-  const handleAddJob = () => {
-    if (!newJobName.trim()) return;
-    const job = { id: uuid(), name: newJobName.trim(), pay: parseInt(newJobPay) || 10, emoji: newJobEmoji };
-    update(prev => ({ ...prev, jobs: [...(prev.jobs||[]), job] }));
-    setNewJobName(""); setNewJobPay("10"); setNewJobEmoji("⭐");
-    showToast("Job added!");
-  };
-
-  const handleDeleteJob = (id) => {
-    update(prev => ({
-      ...prev,
-      jobs: prev.jobs.filter(j => j.id !== id),
-      assigned: Object.fromEntries(Object.entries(prev.assigned||{}).map(([k,v]) => [k, v===id ? null : v])),
-    }));
-  };
-
-
   const fetchStockChange = async (tickers) => {
     const changes = await Promise.all(tickers.map(async ticker => {
       try {
-        const url = `https://corsproxy.io/?https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`;
+        const url = "https://corsproxy.io/?" + encodeURIComponent("https://query1.finance.yahoo.com/v8/finance/chart/" + ticker + "?interval=1d&range=5d");
         const res = await fetch(url);
         const data = await res.json();
         const closes = data?.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(Boolean);
@@ -596,14 +586,12 @@ const handleLogin = () => {
     return changes.reduce((a, b) => a + b, 0) / changes.length;
   };
 
-  // Auto-fetch stock prices daily
   useEffect(() => {
     if (!appState) return;
     const today = todayStr();
     if (appState?.lastStockFetch === today) return;
     const dayOfWeek = new Date().getDay();
     if (dayOfWeek === 0 || dayOfWeek === 6) return;
-
     const fetchStocks = async () => {
       const newPrices = { ...(appState.stockPrices || {}) };
       const newNews = {};
@@ -623,19 +611,27 @@ const handleLogin = () => {
           newPrices[stock.id] = rounded;
         }
       }
-      update(prev => ({
-        ...prev,
-        stockPrices: newPrices,
-        lastStockFetch: today,
-        stockNews: newNews,
-        stockHistory: { ...(prev.stockHistory || {}), [today]: newPrices },
-      }));
+      update(prev => ({ ...prev, stockPrices: newPrices, lastStockFetch: today, stockNews: newNews, stockHistory: { ...(prev.stockHistory || {}), [today]: newPrices } }));
     };
-
     fetchStocks();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appState?.students]);
 
+  const handleAddJob = () => {
+    if (!newJobName.trim()) return;
+    const job = { id: uuid(), name: newJobName.trim(), pay: parseInt(newJobPay) || 10, emoji: newJobEmoji };
+    update(prev => ({ ...prev, jobs: [...(prev.jobs||[]), job] }));
+    setNewJobName(""); setNewJobPay("10"); setNewJobEmoji("⭐");
+    showToast("Job added!");
+  };
+
+  const handleDeleteJob = (id) => {
+    update(prev => ({
+      ...prev,
+      jobs: prev.jobs.filter(j => j.id !== id),
+      assigned: Object.fromEntries(Object.entries(prev.assigned||{}).map(([k,v]) => [k, v===id ? null : v])),
+    }));
+  };
 
  // ── Loading screen ────────────────────────────────────────────────────────
   if (loading) return (
@@ -651,6 +647,7 @@ const handleLogin = () => {
       <div style={{ background:"#fff", borderRadius:24, padding:"40px 36px", boxShadow:"0 12px 48px #0006", width:"100%", maxWidth:380, textAlign:"center" }}>
         <DinoSVG id="trex" c="#C0392B" size={80}/>
         <h1 style={{ fontSize:28, color:"#1a472a", margin:"12px 0 4px", letterSpacing:2 }}>DINO BUCKS</h1>
+
         {!showStudentLogin ? (
           <>
             <p style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13, marginBottom:24 }}>Teacher Login</p>
@@ -695,10 +692,24 @@ const handleLogin = () => {
     </div>
   );
 
+  const { students, balances, jobs, assigned, txLog, lastRotation } = appState;
+  const totalBalance = Object.values(balances || {}).reduce((a, b) => a + b, 0);
+  const selStudent = students?.find(s => s.id === selected);
+  const selDino    = selStudent ? DINOS.find(d => d.id === selStudent.dinoId) : null;
+
+  const tabBtn = (t, label) => (
+    <button key={t} onClick={() => setTab(t)} style={{
+      padding:"12px 20px", border:"none", cursor:"pointer",
+      borderRadius:"14px 14px 0 0",
+      fontFamily:"'Fredoka One',sans-serif", fontSize:16, letterSpacing:0.5,
+      background: tab===t ? "#fff" : "rgba(255,255,255,0.14)",
+      color: tab===t ? "#1a472a" : "#e8f5e9", transition:"all 0.15s",
+    }}>{label}</button>
+  );
 
   // ── Whiteboard display mode ──────────────────────────────────────────
   if (isTeacher === "display") {
-    const totalBal = (appState?.students || []).reduce((sum, s) => sum + (appState?.balances?.[s.id] || 0), 0);
+    const wbTotal = (appState?.students || []).reduce((sum, s) => sum + (appState?.balances?.[s.id] || 0), 0);
     return (
       <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)", fontFamily:"'Fredoka One',sans-serif", padding:24 }}>
         <style>{`* { box-sizing:border-box }`}</style>
@@ -709,7 +720,7 @@ const handleLogin = () => {
           </div>
           <div style={{ background:"rgba(255,255,255,0.15)", borderRadius:16, padding:"10px 24px", textAlign:"center" }}>
             <div style={{ color:"#a8d8b5", fontFamily:"'Nunito',sans-serif", fontSize:14 }}>Class Total</div>
-            <div style={{ color:"#fff", fontSize:32 }}>{fmt(totalBal)}</div>
+            <div style={{ color:"#fff", fontSize:32 }}>{fmt(wbTotal)}</div>
           </div>
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(160px, 1fr))", gap:16, marginBottom:32 }}>
@@ -724,7 +735,7 @@ const handleLogin = () => {
             );
           })}
         </div>
-        <h2 style={{ fontSize:28, color:"#fff", margin:"0 0 16px" }}>🏆 Top Investors</h2>
+        <h2 style={{ fontSize:28, color:"#fff", margin:"0 0 16px", fontFamily:"'Fredoka One',sans-serif" }}>🏆 Top Investors</h2>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(220px, 1fr))", gap:12 }}>
           {(appState?.students || []).map(s => {
             const portfolio = appState?.portfolios?.[s.id] || {};
@@ -751,8 +762,6 @@ const handleLogin = () => {
       </div>
     );
   }
-
-
   if (studentUser) {
     const stuData = (appState?.students || []).find(s => s.id === studentUser.id);
     const stuBalance = appState?.balances?.[studentUser.id] || 0;
@@ -760,6 +769,8 @@ const handleLogin = () => {
     return (
       <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)", fontFamily:"'Fredoka One',sans-serif", padding:20 }}>
         <style>{`* { box-sizing:border-box }`}</style>
+
+        {/* Header */}
         <div style={{ background:"#1A5276", borderRadius:16, padding:"12px 20px", display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
           <span style={{ color:"#fff", fontSize:18 }}>👋 Hi, {studentUser.name.split(" ")[0]}!</span>
           <div style={{ display:"flex", gap:8 }}>
@@ -773,12 +784,16 @@ const handleLogin = () => {
             </button>
           </div>
         </div>
+
+        {/* Avatar + Balance */}
         <div style={{ background:"#fff", borderRadius:20, padding:24, textAlign:"center", marginBottom:20, boxShadow:"0 4px 20px #0003" }}>
           <DinoSVG id={stuData?.dinoId || "trex"} c="#1e8449" size={90}/>
           <h2 style={{ fontSize:24, color:"#1a472a", margin:"12px 0 4px" }}>{stuData?.name}</h2>
           <div style={{ fontSize:42, color:"#27ae60", fontFamily:"'Fredoka One',sans-serif", margin:"8px 0" }}>{fmt(stuBalance)}</div>
           <div style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13 }}>Current Balance</div>
         </div>
+
+        {/* My Investments */}
         <div style={{ background:"#fff", borderRadius:20, padding:24, boxShadow:"0 4px 20px #0003", marginBottom:20 }}>
           <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 16px", fontFamily:"'Fredoka One',sans-serif" }}>📈 My Investments</h3>
           {DINO_STOCKS.map(stock => {
@@ -803,6 +818,8 @@ const handleLogin = () => {
             <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>No investments yet!</div>
           )}
         </div>
+
+        {/* Transaction History */}
         <div style={{ background:"#fff", borderRadius:20, padding:24, boxShadow:"0 4px 20px #0003" }}>
           <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 16px" }}>📜 Transaction History</h3>
           {stuTx.length === 0 ? (
@@ -821,6 +838,8 @@ const handleLogin = () => {
             ))
           )}
         </div>
+
+        {/* Change Password Modal */}
         {showChangePw && (
           <div style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9999 }}>
             <div style={{ background:"#fff",borderRadius:20,padding:28,width:"100%",maxWidth:340,boxShadow:"0 12px 48px #0006" }}>
@@ -844,25 +863,25 @@ const handleLogin = () => {
     );
   }
 
-
-  const { students, balances, jobs, assigned, txLog, lastRotation } = appState;
-  const totalBalance = Object.values(balances || {}).reduce((a, b) => a + b, 0);
-  const selStudent = students?.find(s => s.id === selected);
-  const selDino    = selStudent ? DINOS.find(d => d.id === selStudent.dinoId) : null;
-
-  const tabBtn = (t, label) => (
-    <button key={t} onClick={() => setTab(t)} style={{
-      padding:"12px 20px", border:"none", cursor:"pointer",
-      borderRadius:"14px 14px 0 0",
-      fontFamily:"'Fredoka One',sans-serif", fontSize:16, letterSpacing:0.5,
-      background: tab===t ? "#fff" : "rgba(255,255,255,0.14)",
-      color: tab===t ? "#1a472a" : "#e8f5e9", transition:"all 0.15s",
-    }}>{label}</button>
-  );
-
   return (
     <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)", fontFamily:"'Fredoka One',sans-serif" }}>
       <style>{`* { box-sizing:border-box } button:active { opacity:.84 } select { cursor:pointer }`}</style>
+
+       {studentUser && (
+        <div style={{ background:"#1A5276", padding:"8px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", fontFamily:"'Fredoka One',sans-serif" }}>
+          <span style={{ color:"#fff", fontSize:15 }}>👋 Hi, {studentUser.name.split(" ")[0]}!</span>
+          <div style={{ display:"flex", gap:8 }}>
+            <button onClick={() => setShowChangePw(true)}
+              style={{ padding:"5px 12px", background:"rgba(255,255,255,0.2)", color:"#fff", border:"1.5px solid rgba(255,255,255,0.4)", borderRadius:8, cursor:"pointer", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>
+              🔑 Change Password
+            </button>
+            <button onClick={() => { setStudentUser(null); setSelected(null); setStuLoginUser(""); setStuLoginPass(""); }}
+              style={{ padding:"5px 12px", background:"rgba(255,255,255,0.2)", color:"#fff", border:"1.5px solid rgba(255,255,255,0.4)", borderRadius:8, cursor:"pointer", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>
+              🔒 Logout
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* HEADER */}
       <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 20px 10px",background:"rgba(0,0,0,0.22)",backdropFilter:"blur(10px)",flexWrap:"wrap",gap:10 }}>
@@ -962,7 +981,6 @@ const handleLogin = () => {
           </div>
         )}
 
-
         {/* ═══ PAY ═══ */}
         {tab==="pay" && (
           <div style={{ maxWidth:600 }}>
@@ -979,12 +997,10 @@ const handleLogin = () => {
                     <button key={s.id} onClick={() => {
                       if (payMulti) {
                         setMultiSelected(prev => prev.includes(s.id) ? prev.filter(id => id !== s.id) : [...prev, s.id]);
-                      } else {
-                        setPayAll(false); setPayMulti(false); setSelected(s.id);
-                      }
+                      } else { setPayAll(false); setPayMulti(false); setSelected(s.id); }
                     }} style={{ padding:"7px 12px",borderRadius:10,border:"none",cursor:"pointer",fontFamily:"'Nunito',sans-serif",fontSize:12,fontWeight:800,
-                      background:payMulti ? (isMultiSel?"#27ae60":"#eee") : (!payAll&&selected===s.id)?dino.colour:"#eee",
-                      color:payMulti ? (isMultiSel?"#fff":"#333") : (!payAll&&selected===s.id)?"#fff":"#333",
+                      background:payMulti?(isMultiSel?"#27ae60":"#eee"):(!payAll&&selected===s.id)?dino.colour:"#eee",
+                      color:payMulti?(isMultiSel?"#fff":"#333"):(!payAll&&selected===s.id)?"#fff":"#333",
                       display:"flex",alignItems:"center",gap:4 }}>
                       <DinoSVG id={s.dinoId} c={payMulti?(isMultiSel?"#fff":dino.colour):dino.colour} size={18}/>{s.name.split(" ")[0]}
                     </button>
@@ -1204,6 +1220,154 @@ const handleLogin = () => {
             )}
           </div>
         )}
+        {/* ═══ INVEST ═══ */}
+        {tab==="invest" && (
+          <div style={{ padding:"0 0 40px" }}>
+            <h2 style={{ fontSize:24, color:"#1a472a", margin:"0 0 16px", fontFamily:"'Fredoka One',sans-serif" }}>📈 Dino Stock Market</h2>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))", gap:16, marginBottom:32 }}>
+              {DINO_STOCKS.map(stock => {
+                const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
+                const change = ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
+                const portfolio = appState?.portfolios?.[selected]?.[stock.id] || 0;
+                const portfolioValue = (portfolio * price).toFixed(2);
+                const headline = appState?.stockNews?.[stock.id];
+                return (
+                  <div key={stock.id} style={{ background:"#fff", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0003", border:"1.5px solid #f0f0f0" }}>
+                    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
+                      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                        <span style={{ fontSize:28 }}>{stock.emoji}</span>
+                        <div>
+                          <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a" }}>{stock.name}</div>
+                          <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:11, color:"#888" }}>{stock.description}</div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign:"right" }}>
+                        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:26, color:stock.color }}>{fmt(price)}</div>
+                        <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color: change >= 0 ? "#27ae60" : "#e74c3c", fontWeight:700 }}>
+                          {change >= 0 ? "▲" : "▼"} {Math.abs(change)}%
+                        </div>
+                      </div>
+                    </div>
+                    {headline && (
+                      <div style={{ background:"#f8f9fa", borderLeft:"4px solid " + stock.color, padding:"8px 12px", borderRadius:"0 8px 8px 0", marginBottom:10, fontFamily:"'Nunito',sans-serif", fontSize:12, color:"#555", fontStyle:"italic" }}>
+                        {headline}
+                      </div>
+                    )}
+                    {portfolio > 0 && (
+                      <div style={{ background:"#f0fbf4", borderRadius:10, padding:"8px 12px", marginBottom:10, fontFamily:"'Nunito',sans-serif", fontSize:13 }}>
+                        You own {portfolio.toFixed(4)} shares = {fmt(portfolioValue)}
+                      </div>
+                    )}
+                    <div style={{ display:"flex", gap:8 }}>
+                      <input id={"buy-" + stock.id} type="number" placeholder="$ buy amount" min="1"
+                        style={{ flex:1, padding:"8px 10px", borderRadius:10, border:"2px solid #27ae60", fontFamily:"'Nunito',sans-serif", fontSize:14, outline:"none" }}/>
+                      <input id={"sell-" + stock.id} type="number" placeholder="$ sell" min="1"
+                        style={{ flex:1, padding:"8px 10px", borderRadius:10, border:"2px solid #e74c3c", fontFamily:"'Nunito',sans-serif", fontSize:14, outline:"none" }}/>
+                    </div>
+                    <div style={{ display:"flex", gap:8, marginTop:8 }}>
+                      <button onClick={() => {
+                        const amt = parseFloat(document.getElementById("buy-" + stock.id).value);
+                        if (!amt || amt <= 0) return;
+                        if (!selected) { alert("Select a student first!"); return; }
+                        const bal = appState?.balances?.[selected] || 0;
+                        if (amt > bal) { showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
+                        const shares = amt / price;
+                        update(prev => ({
+                          ...prev,
+                          balances: { ...prev.balances, [selected]: Math.round(bal - amt) },
+                          portfolios: { ...prev.portfolios, [selected]: { ...(prev.portfolios?.[selected] || {}), [stock.id]: (prev.portfolios?.[selected]?.[stock.id] || 0) + shares }},
+                          txLog: [{ id:uuid(), studentId:selected, amount:-Math.round(amt), reason:"Bought " + stock.emoji + " " + stock.name + " shares", date:todayStr() }, ...(prev.txLog||[])],
+                        }));
+                        document.getElementById("buy-" + stock.id).value = "";
+                        showToast("Bought " + stock.emoji + " " + stock.name + " shares!");
+                      }} style={{ flex:1, padding:"8px 14px", background:"#27ae60", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:14 }}>Buy</button>
+                      <button onClick={() => {
+                        if (!selected) { alert("Select a student first!"); return; }
+                        if (!portfolio || portfolio <= 0) { showToast("No shares to sell!", "#e74c3c"); return; }
+                        const sellAmt = parseFloat(document.getElementById("sell-" + stock.id).value);
+                        const totalValue = portfolio * price;
+                        const amtToSell = (sellAmt > 0) ? Math.min(sellAmt, totalValue) : totalValue;
+                        const sharesToSell = amtToSell / price;
+                        const proceeds = Math.round(amtToSell);
+                        update(prev => ({
+                          ...prev,
+                          balances: { ...prev.balances, [selected]: (prev.balances?.[selected] || 0) + proceeds },
+                          portfolios: { ...prev.portfolios, [selected]: { ...(prev.portfolios?.[selected] || {}), [stock.id]: Math.max(0, portfolio - sharesToSell) }},
+                          txLog: [{ id:uuid(), studentId:selected, amount:proceeds, reason:"Sold " + stock.emoji + " " + stock.name + " shares", date:todayStr() }, ...(prev.txLog||[])],
+                        }));
+                        document.getElementById("sell-" + stock.id).value = "";
+                        showToast("Sold " + stock.emoji + " " + stock.name + " shares!");
+                      }} style={{ flex:1, padding:"8px 14px", background:"#e74c3c", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:14 }}>Sell</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Price History Chart */}
+            <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 12px", fontFamily:"'Fredoka One',sans-serif" }}>📊 Price History</h3>
+            <div style={{ background:"#f8f9fa", borderRadius:20, padding:20, marginBottom:24, overflowX:"auto" }}>
+              {(() => {
+                const history = appState?.stockHistory || {};
+                const dates = Object.keys(history).sort();
+                if (dates.length < 2) return <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>Price history appears after a few days!</div>;
+                const W = 600, H = 200, pad = 40;
+                const allPrices = DINO_STOCKS.flatMap(s => dates.map(d => history[d]?.[s.id] ?? s.startPrice));
+                const minP = Math.min(...allPrices) * 0.95;
+                const maxP = Math.max(...allPrices) * 1.05;
+                const x = i => pad + (i / (dates.length - 1)) * (W - pad * 2);
+                const y = p => H - pad - ((p - minP) / (maxP - minP)) * (H - pad * 2);
+                return (
+                  <svg viewBox={"0 0 " + W + " " + H} style={{ width:"100%", minWidth:300 }}>
+                    {DINO_STOCKS.map(stock => {
+                      const points = dates.map((d, i) => x(i) + "," + y(history[d]?.[stock.id] ?? stock.startPrice)).join(" ");
+                      return <polyline key={stock.id} points={points} fill="none" stroke={stock.color} strokeWidth="2.5" strokeLinejoin="round"/>;
+                    })}
+                    {dates.map((d, i) => i % Math.ceil(dates.length / 5) === 0 && (
+                      <text key={d} x={x(i)} y={H - 8} textAnchor="middle" fontSize="10" fill="#888">{d.slice(5)}</text>
+                    ))}
+                    {DINO_STOCKS.map((stock, i) => (
+                      <g key={stock.id}>
+                        <rect x={W - 130} y={10 + i * 22} width={12} height={12} fill={stock.color} rx={3}/>
+                        <text x={W - 114} y={21 + i * 22} fontSize="11" fill="#333">{stock.emoji} {stock.name.split(" ")[0]}</text>
+                      </g>
+                    ))}
+                  </svg>
+                );
+              })()}
+            </div>
+
+            {/* Investor Leaderboard */}
+            <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 12px", fontFamily:"'Fredoka One',sans-serif" }}>🏆 Investor Leaderboard</h3>
+            <div style={{ background:"#f8f9fa", borderRadius:20, padding:20 }}>
+              {(appState?.students || []).map(s => {
+                const portfolio = appState?.portfolios?.[s.id] || {};
+                const totalInvested = (appState?.txLog || []).filter(t => t.studentId === s.id && t.reason?.includes("Bought")).reduce((sum, t) => sum + Math.abs(t.amount), 0);
+                const currentValue = DINO_STOCKS.reduce((sum, stock) => sum + (portfolio[stock.id] || 0) * (appState?.stockPrices?.[stock.id] ?? stock.startPrice), 0);
+                const gain = totalInvested > 0 ? ((currentValue - totalInvested) / totalInvested * 100).toFixed(1) : null;
+                return { ...s, gain, currentValue, totalInvested };
+              }).filter(s => s.totalInvested > 0).sort((a, b) => b.gain - a.gain).map((s, i) => {
+                const dino = DINOS.find(d => d.id === s.dinoId) || DINOS[0];
+                return (
+                  <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #f0f0f0" }}>
+                    <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:20, color:"#1a472a", width:30 }}>#{i+1}</div>
+                    <DinoSVG id={s.dinoId} c={dino.colour} size={36}/>
+                    <div style={{ flex:1, fontFamily:"'Nunito',sans-serif" }}>
+                      <div style={{ fontSize:14, fontWeight:700, color:"#333" }}>{s.name.split(" ")[0]}</div>
+                      <div style={{ fontSize:12, color:"#888" }}>Invested: {fmt(s.totalInvested)} → {fmt(Math.round(s.currentValue))}</div>
+                    </div>
+                    <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:20, color: s.gain >= 0 ? "#27ae60" : "#e74c3c" }}>
+                      {s.gain >= 0 ? "▲" : "▼"}{Math.abs(s.gain)}%
+                    </div>
+                  </div>
+                );
+              })}
+              {!(appState?.students || []).some(s => (appState?.txLog || []).some(t => t.studentId === s.id && t.reason?.includes("Bought"))) && (
+                <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>No investors yet!</div>
+              )}
+            </div>
+          </div>
+        )}
         {/* ═══ SETTINGS ═══ */}
         {tab==="settings" && (
           <div style={{ maxWidth:540 }}>
@@ -1239,145 +1403,6 @@ const handleLogin = () => {
             </div>
           </div>
         )}
-
-        {/* ═══ INVEST ═══ */}
-        {tab==="invest" && (
-          <div style={{ padding:"0 0 40px" }}>
-            <h2 style={{ fontSize:24, color:"#1a472a", margin:"0 0 16px", fontFamily:"'Fredoka One',sans-serif" }}>📈 Dino Stock Market</h2>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))", gap:16, marginBottom:32 }}>
-              {DINO_STOCKS.map(stock => {
-                const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
-                const change = ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
-                const portfolio = appState?.portfolios?.[selected]?.[stock.id] || 0;
-                const portfolioValue = (portfolio * price).toFixed(2);
-                const headline = appState?.stockNews?.[stock.id];
-                return (
-                  <div key={stock.id} style={{ background:"#fff", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0003", border:"1.5px solid #f0f0f0" }}>
-                    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
-                      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                        <span style={{ fontSize:28 }}>{stock.emoji}</span>
-                        <div>
-                          <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a" }}>{stock.name}</div>
-                          <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:11, color:"#888" }}>{stock.description}</div>
-                        </div>
-                      </div>
-                      <div style={{ textAlign:"right" }}>
-                        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:26, color:stock.color }}>{fmt(price)}</div>
-                        <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color: change >= 0 ? "#27ae60" : "#e74c3c", fontWeight:700 }}>
-                          {change >= 0 ? "▲" : "▼"} {Math.abs(change)}%
-                        </div>
-                      </div>
-                    </div>
-                    {headline && (
-                      <div style={{ background:"#f8f9fa", borderLeft:`4px solid ${stock.color}`, padding:"8px 12px", borderRadius:"0 8px 8px 0", marginBottom:10, fontFamily:"'Nunito',sans-serif", fontSize:12, color:"#555", fontStyle:"italic" }}>
-                        {headline}
-                      </div>
-                    )}
-                    {portfolio > 0 && (
-                      <div style={{ background:"#f0fbf4", borderRadius:10, padding:"8px 12px", marginBottom:10, fontFamily:"'Nunito',sans-serif", fontSize:13 }}>
-                        You own {portfolio.toFixed(4)} shares = {fmt(portfolioValue)}
-                      </div>
-                    )}
-                    <div style={{ display:"flex", gap:8 }}>
-                      <input id={`buy-${stock.id}`} type="number" placeholder="$ amount" min="1"
-                        style={{ flex:1, padding:"8px 10px", borderRadius:10, border:"2px solid #4B9B6E", fontFamily:"'Nunito',sans-serif", fontSize:14, outline:"none" }}/>
-                      <button onClick={() => {
-                        const amt = parseFloat(document.getElementById(`buy-${stock.id}`).value);
-                        if (!amt || amt <= 0) return;
-                        const bal = appState?.balances?.[selected] || 0;
-                        if (amt > bal) { showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
-                        const shares = amt / price;
-                        update(prev => ({
-                          ...prev,
-                          balances: { ...prev.balances, [selected]: Math.round(bal - amt) },
-                          portfolios: { ...prev.portfolios, [selected]: { ...(prev.portfolios?.[selected] || {}), [stock.id]: (prev.portfolios?.[selected]?.[stock.id] || 0) + shares }},
-                          txLog: [{ id:uuid(), studentId:selected, amount:-Math.round(amt), reason:`Bought ${stock.emoji} ${stock.name} shares`, date:todayStr() }, ...(prev.txLog||[])],
-                        }));
-                        document.getElementById(`buy-${stock.id}`).value = "";
-                        showToast(`Bought ${stock.emoji} ${stock.name} shares!`);
-                      }} style={{ padding:"8px 14px", background:"#27ae60", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:14 }}>Buy</button>
-                      <button onClick={() => {
-                        if (!portfolio || portfolio <= 0) { showToast("No shares to sell!", "#e74c3c"); return; }
-                        const value = Math.round(portfolio * price);
-                        update(prev => ({
-                          ...prev,
-                          balances: { ...prev.balances, [selected]: (prev.balances?.[selected] || 0) + value },
-                          portfolios: { ...prev.portfolios, [selected]: { ...(prev.portfolios?.[selected] || {}), [stock.id]: 0 }},
-                          txLog: [{ id:uuid(), studentId:selected, amount:value, reason:`Sold ${stock.emoji} ${stock.name} shares`, date:todayStr() }, ...(prev.txLog||[])],
-                        }));
-                        showToast(`Sold ${stock.emoji} ${stock.name} shares!`);
-                      }} style={{ padding:"8px 14px", background:"#e74c3c", color:"#fff", border:"none", borderRadius:10, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:14 }}>Sell</button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Price History Chart */}
-            <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 12px", fontFamily:"'Fredoka One',sans-serif" }}>📊 Price History</h3>
-            <div style={{ background:"#f8f9fa", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0003", marginBottom:24, overflowX:"auto" }}>
-              {(() => {
-                const history = appState?.stockHistory || {};
-                const dates = Object.keys(history).sort();
-                if (dates.length < 2) return <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>Price history will appear after a few days of trading!</div>;
-                const W = 600, H = 200, pad = 40;
-                const allPrices = DINO_STOCKS.flatMap(s => dates.map(d => history[d]?.[s.id] ?? s.startPrice));
-                const minP = Math.min(...allPrices) * 0.95;
-                const maxP = Math.max(...allPrices) * 1.05;
-                const x = i => pad + (i / (dates.length - 1)) * (W - pad * 2);
-                const y = p => H - pad - ((p - minP) / (maxP - minP)) * (H - pad * 2);
-                return (
-                  <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", minWidth:300 }}>
-                    {DINO_STOCKS.map(stock => {
-                      const points = dates.map((d, i) => `${x(i)},${y(history[d]?.[stock.id] ?? stock.startPrice)}`).join(" ");
-                      return <polyline key={stock.id} points={points} fill="none" stroke={stock.color} strokeWidth="2.5" strokeLinejoin="round"/>;
-                    })}
-                    {dates.map((d, i) => i % Math.ceil(dates.length / 5) === 0 && (
-                      <text key={d} x={x(i)} y={H - 8} textAnchor="middle" fontSize="10" fill="#888">{d.slice(5)}</text>
-                    ))}
-                    {DINO_STOCKS.map((stock, i) => (
-                      <g key={stock.id}>
-                        <rect x={W - 130} y={10 + i * 22} width={12} height={12} fill={stock.color} rx={3}/>
-                        <text x={W - 114} y={21 + i * 22} fontSize="11" fill="#333">{stock.emoji} {stock.name.split(" ")[0]}</text>
-                      </g>
-                    ))}
-                  </svg>
-                );
-              })()}
-            </div>
-
-            {/* Investor Leaderboard */}
-            <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 12px", fontFamily:"'Fredoka One',sans-serif" }}>🏆 Investor Leaderboard</h3>
-            <div style={{ background:"#f8f9fa", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0003" }}>
-              {(appState?.students || []).map(s => {
-                const portfolio = appState?.portfolios?.[s.id] || {};
-                const totalInvested = (appState?.txLog || []).filter(t => t.studentId === s.id && t.reason?.includes("Bought")).reduce((sum, t) => sum + Math.abs(t.amount), 0);
-                const currentValue = DINO_STOCKS.reduce((sum, stock) => sum + (portfolio[stock.id] || 0) * (appState?.stockPrices?.[stock.id] ?? stock.startPrice), 0);
-                const gain = totalInvested > 0 ? ((currentValue - totalInvested) / totalInvested * 100).toFixed(1) : null;
-                return { ...s, gain, currentValue, totalInvested };
-              }).filter(s => s.totalInvested > 0).sort((a, b) => b.gain - a.gain).map((s, i) => {
-                const dino = DINOS.find(d => d.id === s.dinoId) || DINOS[0];
-                return (
-                  <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #f0f0f0" }}>
-                    <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:20, color:"#1a472a", width:30 }}>#{i+1}</div>
-                    <DinoSVG id={s.dinoId} c={dino.colour} size={36}/>
-                    <div style={{ flex:1, fontFamily:"'Nunito',sans-serif" }}>
-                      <div style={{ fontSize:14, fontWeight:700, color:"#333" }}>{s.name.split(" ")[0]}</div>
-                      <div style={{ fontSize:12, color:"#888" }}>Invested: {fmt(s.totalInvested)} → {fmt(Math.round(s.currentValue))}</div>
-                    </div>
-                    <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:20, color: s.gain >= 0 ? "#27ae60" : "#e74c3c" }}>
-                      {s.gain >= 0 ? "▲" : "▼"}{Math.abs(s.gain)}%
-                    </div>
-                  </div>
-                );
-              })}
-              {!(appState?.students || []).some(s => (appState?.txLog || []).some(t => t.studentId === s.id && t.reason?.includes("Bought"))) && (
-                <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>No investors yet — buy some shares!</div>
-              )}
-            </div>
-        </div>
-        )}
-
       </div>
 
       {/* DEDUCT MODAL */}
