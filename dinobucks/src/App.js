@@ -806,7 +806,6 @@ const handleLogin = () => {
             </button>
           ))}
         </div>
-        </div>
 
         {/* Transaction History */}
         {tab==="log" && (
