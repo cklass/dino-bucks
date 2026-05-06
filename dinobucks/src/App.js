@@ -793,6 +793,7 @@ const handleLogin = () => {
           <div style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13 }}>Current Balance</div>
           <div style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13 }}>Current Balance</div>
         </div>
+        {tab === "dashboard" && setTab("log")}
         {/* Student Tabs */}
         <div style={{ display:"flex", gap:8, marginBottom:16, flexWrap:"wrap", marginTop:16 }}>
           {["invest","play","log"].map(t => (
@@ -808,6 +809,94 @@ const handleLogin = () => {
         </div>
 
         {/* Transaction History */}
+        {/* Student Invest Tab */}
+        {tab==="invest" && (
+          <div>
+            <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 16px", fontFamily:"'Fredoka One',sans-serif" }}>📈 Dino Stock Market</h3>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(260px, 1fr))", gap:16, marginBottom:24 }}>
+              {DINO_STOCKS.map(stock => {
+                const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
+                const change = ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
+                const shares = appState?.portfolios?.[studentUser.id]?.[stock.id] || 0;
+                const value = shares * price;
+                const headline = appState?.stockNews?.[stock.id];
+                return (
+                  <div key={stock.id} style={{ background:"#fff", borderRadius:20, padding:18, boxShadow:"0 4px 16px #0003", border:"1.5px solid #f0f0f0" }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+                      <div>
+                        <div style={{ fontSize:24 }}>{stock.emoji}</div>
+                        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:15, color:"#1a472a" }}>{stock.name}</div>
+                        <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:11, color:"#888" }}>{stock.description}</div>
+                      </div>
+                      <div style={{ textAlign:"right" }}>
+                        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:22, color:stock.color }}>{fmt(price)}</div>
+                        <div style={{ fontSize:12, color: change >= 0 ? "#27ae60" : "#e74c3c", fontWeight:700 }}>
+                          {change >= 0 ? "▲" : "▼"} {Math.abs(change)}%
+                        </div>
+                      </div>
+                    </div>
+                    {headline && (
+                      <div style={{ background:"#f8f9fa", borderLeft:"4px solid " + stock.color, padding:"6px 10px", borderRadius:"0 6px 6px 0", marginBottom:8, fontFamily:"'Nunito',sans-serif", fontSize:11, color:"#555", fontStyle:"italic" }}>
+                        {headline}
+                      </div>
+                    )}
+                    {shares > 0 && (
+                      <div style={{ background:"#f0fbf4", borderRadius:8, padding:"6px 10px", marginBottom:8, fontFamily:"'Nunito',sans-serif", fontSize:12 }}>
+                        You own {shares.toFixed(4)} shares = {fmt(value.toFixed(2))}
+                      </div>
+                    )}
+                    <div style={{ display:"flex", gap:6, marginTop:8 }}>
+                      <input id={"stu-buy-" + stock.id} type="number" placeholder="$ buy" min="1"
+                        style={{ flex:1, padding:"7px 8px", borderRadius:8, border:"2px solid #27ae60", fontFamily:"'Nunito',sans-serif", fontSize:13, outline:"none", width:0 }}/>
+                      <button onClick={() => {
+                        const amt = parseFloat(document.getElementById("stu-buy-" + stock.id).value);
+                        if (!amt || amt <= 0) return;
+                        const bal = stuBalance;
+                        if (amt > bal) { showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
+                        const newShares = amt / price;
+                        update(prev => ({
+                          ...prev,
+                          balances: { ...prev.balances, [studentUser.id]: Math.round(bal - amt) },
+                          portfolios: { ...prev.portfolios, [studentUser.id]: { ...(prev.portfolios?.[studentUser.id] || {}), [stock.id]: (prev.portfolios?.[studentUser.id]?.[stock.id] || 0) + newShares }},
+                          txLog: [{ id:uuid(), studentId:studentUser.id, amount:-Math.round(amt), reason:"Bought " + stock.emoji + " " + stock.name + " shares", date:todayStr() }, ...(prev.txLog||[])],
+                        }));
+                        document.getElementById("stu-buy-" + stock.id).value = "";
+                        showToast("Bought " + stock.emoji + " shares!");
+                      }} style={{ padding:"7px 12px", background:"#27ae60", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:13 }}>Buy</button>
+                      <input id={"stu-sell-" + stock.id} type="number" placeholder="$ sell" min="1"
+                        style={{ flex:1, padding:"7px 8px", borderRadius:8, border:"2px solid #e74c3c", fontFamily:"'Nunito',sans-serif", fontSize:13, outline:"none", width:0 }}/>
+                      <button onClick={() => {
+                        if (!shares || shares <= 0) { showToast("No shares to sell!", "#e74c3c"); return; }
+                        const sellAmt = parseFloat(document.getElementById("stu-sell-" + stock.id).value);
+                        const totalVal = shares * price;
+                        const amtToSell = (sellAmt > 0) ? Math.min(sellAmt, totalVal) : totalVal;
+                        const sharesToSell = amtToSell / price;
+                        const proceeds = Math.round(amtToSell);
+                        update(prev => ({
+                          ...prev,
+                          balances: { ...prev.balances, [studentUser.id]: (prev.balances?.[studentUser.id] || 0) + proceeds },
+                          portfolios: { ...prev.portfolios, [studentUser.id]: { ...(prev.portfolios?.[studentUser.id] || {}), [stock.id]: Math.max(0, shares - sharesToSell) }},
+                          txLog: [{ id:uuid(), studentId:studentUser.id, amount:proceeds, reason:"Sold " + stock.emoji + " " + stock.name + " shares", date:todayStr() }, ...(prev.txLog||[])],
+                        }));
+                        document.getElementById("stu-sell-" + stock.id).value = "";
+                        showToast("Sold " + stock.emoji + " shares!");
+                      }} style={{ padding:"7px 12px", background:"#e74c3c", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:13 }}>Sell</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Student Play Tab */}
+        {tab==="play" && (
+          <div style={{ textAlign:"center", padding:"40px 20px" }}>
+            <div style={{ fontSize:60, marginBottom:16 }}>🎮</div>
+            <h3 style={{ fontSize:22, color:"#1a472a", fontFamily:"'Fredoka One',sans-serif", marginBottom:8 }}>Games Coming Soon!</h3>
+            <p style={{ fontFamily:"'Nunito',sans-serif", color:"#888", fontSize:14 }}>Check back later for fun dino games you can play with your Dino Bucks!</p>
+          </div>
+        )}
         {tab==="log" && (
         <div style={{ background:"#fff", borderRadius:20, padding:24, boxShadow:"0 4px 20px #0003" }}>
           <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 16px" }}>📜 Transaction History</h3>
