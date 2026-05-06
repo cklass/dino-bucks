@@ -791,6 +791,21 @@ const handleLogin = () => {
           <h2 style={{ fontSize:24, color:"#1a472a", margin:"12px 0 4px" }}>{stuData?.name}</h2>
           <div style={{ fontSize:42, color:"#27ae60", fontFamily:"'Fredoka One',sans-serif", margin:"8px 0" }}>{fmt(stuBalance)}</div>
           <div style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13 }}>Current Balance</div>
+          <div style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13 }}>Current Balance</div>
+        </div>
+        {/* Student Tabs */}
+        <div style={{ display:"flex", gap:8, marginBottom:16, flexWrap:"wrap", marginTop:16 }}>
+          {["invest","play","log"].map(t => (
+            <button key={t} onClick={() => setTab(t)} style={{
+              padding:"10px 18px", border:"none", cursor:"pointer", borderRadius:12,
+              fontFamily:"'Fredoka One',sans-serif", fontSize:15,
+              background: tab===t ? "#1a472a" : "rgba(255,255,255,0.9)",
+              color: tab===t ? "#fff" : "#1a472a",
+            }}>
+              {t==="invest" ? "📈 Invest" : t==="play" ? "🎮 Play" : "📋 History"}
+            </button>
+          ))}
+        </div>
         </div>
 
         {/* Transaction History */}
