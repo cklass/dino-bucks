@@ -915,8 +915,8 @@ const handleLogin = () => {
       {/* TABS */}
       <div style={{ display:"flex",gap:4,padding:"0 20px",marginTop:12,flexWrap:"wrap" }}>
         {tabBtn("dashboard","🏠 Class")}
-        {tabBtn("pay","💵 Pay")}
-        {tabBtn("jobs","👷 Jobs")}
+        {!studentUser && tabBtn("pay","💵 Pay")}
+        {!studentUser && tabBtn("jobs","👷 Jobs")}
         {tabBtn("log","📋 History")}
         {tabBtn("store","🏪 Store")}
         {tabBtn("invest","📈 Invest")}
