@@ -713,10 +713,17 @@ const handleLogin = () => {
     setStudentUser({ ...match, id: stuData.id });
     setSelected(stuData.id);
     setStuLoginError("");
-    };
+    // Force password change if they haven't changed it yet
+    if (!appState?.passwords?.[stuLoginUser.trim().toLowerCase()]) {
+      setShowChangePw(true);
+    }
+  };
+
   const handleStudentPasswordChange = () => {
     if (newPw1.length < 4) { setChangePwError("Password must be at least 4 characters!"); return; }
     if (newPw1 !== newPw2) { setChangePwError("Passwords don't match!"); return; }
+    // Don't allow password same as username
+    if (newPw1.toLowerCase() === studentUser.username.toLowerCase()) { setChangePwError("Password cannot be the same as your username!"); return; }
     update(prev => ({
       ...prev,
       passwords: { ...(prev.passwords||{}), [studentUser.username]: newPw1 }
@@ -1239,7 +1246,8 @@ const handleLogin = () => {
         {showChangePw && (
           <div style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9999 }}>
             <div style={{ background:"#fff",borderRadius:20,padding:28,width:"100%",maxWidth:340,boxShadow:"0 12px 48px #0006" }}>
-              <h3 style={{ fontSize:22,color:"#1a472a",margin:"0 0 16px",fontFamily:"'Fredoka One',sans-serif" }}>🔑 Change Password</h3>
+              <h3 style={{ fontSize:22,color:"#1a472a",margin:"0 0 16px",fontFamily:"'Fredoka One',sans-serif" }}>🔑 {!appState?.passwords?.[studentUser?.username] ? "Set Your New Password" : "Change Password"}</h3>
+               {!appState?.passwords?.[studentUser?.username] && <p style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#e67e22", marginBottom:12 }}>⚠️ You must set a new password before you can use Dino Bucks!</p>}
               <input type="password" value={newPw1} onChange={e => setNewPw1(e.target.value)} placeholder="New password" autoFocus
                 style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #4B9B6E",fontSize:16,fontFamily:"'Nunito',sans-serif",outline:"none",marginBottom:10 }}/>
               <input type="password" value={newPw2} onChange={e => setNewPw2(e.target.value)} placeholder="Confirm new password"
@@ -1657,9 +1665,9 @@ const handleLogin = () => {
                     )}
                     <div style={{ display:"flex", gap:8 }}>
                       <input id={"buy-" + stock.id} type="number" placeholder="$ buy amount" min="1"
-                        style={{ flex:1, padding:"8px 10px", borderRadius:10, border:"2px solid #27ae60", fontFamily:"'Nunito',sans-serif", fontSize:14, outline:"none" }}/>
+                        style={{ width:"70px", padding:"8px 10px", borderRadius:10, border:"2px solid #27ae60", fontFamily:"'Nunito',sans-serif", fontSize:14, outline:"none" }}/>
                       <input id={"sell-" + stock.id} type="number" placeholder="$ sell" min="1"
-                        style={{ flex:1, padding:"8px 10px", borderRadius:10, border:"2px solid #e74c3c", fontFamily:"'Nunito',sans-serif", fontSize:14, outline:"none" }}/>
+                        style={{ width:"70px", padding:"8px 10px", borderRadius:10, border:"2px solid #e74c3c", fontFamily:"'Nunito',sans-serif", fontSize:14, outline:"none" }}/>
                     </div>
                     <div style={{ display:"flex", gap:8, marginTop:8 }}>
                       <button onClick={() => {
