@@ -412,7 +412,9 @@ const handleLogin = () => {
   }
 };
   const handleStudentLogin = () => {
-    const match = CLASS_LIST.find(s => s.username === stuLoginUser.trim().toLowerCase() && s.password === stuLoginPass);
+    const savedPassword = appState?.passwords?.[stuLoginUser.trim().toLowerCase()];
+    const match = CLASS_LIST.find(s => s.username === stuLoginUser.trim().toLowerCase() && (savedPassword ? savedPassword === stuLoginPass : s.password === stuLoginPass));
+    password === stuLoginPass);
     if (!match) { setStuLoginError("Wrong username or password!"); return; }
     const stuData = appState?.students?.find(s => s.name === match.name);
     if (!stuData) { setStuLoginError("Student not found in class!"); return; }
@@ -423,8 +425,10 @@ const handleLogin = () => {
   const handleStudentPasswordChange = () => {
     if (newPw1.length < 4) { setChangePwError("Password must be at least 4 characters!"); return; }
     if (newPw1 !== newPw2) { setChangePwError("Passwords don't match!"); return; }
-    const idx = CLASS_LIST.findIndex(s => s.username === studentUser.username);
-    if (idx !== -1) CLASS_LIST[idx].password = newPw1;
+    update(prev => ({
+      ...prev,
+      passwords: { ...(prev.passwords||{}), [studentUser.username]: newPw1 }
+    }));
     setStudentUser(prev => ({ ...prev, password: newPw1 }));
     setShowChangePw(false);
     setNewPw1(""); setNewPw2(""); setChangePwError("");
@@ -891,12 +895,33 @@ const handleLogin = () => {
 
         {/* Student Play Tab */}
         {tab==="play" && (
-          <div style={{ textAlign:"center", padding:"40px 20px" }}>
-            <div style={{ fontSize:60, marginBottom:16 }}>🎮</div>
-            <h3 style={{ fontSize:22, color:"#1a472a", fontFamily:"'Fredoka One',sans-serif", marginBottom:8 }}>Games Coming Soon!</h3>
-            <p style={{ fontFamily:"'Nunito',sans-serif", color:"#888", fontSize:14 }}>Check back later for fun dino games you can play with your Dino Bucks!</p>
+          <div>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(150px, 1fr))", gap:12, marginBottom:16 }}>
+              {[
+                { id:"runner", name:"Dino Jump",    emoji:"🦕", desc:"Dodge obstacles!", color:"#27ae60" },
+                { id:"egg",    name:"Egg Drop",      emoji:"🥚", desc:"Catch the eggs!",  color:"#e67e22" },
+                { id:"memory", name:"Memory Match",  emoji:"🧠", desc:"Find the pairs!",  color:"#8e44ad" },
+                { id:"trivia", name:"Dino Trivia",   emoji:"🦖", desc:"Test your knowledge!", color:"#2980b9" },
+                { id:"digger", name:"Bone Dig",      emoji:"🦴", desc:"Find the bones!",  color:"#c0392b" },
+              ].map(game => (
+                <div key={game.id} onClick={() => setActiveGame(game.id)}
+                  style={{ background:"#fff", borderRadius:16, padding:16, textAlign:"center", cursor:"pointer",
+                    boxShadow:"0 4px 16px #0002", border:`2px solid ${game.color}33` }}>
+                  <div style={{ fontSize:36, marginBottom:8 }}>{game.emoji}</div>
+                  <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:15, color:game.color }}>{game.name}</div>
+                  <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:11, color:"#777" }}>{game.desc}</div>
+                </div>
+              ))}
+            </div>
+            {activeGame && (
+              <div style={{ background:"#fff", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0002" }}>
+                <button onClick={() => setActiveGame(null)} style={{ padding:"6px 14px", background:"#eee", border:"none", borderRadius:8, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:14, marginBottom:12 }}>✕ Close Game</button>
+                <GameArea game={activeGame} studentUser={studentUser} appState={appState} update={update} todayStr={todayStr} showToast={showToast} fmt={fmt}/>
+              </div>
+            )}
           </div>
         )}
+
         {tab==="log" && (
         <div style={{ background:"#fff", borderRadius:20, padding:24, boxShadow:"0 4px 20px #0003" }}>
           <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 16px" }}>📜 Transaction History</h3>
