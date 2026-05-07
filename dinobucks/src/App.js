@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { saveToFirebase, subscribeToFirebase } from "./firebase";
 
 // — Sound effects
@@ -381,6 +381,7 @@ export default function App() {
   const [newJobPay,  setNewJobPay]    = useState("10");
   const [newJobEmoji,setNewJobEmoji]  = useState("⭐");
   const [showReset,  setShowReset]    = useState(false);
+  const [activeGame, setActiveGame] = useState(null);
   const [deductModal, setDeductModal] = useState(false);
   const [studentUser, setStudentUser]       = useState(null);  // logged-in student object
   const [showStudentLogin, setShowStudentLogin] = useState(false);
