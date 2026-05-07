@@ -1021,10 +1021,9 @@ const handleLogin = () => {
         {tabBtn("dashboard","🏠 Class")}
         {!studentUser && tabBtn("pay","💵 Pay")}
         {!studentUser && tabBtn("jobs","👷 Jobs")}
-        {tabBtn("log","📋 History")}
-        {tabBtn("store","🏪 Store")}
         {tabBtn("invest","📈 Invest")}
-        {tabBtn("settings","⚙️ Settings")}
+        {tabBtn("play","🎮 Play")}
+        {!studentUser && tabBtn("settings","⚙️ Settings")}}
       </div>
 
       {/* PANEL */}
