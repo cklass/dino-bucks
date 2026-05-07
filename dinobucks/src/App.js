@@ -367,6 +367,298 @@ function TxRow({ tx, students }) {
 }
 
 // ── Main App ──────────────────────────────────────────────────────────────────
+// ── Game Components ───────────────────────────────────────────────────────────
+function GameArea({ game, studentUser, appState, update, todayStr, showToast, fmt }) {
+  if (game === "trivia") return <TriviaGame />;
+  if (game === "memory") return <MemoryGame />;
+  if (game === "runner") return <RunnerGame />;
+  if (game === "egg")    return <EggDropGame />;
+  if (game === "digger") return <DiggerGame />;
+  return null;
+}
+
+function TriviaGame() {
+  const questions = [
+    { q:"What is the largest dinosaur ever discovered?", a:"Argentinosaurus", choices:["T-Rex","Argentinosaurus","Brachiosaurus","Diplodocus"] },
+    { q:"What did T-Rex eat?", a:"Meat", choices:["Plants","Meat","Both","Fish only"] },
+    { q:"What period did most dinosaurs live in?", a:"Jurassic", choices:["Triassic","Jurassic","Cretaceous","Permian"] },
+    { q:"What does 'dinosaur' mean?", a:"Terrible lizard", choices:["Giant reptile","Terrible lizard","Big beast","Stone bone"] },
+    { q:"Which dinosaur had 3 horns?", a:"Triceratops", choices:["Stegosaurus","Ankylosaurus","Triceratops","Spinosaurus"] },
+    { q:"What group of animals are dinosaurs most related to?", a:"Birds", choices:["Lizards","Crocodiles","Birds","Snakes"] },
+    { q:"Which dinosaur had plates on its back?", a:"Stegosaurus", choices:["Stegosaurus","Diplodocus","T-Rex","Raptor"] },
+    { q:"How did most dinosaurs go extinct?", a:"Asteroid impact", choices:["Ice age","Volcano only","Asteroid impact","Flood"] },
+    { q:"What is a fossil?", a:"Preserved remains of ancient life", choices:["A rock","Preserved remains of ancient life","A dinosaur egg","A bone replica"] },
+    { q:"Which was the fastest dinosaur?", a:"Compsognathus", choices:["T-Rex","Velociraptor","Compsognathus","Gallimimus"] },
+  ];
+  const [idx, setIdx] = React.useState(0);
+  const [score, setScore] = React.useState(0);
+  const [done, setDone] = React.useState(false);
+  const [feedback, setFeedback] = React.useState(null);
+  const answer = (choice) => {
+    if (feedback) return;
+    const correct = choice === questions[idx].a;
+    setFeedback(correct ? "correct" : "wrong");
+    if (correct) setScore(s => s + 1);
+    setTimeout(() => {
+      setFeedback(null);
+      if (idx + 1 >= questions.length) setDone(true);
+      else setIdx(i => i + 1);
+    }, 900);
+  };
+  if (done) return (
+    <div style={{ textAlign:"center", padding:24 }}>
+      <div style={{ fontSize:48 }}>🏆</div>
+      <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:24, color:"#1a472a", margin:"12px 0" }}>You scored {score}/{questions.length}!</div>
+      <button onClick={() => { setIdx(0); setScore(0); setDone(false); }} style={{ padding:"10px 24px", background:"#27ae60", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>Play Again</button>
+    </div>
+  );
+  const q = questions[idx];
+  return (
+    <div style={{ maxWidth:500, margin:"0 auto" }}>
+      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>Question {idx+1} of {questions.length} · Score: {score}</div>
+      <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:18, color:"#1a472a", marginBottom:16, background:"#f0fbf4", padding:16, borderRadius:12 }}>{q.q}</div>
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+        {q.choices.map(c => (
+          <button key={c} onClick={() => answer(c)} style={{
+            padding:"12px 16px", border:"2px solid #4B9B6E", borderRadius:12, cursor:"pointer",
+            fontFamily:"'Nunito',sans-serif", fontSize:14, fontWeight:700,
+            background: feedback && c === q.a ? "#27ae60" : feedback && c !== q.a ? "#fee" : "#fff",
+            color: feedback && c === q.a ? "#fff" : "#333", transition:"all 0.2s"
+          }}>{c}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MemoryGame() {
+  const emojis = ["🦕","🦖","🦴","🥚","🌿","🏔️","🦷","🌋"];
+  const [cards, setCards] = React.useState(() => {
+    const deck = [...emojis, ...emojis].map((e, i) => ({ id:i, emoji:e, flipped:false, matched:false }));
+    for (let i = deck.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+    return deck;
+  });
+  const [selected, setSelected] = React.useState([]);
+  const [moves, setMoves] = React.useState(0);
+  const [won, setWon] = React.useState(false);
+  const flip = (id) => {
+    if (selected.length === 2) return;
+    const card = cards.find(c => c.id === id);
+    if (card.flipped || card.matched) return;
+    const newCards = cards.map(c => c.id === id ? { ...c, flipped:true } : c);
+    const newSel = [...selected, id];
+    setCards(newCards);
+    setSelected(newSel);
+    if (newSel.length === 2) {
+      setMoves(m => m+1);
+      const [a, b] = newSel.map(id => newCards.find(c => c.id === id));
+      if (a.emoji === b.emoji) {
+        const matched = newCards.map(c => newSel.includes(c.id) ? { ...c, matched:true } : c);
+        setCards(matched);
+        setSelected([]);
+        if (matched.every(c => c.matched)) setWon(true);
+      } else {
+        setTimeout(() => {
+          setCards(prev => prev.map(c => newSel.includes(c.id) ? { ...c, flipped:false } : c));
+          setSelected([]);
+        }, 800);
+      }
+    }
+  };
+  if (won) return (
+    <div style={{ textAlign:"center", padding:24 }}>
+      <div style={{ fontSize:48 }}>🎉</div>
+      <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:24, color:"#1a472a", margin:"12px 0" }}>You won in {moves} moves!</div>
+      <button onClick={() => { setCards(() => { const deck = [...emojis,...emojis].map((e,i)=>({id:i,emoji:e,flipped:false,matched:false})); for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}return deck;}); setMoves(0); setWon(false); setSelected([]); }} style={{ padding:"10px 24px", background:"#27ae60", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>Play Again</button>
+    </div>
+  );
+  return (
+    <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:10, maxWidth:360, margin:"0 auto" }}>
+      {cards.map(c => (
+        <div key={c.id} onClick={() => flip(c.id)} style={{
+          height:70, borderRadius:12, display:"flex", alignItems:"center", justifyContent:"center",
+          fontSize:32, cursor:"pointer", transition:"all 0.2s",
+          background: c.flipped||c.matched ? "#f0fbf4" : "#1a472a",
+          border: c.matched ? "3px solid #27ae60" : "3px solid #145a32",
+        }}>{c.flipped||c.matched ? c.emoji : "🌿"}</div>
+      ))}
+    </div>
+  );
+}
+
+function RunnerGame() {
+  const OBSTACLES = ["🌵","🌵","🌵","🦴","🪨","🌿","🦖","🌴"];
+  const BIRDS = ["🦅","🦜","🐦"];
+  const [running, setRunning] = React.useState(false);
+  const [score, setScore] = React.useState(0);
+  const [dead, setDead] = React.useState(false);
+  const [dinoY, setDinoY] = React.useState(0);
+  const [obstacles, setObstacles] = React.useState([]);
+  const [clouds, setClouds] = React.useState([{id:1,x:100,y:20},{id:2,x:300,y:40},{id:3,x:500,y:15}]);
+  const jumpRef = React.useRef(false);
+  const frameRef = React.useRef();
+  const obstRef = React.useRef([]);
+  const scoreRef = React.useRef(0);
+  const dinoYRef = React.useRef(0);
+  const speedRef = React.useRef(6);
+  const cloudsRef = React.useRef([{id:1,x:100,y:20},{id:2,x:300,y:40},{id:3,x:500,y:15}]);
+  const jump = React.useCallback(() => {
+    if (jumpRef.current) return;
+    jumpRef.current = true;
+    setDinoY(110); dinoYRef.current = 110;
+    setTimeout(() => { setDinoY(0); dinoYRef.current = 0; setTimeout(() => { jumpRef.current = false; }, 100); }, 500);
+  }, []);
+  React.useEffect(() => {
+    if (!running) return;
+    const handleKey = (e) => { if (e.code === "Space" || e.code === "ArrowUp") jump(); };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [running, jump]);
+  React.useEffect(() => {
+    if (!running) return;
+    let lastObst = 0;
+    const tick = (ts) => {
+      scoreRef.current += 1;
+      const newSpeed = 6 + Math.floor(scoreRef.current / 200);
+      if (newSpeed !== speedRef.current) speedRef.current = newSpeed;
+      if (scoreRef.current % 10 === 0) setScore(scoreRef.current);
+      if (ts - lastObst > Math.max(600, 1400 - scoreRef.current/2) + Math.random()*600) {
+        lastObst = ts;
+        const isBird = Math.random() < 0.25 && scoreRef.current > 150;
+        const emoji = isBird ? BIRDS[Math.floor(Math.random()*BIRDS.length)] : OBSTACLES[Math.floor(Math.random()*OBSTACLES.length)];
+        const birdHeight = isBird ? 50 + Math.random()*40 : 0;
+        obstRef.current = [...obstRef.current, { id:Math.random(), x:520, emoji, birdHeight }];
+      }
+      obstRef.current = obstRef.current.map(o => ({ ...o, x: o.x - speedRef.current })).filter(o => o.x > -40);
+      setObstacles([...obstRef.current]);
+      cloudsRef.current = cloudsRef.current.map(c => ({ ...c, x: c.x - 1 < -50 ? 550 : c.x - 1 }));
+      setClouds([...cloudsRef.current]);
+      const hit = obstRef.current.some(o => {
+        if (o.x < 90 && o.x > 25) {
+          if (o.birdHeight > 0) return dinoYRef.current < o.birdHeight + 30 && dinoYRef.current > o.birdHeight - 30;
+          return dinoYRef.current < 45;
+        }
+        return false;
+      });
+      if (hit) { setRunning(false); setDead(true); return; }
+      frameRef.current = requestAnimationFrame(tick);
+    };
+    frameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [running]);
+  const start = () => { setDead(false); setScore(0); scoreRef.current=0; obstRef.current=[]; setObstacles([]); speedRef.current=6; setRunning(true); };
+  return (
+    <div style={{ textAlign:"center" }}>
+      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>Press SPACE or tap to jump! Score: {score}</div>
+      <div onClick={jump} style={{ position:"relative", width:"100%", maxWidth:560, height:200, background:"linear-gradient(180deg,#87CEEB 0%,#c8e6f5 55%,#98c87a 55%,#7aaa55 65%,#8B6914 65%,#7a5c10 100%)", borderRadius:14, overflow:"hidden", cursor:"pointer", margin:"0 auto", border:"3px solid #4B9B6E" }}>
+        {clouds.map(c => <div key={c.id} style={{ position:"absolute", top:c.y, left:c.x, fontSize:22, opacity:0.7 }}>☁️</div>)}
+        <div style={{ position:"absolute", bottom:44, left:0, right:0, height:2, background:"rgba(0,0,0,0.1)" }}/>
+        <div style={{ position:"absolute", bottom:44+dinoY, left:55, fontSize:40, transition:"bottom 0.08s", transform:"scaleX(-1)" }}>🦕</div>
+        {obstacles.map(o => <div key={o.id} style={{ position:"absolute", bottom: o.birdHeight > 0 ? 44+o.birdHeight : 44, left:o.x, fontSize:o.birdHeight > 0 ? 24 : 30 }}>{o.emoji}</div>)}
+        <div style={{ position:"absolute", top:8, right:12, fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"rgba(0,0,0,0.4)" }}>{score}</div>
+      </div>
+      {!running && <button onClick={start} style={{ marginTop:16, padding:"10px 24px", background:"#27ae60", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>{dead ? `💀 Game Over! Score: ${score} — Play Again` : "Start Running! 🦕"}</button>}
+    </div>
+  );
+}
+
+function EggDropGame() {
+  const [playing, setPlaying] = React.useState(false);
+  const [basketX, setBasketX] = React.useState(250);
+  const [eggs, setEggs] = React.useState([]);
+  const [score, setScore] = React.useState(0);
+  const [missed, setMissed] = React.useState(0);
+  const [done, setDone] = React.useState(false);
+  const frameRef = React.useRef();
+  const eggsRef = React.useRef([]);
+  const scoreRef = React.useRef(0);
+  const missedRef = React.useRef(0);
+  const basketRef = React.useRef(250);
+  React.useEffect(() => {
+    const move = (e) => {
+      const rect = document.getElementById("eggcanvas2")?.getBoundingClientRect();
+      const basket = document.getElementById("basket2");
+      if (rect && basket) { const newX = Math.max(50, Math.min(rect.width-50, e.clientX - rect.left)); basketRef.current = newX; basket.style.left = newX + "px"; }
+    };
+    const touch = (e) => {
+      const rect = document.getElementById("eggcanvas2")?.getBoundingClientRect();
+      const basket = document.getElementById("basket2");
+      if (rect && basket && e.touches[0]) { const newX = Math.max(50, Math.min(rect.width-50, e.touches[0].clientX - rect.left)); basketRef.current = newX; basket.style.left = newX + "px"; }
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("touchmove", touch);
+    return () => { window.removeEventListener("mousemove", move); window.removeEventListener("touchmove", touch); };
+  }, []);
+  React.useEffect(() => {
+    if (!playing) return;
+    let last = 0;
+    const tick = (ts) => {
+      if (ts - last > 800) { last = ts; eggsRef.current = [...eggsRef.current, { id:Math.random(), x:Math.random()*440+30, y:0 }]; }
+      eggsRef.current = eggsRef.current.map(e => ({ ...e, y: e.y+4 }));
+      const caught = eggsRef.current.filter(e => e.y > 230 && e.y < 270 && Math.abs(e.x - basketRef.current) < 55);
+      const fell = eggsRef.current.filter(e => e.y > 310 && Math.abs(e.x - basketRef.current) >= 55);
+      if (caught.length) { scoreRef.current += caught.length; setScore(scoreRef.current); }
+      if (fell.length) { missedRef.current += fell.length; setMissed(missedRef.current); }
+      eggsRef.current = eggsRef.current.filter(e => e.y <= 310);
+      setEggs([...eggsRef.current]);
+      if (missedRef.current >= 5) { setPlaying(false); setDone(true); return; }
+      frameRef.current = requestAnimationFrame(tick);
+    };
+    frameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [playing]);
+  const start = () => { setDone(false); setScore(0); setMissed(0); scoreRef.current=0; missedRef.current=0; eggsRef.current=[]; setEggs([]); setPlaying(true); };
+  return (
+    <div style={{ textAlign:"center" }}>
+      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>Move your mouse to catch eggs! Caught: {score} | Missed: {missed}/5</div>
+      <div id="eggcanvas2" style={{ position:"relative", width:"100%", maxWidth:540, height:300, background:"linear-gradient(180deg,#1a1a4e 0%,#2d1b69 30%,#1a472a 70%,#145a32 100%)", borderRadius:16, overflow:"hidden", margin:"0 auto", border:"3px solid #4B9B6E", cursor:"none" }}>
+        {[{x:10,y:15},{x:25,y:8},{x:50,y:20},{x:70,y:5},{x:85,y:18},{x:95,y:10}].map((s,i) => <div key={i} style={{ position:"absolute", left:`${s.x}%`, top:`${s.y}%`, fontSize:10, opacity:0.7 }}>⭐</div>)}
+        <div style={{ position:"absolute", top:10, right:20, fontSize:28 }}>🌙</div>
+        <div style={{ position:"absolute", top:8, left:"50%", transform:"translateX(-50%)", fontSize:20 }}>🦕</div>
+        <div style={{ position:"absolute", bottom:0, left:0, right:0, height:40, background:"linear-gradient(180deg,#1a5c2a,#0d3d1a)", borderTop:"2px solid #27ae60" }}/>
+        <div style={{ position:"absolute", bottom:35, left:10, fontSize:28 }}>🌲</div>
+        <div style={{ position:"absolute", bottom:35, right:10, fontSize:28 }}>🌲</div>
+        {eggs.map(e => <div key={e.id} style={{ position:"absolute", left:e.x, top:e.y, fontSize:22, transform:"translateX(-50%)" }}>🥚</div>)}
+        <div id="basket2" style={{ position:"absolute", bottom:42, left:basketRef.current, transform:"translateX(-50%)", fontSize:44, filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.5))" }}>🧺</div>
+      </div>
+      {!playing && <button onClick={start} style={{ marginTop:16, padding:"10px 28px", background:"linear-gradient(135deg,#e67e22,#d35400)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>{done ? `🎉 Game Over! Caught ${score} — Play Again` : "Start Catching! 🥚"}</button>}
+    </div>
+  );
+}
+
+function DiggerGame() {
+  const GRID = 16;
+  const [cells, setCells] = React.useState(() => Array(GRID).fill(null).map((_,i) => ({ id:i, dug:false, hasBone:Math.random()<0.35, hasRock:Math.random()<0.2 })));
+  const [timeLeft, setTimeLeft] = React.useState(20);
+  const [score, setScore] = React.useState(0);
+  const [playing, setPlaying] = React.useState(false);
+  const [done, setDone] = React.useState(false);
+  const timerRef = React.useRef();
+  React.useEffect(() => {
+    if (!playing) return;
+    timerRef.current = setInterval(() => {
+      setTimeLeft(t => { if (t <= 1) { clearInterval(timerRef.current); setPlaying(false); setDone(true); return 0; } return t-1; });
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+  }, [playing]);
+  const dig = (id) => {
+    if (!playing) return;
+    const cell = cells.find(c => c.id === id);
+    if (cell.dug) return;
+    setCells(prev => prev.map(c => c.id === id ? { ...c, dug:true } : c));
+    if (cell.hasBone) setScore(s => s+1);
+  };
+  const start = () => { setCells(Array(GRID).fill(null).map((_,i) => ({ id:i, dug:false, hasBone:Math.random()<0.35, hasRock:Math.random()<0.2 }))); setTimeLeft(20); setScore(0); setDone(false); setPlaying(true); };
+  return (
+    <div style={{ textAlign:"center" }}>
+      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>Click to dig! Time: {timeLeft}s | Bones: {score}</div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8, maxWidth:320, margin:"0 auto 16px" }}>
+        {cells.map(c => <div key={c.id} onClick={() => dig(c.id)} style={{ height:64, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:28, cursor:playing?"pointer":"default", background: c.dug ? "#f5e6c8" : "#8B6914", border:"3px solid #6b4f10" }}>{c.dug ? (c.hasBone ? "🦴" : c.hasRock ? "🪨" : "💨") : "🟫"}</div>)}
+      </div>
+      {!playing && <button onClick={start} style={{ padding:"10px 24px", background:"#c0392b", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>{done ? `Found ${score} bones! Play Again` : "Start Digging! 🦴"}</button>}
+    </div>
+  );
+}
 export default function App() {
   const [appState, setAppState]   = useState(null);   // full synced state
   const [loading,  setLoading]    = useState(true);
