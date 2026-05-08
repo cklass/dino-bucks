@@ -1763,9 +1763,56 @@ const handleLogin = () => {
               const dayPct = yestValue && yestValue > 0 ? ((dayChange / yestValue) * 100).toFixed(1) : null;
 
               return (
+                // Build portfolio history from stock history
+              const historyDates = Object.keys(appState?.stockHistory || {}).sort();
+              const portfolioHistory = historyDates.map(date => {
+                const val = DINO_STOCKS.reduce((sum, stock) => {
+                  const p = appState.stockHistory[date]?.[stock.id] ?? stock.startPrice;
+                  const sh = appState?.portfolios?.[studentUser.id]?.[stock.id] || 0;
+                  return sum + sh * p;
+                }, 0);
+                return { date, val };
+              });
+
+              return (
                 <div style={{ background:"linear-gradient(135deg,#1a472a,#27ae60)", borderRadius:20, padding:24, marginBottom:20, color:"#fff", boxShadow:"0 8px 24px #1a472a44" }}>
                   <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"rgba(255,255,255,0.7)", marginBottom:4 }}>Total Portfolio Value</div>
                   <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:48, margin:"0 0 8px", textShadow:"0 2px 8px rgba(0,0,0,0.2)" }}>{fmt(Math.round(totalValue))}</div>
+
+                  {/* Line Graph */}
+                  {portfolioHistory.length >= 2 && (
+                    <div style={{ marginBottom:12, background:"rgba(0,0,0,0.15)", borderRadius:12, padding:"8px 4px" }}>
+                      {(() => {
+                        const W = 400, H = 60, pad = 8;
+                        const vals = portfolioHistory.map(p => p.val);
+                        const minV = Math.min(...vals) * 0.98;
+                        const maxV = Math.max(...vals) * 1.02;
+                        const x = i => pad + (i / (vals.length-1)) * (W - pad*2);
+                        const y = v => H - pad - ((v - minV) / (maxV - minV || 1)) * (H - pad*2);
+                        const points = vals.map((v,i) => `${x(i)},${y(v)}`).join(" ");
+                        const areaPoints = `${x(0)},${H} ${points} ${x(vals.length-1)},${H}`;
+                        const lineColor = vals[vals.length-1] >= vals[0] ? "#a8f0c0" : "#ffaaaa";
+                        return (
+                          <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:60 }}>
+                            <defs>
+                              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor={lineColor} stopOpacity="0.3"/>
+                                <stop offset="100%" stopColor={lineColor} stopOpacity="0"/>
+                              </linearGradient>
+                            </defs>
+                            <polygon points={areaPoints} fill="url(#areaGrad)"/>
+                            <polyline points={points} fill="none" stroke={lineColor} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"/>
+                            {/* Today's dot */}
+                            <circle cx={x(vals.length-1)} cy={y(vals[vals.length-1])} r={4} fill={lineColor} filter="drop-shadow(0 0 4px white)"/>
+                            {/* Date labels */}
+                            {portfolioHistory.length <= 7 && portfolioHistory.map((p,i) => (
+                              <text key={i} x={x(i)} y={H-1} textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.5)">{p.date.slice(5)}</text>
+                            ))}
+                          </svg>
+                        );
+                      })()}
+                    </div>
+                  )}
                   <div style={{ display:"flex", gap:16, flexWrap:"wrap" }}>
                     {dayChange !== null && (
                       <div style={{ background:"rgba(255,255,255,0.15)", borderRadius:12, padding:"8px 16px" }}>
