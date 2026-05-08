@@ -489,7 +489,7 @@ function MemoryGame() {
   );
 }
 
-function RunnerGame() {
+function RunnerGame({ studentUser, appState, update }) {
   const OBSTACLES = ["🌵","🌵","🌵","🦴","🪨","🌿","🦖","🌴"];
   const BIRDS = ["🦅","🦜","🐦"];
   const [running, setRunning] = React.useState(false);
@@ -503,28 +503,45 @@ function RunnerGame() {
   const obstRef = React.useRef([]);
   const scoreRef = React.useRef(0);
   const dinoYRef = React.useRef(0);
+  const dinoVelRef = React.useRef(0);
   const speedRef = React.useRef(6);
   const cloudsRef = React.useRef([{id:1,x:100,y:20},{id:2,x:300,y:40},{id:3,x:500,y:15}]);
+
   const jump = React.useCallback(() => {
     if (jumpRef.current) return;
     jumpRef.current = true;
-    setDinoY(110); dinoYRef.current = 110;
-    setTimeout(() => { setDinoY(0); dinoYRef.current = 0; setTimeout(() => { jumpRef.current = false; }, 100); }, 500);
+    dinoVelRef.current = 12;
   }, []);
+
   React.useEffect(() => {
     if (!running) return;
-    const handleKey = (e) => { if (e.code === "Space" || e.code === "ArrowUp") jump(); };
+    const handleKey = (e) => { if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); jump(); } };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [running, jump]);
+
   React.useEffect(() => {
     if (!running) return;
     let lastObst = 0;
+    const GRAVITY = 0.8;
     const tick = (ts) => {
       scoreRef.current += 1;
       const newSpeed = 6 + Math.floor(scoreRef.current / 200);
       if (newSpeed !== speedRef.current) speedRef.current = newSpeed;
       if (scoreRef.current % 10 === 0) setScore(scoreRef.current);
+
+      // Smooth physics jump
+      if (jumpRef.current) {
+        dinoVelRef.current -= GRAVITY;
+        dinoYRef.current = Math.max(0, dinoYRef.current + dinoVelRef.current);
+        if (dinoYRef.current <= 0) {
+          dinoYRef.current = 0;
+          dinoVelRef.current = 0;
+          jumpRef.current = false;
+        }
+        setDinoY(dinoYRef.current);
+      }
+
       if (ts - lastObst > Math.max(600, 1400 - scoreRef.current/2) + Math.random()*600) {
         lastObst = ts;
         const isBird = Math.random() < 0.25 && scoreRef.current > 150;
@@ -536,6 +553,7 @@ function RunnerGame() {
       setObstacles([...obstRef.current]);
       cloudsRef.current = cloudsRef.current.map(c => ({ ...c, x: c.x - 1 < -50 ? 550 : c.x - 1 }));
       setClouds([...cloudsRef.current]);
+
       const hit = obstRef.current.some(o => {
         if (o.x < 90 && o.x > 25) {
           if (o.birdHeight > 0) return dinoYRef.current < o.birdHeight + 30 && dinoYRef.current > o.birdHeight - 30;
@@ -543,24 +561,72 @@ function RunnerGame() {
         }
         return false;
       });
-      if (hit) { setRunning(false); setDead(true); return; }
+
+      if (hit) {
+        setRunning(false); setDead(true);
+        if (studentUser) {
+          update(prev => {
+            const lb = prev.leaderboards?.runner || [];
+            const filtered = lb.filter(e => e.username !== studentUser.username);
+            const existing = lb.find(e => e.username === studentUser.username);
+            if (existing && existing.score >= scoreRef.current) return prev;
+            const newLb = [...filtered, { username:studentUser.username, name:studentUser.name.split(" ")[0], dinoId:studentUser.dinoId, score:scoreRef.current }]
+              .sort((a,b) => b.score - a.score).slice(0,10);
+            return { ...prev, leaderboards: { ...(prev.leaderboards||{}), runner: newLb }};
+          });
+        }
+        return;
+      }
       frameRef.current = requestAnimationFrame(tick);
     };
     frameRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameRef.current);
   }, [running]);
-  const start = () => { setDead(false); setScore(0); scoreRef.current=0; obstRef.current=[]; setObstacles([]); speedRef.current=6; setRunning(true); };
+
+  const start = () => {
+    setDead(false); setScore(0); scoreRef.current=0;
+    obstRef.current=[]; setObstacles([]);
+    speedRef.current=6; dinoYRef.current=0; dinoVelRef.current=0;
+    jumpRef.current=false; setDinoY(0); setRunning(true);
+  };
+
+  const lb = appState?.leaderboards?.runner || [];
+
   return (
     <div style={{ textAlign:"center" }}>
-      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>Press SPACE or tap to jump! Score: {score}</div>
-      <div onClick={jump} style={{ position:"relative", width:"100%", maxWidth:560, height:200, background:"linear-gradient(180deg,#87CEEB 0%,#c8e6f5 55%,#98c87a 55%,#7aaa55 65%,#8B6914 65%,#7a5c10 100%)", borderRadius:14, overflow:"hidden", cursor:"pointer", margin:"0 auto", border:"3px solid #4B9B6E" }}>
-        {clouds.map(c => <div key={c.id} style={{ position:"absolute", top:c.y, left:c.x, fontSize:22, opacity:0.7 }}>☁️</div>)}
-        <div style={{ position:"absolute", bottom:44, left:0, right:0, height:2, background:"rgba(0,0,0,0.1)" }}/>
-        <div style={{ position:"absolute", bottom:44+dinoY, left:55, fontSize:40, transition:"bottom 0.08s", transform:"scaleX(-1)" }}>🦕</div>
-        {obstacles.map(o => <div key={o.id} style={{ position:"absolute", bottom: o.birdHeight > 0 ? 44+o.birdHeight : 44, left:o.x, fontSize:o.birdHeight > 0 ? 24 : 30 }}>{o.emoji}</div>)}
-        <div style={{ position:"absolute", top:8, right:12, fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"rgba(0,0,0,0.4)" }}>{score}</div>
+      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>
+        Press SPACE or tap to jump! Score: {score} {speedRef.current > 6 ? `⚡ Speed x${speedRef.current-4}` : ""}
       </div>
-      {!running && <button onClick={start} style={{ marginTop:16, padding:"10px 24px", background:"#27ae60", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>{dead ? `💀 Game Over! Score: ${score} — Play Again` : "Start Running! 🦕"}</button>}
+      <div style={{ display:"flex", gap:16, justifyContent:"center", flexWrap:"wrap" }}>
+        <div>
+          <div onClick={jump} style={{ position:"relative", width:"100%", maxWidth:560, height:200,
+            background:"linear-gradient(180deg,#87CEEB 0%,#c8e6f5 55%,#98c87a 55%,#7aaa55 65%,#8B6914 65%,#7a5c10 100%)",
+            borderRadius:14, overflow:"hidden", cursor:"pointer", margin:"0 auto", border:"3px solid #4B9B6E" }}>
+            {clouds.map(c => <div key={c.id} style={{ position:"absolute", top:c.y, left:c.x, fontSize:22, opacity:0.7 }}>☁️</div>)}
+            <div style={{ position:"absolute", bottom:44, left:0, right:0, height:2, background:"rgba(0,0,0,0.1)" }}/>
+            <div style={{ position:"absolute", bottom:44+dinoY, left:55, fontSize:40, transform:"scaleX(-1)" }}>🦕</div>
+            {obstacles.map(o => <div key={o.id} style={{ position:"absolute", bottom: o.birdHeight > 0 ? 44+o.birdHeight : 44, left:o.x, fontSize:o.birdHeight > 0 ? 24 : 30 }}>{o.emoji}</div>)}
+            <div style={{ position:"absolute", top:8, right:12, fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"rgba(0,0,0,0.4)" }}>{score}</div>
+          </div>
+          {!running && (
+            <button onClick={start} style={{ marginTop:16, padding:"10px 24px", background:"#27ae60", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>
+              {dead ? `💀 Game Over! Score: ${score} — Play Again` : "Start Running! 🦕"}
+            </button>
+          )}
+        </div>
+        <div style={{ background:"#f8f9fa", borderRadius:16, padding:16, minWidth:180, maxHeight:320, overflowY:"auto" }}>
+          <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a", marginBottom:10 }}>🏆 Top 10</div>
+          {lb.length === 0 ? <div style={{ color:"#aaa", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>No scores yet!</div> :
+            lb.map((e,i) => (
+              <div key={e.username} style={{ display:"flex", alignItems:"center", gap:8, padding:"6px 0", borderBottom:"1px solid #eee" }}>
+                <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#1a472a", width:24 }}>#{i+1}</div>
+                <div style={{ flex:1, fontFamily:"'Nunito',sans-serif", fontSize:13, fontWeight:700 }}>{e.name}</div>
+                <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#27ae60" }}>{e.score}</div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
     </div>
   );
 }
