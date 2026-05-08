@@ -1695,32 +1695,29 @@ const handleLogin = () => {
       <div style={{ minHeight:"100vh", background:"linear-gradient(155deg,#145a32 0%,#1e8449 50%,#0b5345 100%)", fontFamily:"'Fredoka One',sans-serif", padding:20 }}>
         <style>{`* { box-sizing:border-box }`}</style>
 
-        {/* Header */}
-        <div style={{ background:"#1A5276", borderRadius:16, padding:"12px 20px", display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
-          <span style={{ color:"#fff", fontSize:18 }}>👋 Hi, {studentUser.name.split(" ")[0]}!</span>
-          <div style={{ display:"flex", gap:8 }}>
+        {/* Compact Header */}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12, background:"rgba(0,0,0,0.2)", borderRadius:14, padding:"8px 14px" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <DinoSVG id={stuData?.dinoId || "trex"} c="#fff" size={36}/>
+            <div>
+              <div style={{ color:"#fff", fontSize:15, fontFamily:"'Fredoka One',sans-serif" }}>{studentUser.name.split(" ")[0]}</div>
+              <div style={{ color:"#a8f0c0", fontSize:18, fontFamily:"'Fredoka One',sans-serif" }}>{fmt(stuBalance)}</div>
+            </div>
+          </div>
+          <div style={{ display:"flex", gap:6 }}>
             <button onClick={() => setShowChangePw(true)}
-              style={{ padding:"5px 12px", background:"rgba(255,255,255,0.2)", color:"#fff", border:"1.5px solid rgba(255,255,255,0.4)", borderRadius:8, cursor:"pointer", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>
+              style={{ padding:"4px 10px", background:"rgba(255,255,255,0.15)", color:"#fff", border:"1px solid rgba(255,255,255,0.3)", borderRadius:8, cursor:"pointer", fontSize:11, fontFamily:"'Nunito',sans-serif" }}>
               🔑 Change Password
             </button>
             <button onClick={() => { setStudentUser(null); setStuLoginUser(""); setStuLoginPass(""); }}
-              style={{ padding:"5px 12px", background:"rgba(255,255,255,0.2)", color:"#fff", border:"1.5px solid rgba(255,255,255,0.4)", borderRadius:8, cursor:"pointer", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>
+              style={{ padding:"4px 10px", background:"rgba(255,255,255,0.15)", color:"#fff", border:"1px solid rgba(255,255,255,0.3)", borderRadius:8, cursor:"pointer", fontSize:11, fontFamily:"'Nunito',sans-serif" }}>
               🔒 Logout
             </button>
           </div>
         </div>
 
-        {/* Avatar + Balance */}
-        <div style={{ background:"#fff", borderRadius:20, padding:24, textAlign:"center", marginBottom:20, boxShadow:"0 4px 20px #0003" }}>
-          <DinoSVG id={stuData?.dinoId || "trex"} c="#1e8449" size={90}/>
-          <h2 style={{ fontSize:24, color:"#1a472a", margin:"12px 0 4px" }}>{stuData?.name}</h2>
-          <div style={{ fontSize:42, color:"#27ae60", fontFamily:"'Fredoka One',sans-serif", margin:"8px 0" }}>{fmt(stuBalance)}</div>
-          <div style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13 }}>Current Balance</div>
-          <div style={{ color:"#888", fontFamily:"'Nunito',sans-serif", fontSize:13 }}>Current Balance</div>
-        </div>
-        {tab === "dashboard" && setTab("log")}
         {/* Student Tabs */}
-        <div style={{ display:"flex", gap:8, marginBottom:16, flexWrap:"wrap", marginTop:16 }}>
+        <div style={{ display:"flex", gap:8, marginBottom:16, flexWrap:"wrap" }}>
           {["invest","play","log"].map(t => (
             <button key={t} onClick={() => setTab(t)} style={{
               padding:"10px 18px", border:"none", cursor:"pointer", borderRadius:12,
