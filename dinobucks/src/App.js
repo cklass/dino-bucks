@@ -1816,55 +1816,63 @@ const handleLogin = () => {
 
         {/* Student Play Tab */}
         {tab==="play" && (
-          <div>
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(150px, 1fr))", gap:12, marginBottom:16 }}>
-              {[
-                { id:"runner", name:"Dino Jump",    emoji:"🦕", desc:"Dodge obstacles!", color:"#27ae60" },
-                { id:"egg",    name:"Egg Drop",      emoji:"🥚", desc:"Catch the eggs!",  color:"#e67e22" },
-                { id:"memory", name:"Memory Match",  emoji:"🧠", desc:"Find the pairs!",  color:"#8e44ad" },
-                { id:"trivia", name:"Dino Trivia",   emoji:"🦖", desc:"Test your knowledge!", color:"#2980b9" },
-                { id:"digger",  name:"Bone Dig",       emoji:"🦴", desc:"Find the bones!",    color:"#c0392b" },
-                { id:"meteor",  name:"Meteor Blaster", emoji:"☄️", desc:"Shoot the meteors!", color:"#e74c3c" },
-                { id:"snake",   name:"Dino Snake",     emoji:"🐍", desc:"Eat the eggs!",       color:"#27ae60" },
-                { id:"dinopac", name:"Dino-Pac",       emoji:"🦕", desc:"Chomp through maze!", color:"#f39c12" },
-              ].map(game => (
-                <div key={game.id} onClick={() => setActiveGame(game.id)}
-                  style={{ background:"#fff", borderRadius:16, padding:16, textAlign:"center", cursor:"pointer",
-                    boxShadow:"0 4px 16px #0002", border:`2px solid ${game.color}33` }}>
-                  <div style={{ fontSize:36, marginBottom:8 }}>{game.emoji}</div>
-                  <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:15, color:game.color }}>{game.name}</div>
-                  <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:11, color:"#777" }}>{game.desc}</div>
+          <div style={{ background:"linear-gradient(135deg,#0a0a2e 0%,#1a1a4e 50%,#0d1a3d 100%)", borderRadius:20, padding:24, minHeight:400 }}>
+            {!activeGame ? (
+              <>
+                <div style={{ textAlign:"center", marginBottom:24 }}>
+                  <div style={{ fontSize:48, marginBottom:8 }}>🎮</div>
+                  <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:28, color:"#fff", letterSpacing:2, textShadow:"0 0 20px #4B9B6E" }}>DINO GAME ZONE</div>
+                  <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#a8d8b5", marginTop:4 }}>
+                    Daily earnings: {fmt(appState?.gameEarnings?.[studentUser.id]?.[todayStr()] || 0)} / $10.00
+                  </div>
                 </div>
-              ))}
-            </div>
-            {activeGame && (
-              <div style={{ background:"#fff", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0002" }}>
-                <button onClick={() => setActiveGame(null)} style={{ padding:"6px 14px", background:"#eee", border:"none", borderRadius:8, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:14, marginBottom:12 }}>✕ Close Game</button>
-                <GameArea game={activeGame} studentUser={studentUser} appState={appState} update={update} todayStr={todayStr} showToast={showToast} fmt={fmt}/>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(180px, 1fr))", gap:16 }}>
+                  {[
+                    { id:"runner",  name:"Dino Jump",      emoji:"🦕", desc:"Dodge obstacles!",     color:"#27ae60", bg:"linear-gradient(135deg,#1a472a,#27ae60)", stars:"⭐⭐⭐" },
+                    { id:"egg",     name:"Egg Drop",        emoji:"🥚", desc:"Catch the eggs!",      color:"#e67e22", bg:"linear-gradient(135deg,#1a1a4e,#e67e22)", stars:"⭐⭐" },
+                    { id:"memory",  name:"Memory Match",    emoji:"🧠", desc:"Find the pairs!",      color:"#8e44ad", bg:"linear-gradient(135deg,#2d1b69,#8e44ad)", stars:"⭐⭐" },
+                    { id:"trivia",  name:"Dino Trivia",     emoji:"🦖", desc:"Test your knowledge!", color:"#2980b9", bg:"linear-gradient(135deg,#1a3a5c,#2980b9)", stars:"⭐⭐⭐" },
+                    { id:"digger",  name:"Bone Dig",        emoji:"🦴", desc:"Find the bones!",      color:"#c0392b", bg:"linear-gradient(135deg,#4a1a0a,#c0392b)", stars:"⭐⭐" },
+                    { id:"meteor",  name:"Meteor Blaster",  emoji:"☄️", desc:"Shoot the meteors!",  color:"#e74c3c", bg:"linear-gradient(135deg,#0a0a2e,#e74c3c)", stars:"⭐⭐⭐" },
+                    { id:"snake",   name:"Dino Snake",      emoji:"🐍", desc:"Eat the eggs!",        color:"#27ae60", bg:"linear-gradient(135deg,#0d2b1a,#27ae60)", stars:"⭐⭐⭐" },
+                    { id:"dinopac", name:"Dino-Pac",        emoji:"🦕", desc:"Chomp the maze!",      color:"#f39c12", bg:"linear-gradient(135deg,#2d1a00,#f39c12)", stars:"⭐⭐⭐" },
+                  ].map(game => (
+                    <div key={game.id} onClick={() => setActiveGame(game.id)}
+                      style={{ background:game.bg, borderRadius:20, padding:"20px 16px", textAlign:"center", cursor:"pointer",
+                        boxShadow:`0 8px 24px ${game.color}44`, border:`2px solid ${game.color}66`,
+                        transition:"transform 0.15s, box-shadow 0.15s", position:"relative", overflow:"hidden" }}
+                      onMouseEnter={e => { e.currentTarget.style.transform="scale(1.06)"; e.currentTarget.style.boxShadow=`0 12px 32px ${game.color}77`; }}
+                      onMouseLeave={e => { e.currentTarget.style.transform="scale(1)"; e.currentTarget.style.boxShadow=`0 8px 24px ${game.color}44`; }}>
+                      {/* Glowing background circle */}
+                      <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", width:120, height:120, borderRadius:"50%", background:game.color, opacity:0.1, filter:"blur(20px)" }}/>
+                      <div style={{ fontSize:52, marginBottom:10, filter:`drop-shadow(0 0 12px ${game.color})` }}>{game.emoji}</div>
+                      <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:17, color:"#fff", marginBottom:6, textShadow:`0 0 10px ${game.color}` }}>{game.name}</div>
+                      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:11, color:"rgba(255,255,255,0.75)", marginBottom:8 }}>{game.desc}</div>
+                      <div style={{ fontSize:12 }}>{game.stars}</div>
+                      {/* High score badge */}
+                      {appState?.leaderboards?.[game.id]?.find(e => e.username === studentUser.username) && (
+                        <div style={{ position:"absolute", top:8, right:8, background:"#f39c12", borderRadius:20, padding:"2px 8px", fontSize:10, fontFamily:"'Fredoka One',sans-serif", color:"#fff" }}>
+                          #{appState.leaderboards[game.id].findIndex(e => e.username === studentUser.username) + 1} 🏆
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
+                  <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:22, color:"#fff" }}>
+                    {activeGame==="runner"?"🦕 Dino Jump":activeGame==="egg"?"🥚 Egg Drop":activeGame==="memory"?"🧠 Memory Match":activeGame==="trivia"?"🦖 Dino Trivia":activeGame==="digger"?"🦴 Bone Dig":activeGame==="meteor"?"☄️ Meteor Blaster":activeGame==="snake"?"🐍 Dino Snake":"🦕 Dino-Pac"}
+                  </div>
+                  <button onClick={() => setActiveGame(null)} style={{ padding:"8px 18px", background:"rgba(255,255,255,0.15)", color:"#fff", border:"2px solid rgba(255,255,255,0.3)", borderRadius:10, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:14 }}>← Back</button>
+                </div>
+                <div style={{ background:"rgba(255,255,255,0.05)", borderRadius:16, padding:20 }}>
+                  <GameArea game={activeGame} studentUser={studentUser} appState={appState} update={update} todayStr={todayStr} showToast={showToast} fmt={fmt}/>
+                </div>
               </div>
             )}
           </div>
-        )}
-
-        {tab==="log" && (
-        <div style={{ background:"#fff", borderRadius:20, padding:24, boxShadow:"0 4px 20px #0003" }}>
-          <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 16px" }}>📜 Transaction History</h3>
-          {stuTx.length === 0 ? (
-            <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>No transactions yet!</div>
-          ) : (
-            stuTx.slice(0, 30).map(t => (
-              <div key={t.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"10px 0", borderBottom:"1px solid #f0f0f0", fontFamily:"'Nunito',sans-serif" }}>
-                <div>
-                  <div style={{ fontSize:14, color:"#333" }}>{t.reason}</div>
-                  <div style={{ fontSize:11, color:"#aaa" }}>{t.date}</div>
-                </div>
-                <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:18, color: t.amount >= 0 ? "#27ae60" : "#e74c3c" }}>
-                  {t.amount >= 0 ? "+" : ""}{fmt(t.amount)}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
         )}
 
         {/* Change Password Modal */}
