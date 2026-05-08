@@ -374,6 +374,9 @@ function GameArea({ game, studentUser, appState, update, todayStr, showToast, fm
   if (game === "runner") return <RunnerGame />;
   if (game === "egg")    return <EggDropGame />;
   if (game === "digger") return <DiggerGame />;
+  if (game === "meteor") return <MeteorGame studentUser={studentUser} appState={appState} update={update} />;
+  if (game === "snake")  return <SnakeGame studentUser={studentUser} appState={appState} update={update} />;
+  if (game === "dinopac") return <DinoPacGame studentUser={studentUser} appState={appState} update={update} />;
   return null;
 }
 
@@ -656,6 +659,557 @@ function DiggerGame() {
         {cells.map(c => <div key={c.id} onClick={() => dig(c.id)} style={{ height:64, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:28, cursor:playing?"pointer":"default", background: c.dug ? "#f5e6c8" : "#8B6914", border:"3px solid #6b4f10" }}>{c.dug ? (c.hasBone ? "🦴" : c.hasRock ? "🪨" : "💨") : "🟫"}</div>)}
       </div>
       {!playing && <button onClick={start} style={{ padding:"10px 24px", background:"#c0392b", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>{done ? `Found ${score} bones! Play Again` : "Start Digging! 🦴"}</button>}
+    </div>
+  );
+}
+function MeteorGame({ studentUser, appState, update }) {
+  const W = 500, H = 300;
+  const [playing, setPlaying] = React.useState(false);
+  const [score, setScore] = React.useState(0);
+  const [lives, setLives] = React.useState(3);
+  const [done, setDone] = React.useState(false);
+  const [shipX, setShipX] = React.useState(250);
+  const [meteors, setMeteors] = React.useState([]);
+  const [bullets, setBullets] = React.useState([]);
+  const [explosions, setExplosions] = React.useState([]);
+  const frameRef = React.useRef();
+  const shipRef = React.useRef(250);
+  const meteorsRef = React.useRef([]);
+  const bulletsRef = React.useRef([]);
+  const scoreRef = React.useRef(0);
+  const livesRef = React.useRef(3);
+  const keysRef = React.useRef({});
+
+  React.useEffect(() => {
+    const down = (e) => { keysRef.current[e.code] = true; if (e.code === "Space") { e.preventDefault(); fire(); } };
+    const up = (e) => { keysRef.current[e.code] = false; };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
+  }, [playing]);
+
+  const fire = React.useCallback(() => {
+    bulletsRef.current = [...bulletsRef.current, { id:Math.random(), x:shipRef.current, y:240 }];
+  }, []);
+
+  React.useEffect(() => {
+    if (!playing) return;
+    let lastMeteor = 0;
+    const tick = (ts) => {
+      // Move ship
+      if (keysRef.current["ArrowLeft"] || keysRef.current["KeyA"]) { shipRef.current = Math.max(20, shipRef.current - 5); setShipX(shipRef.current); }
+      if (keysRef.current["ArrowRight"] || keysRef.current["KeyD"]) { shipRef.current = Math.min(W-20, shipRef.current + 5); setShipX(shipRef.current); }
+      // Spawn meteors
+      const interval = Math.max(400, 1200 - scoreRef.current * 2);
+      if (ts - lastMeteor > interval) {
+        lastMeteor = ts;
+        meteorsRef.current = [...meteorsRef.current, { id:Math.random(), x:Math.random()*(W-40)+20, y:-20, speed:2+Math.random()*3+scoreRef.current*0.01 }];
+      }
+      // Move meteors
+      meteorsRef.current = meteorsRef.current.map(m => ({ ...m, y: m.y + m.speed }));
+      // Move bullets
+      bulletsRef.current = bulletsRef.current.map(b => ({ ...b, y: b.y - 10 })).filter(b => b.y > -10);
+      // Check bullet-meteor collisions
+      const newExplosions = [];
+      const hitMeteorIds = new Set();
+      const hitBulletIds = new Set();
+      bulletsRef.current.forEach(b => {
+        meteorsRef.current.forEach(m => {
+          if (Math.abs(b.x - m.x) < 25 && Math.abs(b.y - m.y) < 25) {
+            hitMeteorIds.add(m.id);
+            hitBulletIds.add(b.id);
+            scoreRef.current += 10;
+            newExplosions.push({ id:Math.random(), x:m.x, y:m.y, t:0 });
+          }
+        });
+      });
+      if (newExplosions.length) { setScore(scoreRef.current); setExplosions(prev => [...prev, ...newExplosions]); }
+      meteorsRef.current = meteorsRef.current.filter(m => !hitMeteorIds.has(m.id));
+      bulletsRef.current = bulletsRef.current.filter(b => !hitBulletIds.has(b.id));
+      // Check meteor hits ship or ground
+      const escaped = meteorsRef.current.filter(m => m.y > H);
+      if (escaped.length) {
+        livesRef.current = Math.max(0, livesRef.current - escaped.length);
+        setLives(livesRef.current);
+        meteorsRef.current = meteorsRef.current.filter(m => m.y <= H);
+        if (livesRef.current <= 0) {
+          setPlaying(false); setDone(true);
+          // Save leaderboard
+          if (studentUser) {
+            update(prev => {
+              const lb = prev.leaderboards?.meteor || [];
+              const filtered = lb.filter(e => e.username !== studentUser.username);
+              const existing = lb.find(e => e.username === studentUser.username);
+              if (existing && existing.score >= scoreRef.current) return prev;
+              const newLb = [...filtered, { username:studentUser.username, name:studentUser.name.split(" ")[0], dinoId:studentUser.dinoId, score:scoreRef.current }]
+                .sort((a,b) => b.score - a.score).slice(0,10);
+              return { ...prev, leaderboards: { ...(prev.leaderboards||{}), meteor: newLb }};
+            });
+          }
+          return;
+        }
+      }
+      setMeteors([...meteorsRef.current]);
+      setBullets([...bulletsRef.current]);
+      setExplosions(prev => prev.map(e => ({ ...e, t: e.t+1 })).filter(e => e.t < 8));
+      frameRef.current = requestAnimationFrame(tick);
+    };
+    frameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [playing]);
+
+  const start = () => {
+    setDone(false); setScore(0); setLives(3); setShipX(250);
+    scoreRef.current=0; livesRef.current=3; shipRef.current=250;
+    meteorsRef.current=[]; bulletsRef.current=[];
+    setMeteors([]); setBullets([]); setExplosions([]);
+    setPlaying(true);
+  };
+
+  const lb = appState?.leaderboards?.meteor || [];
+
+  return (
+    <div style={{ textAlign:"center" }}>
+      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>
+        Arrow keys to move · SPACE to shoot! Score: {score} | Lives: {"❤️".repeat(lives)}
+      </div>
+      <div style={{ display:"flex", gap:16, justifyContent:"center", flexWrap:"wrap" }}>
+        <div>
+          <div onClick={() => { if (playing) fire(); }}
+            style={{ position:"relative", width:W, maxWidth:"100%", height:H,
+              background:"linear-gradient(180deg,#0a0a2e 0%,#1a1a4e 50%,#0d0d3d 100%)",
+              borderRadius:14, overflow:"hidden", cursor:"crosshair", border:"3px solid #4B9B6E", margin:"0 auto" }}>
+            {/* Stars */}
+            {[{x:5,y:10},{x:15,y:25},{x:30,y:8},{x:45,y:20},{x:60,y:5},{x:75,y:15},{x:85,y:28},{x:92,y:10},{x:20,y:40},{x:55,y:35},{x:70,y:42},{x:38,y:50}].map((s,i) => (
+              <div key={i} style={{ position:"absolute", left:`${s.x}%`, top:`${s.y}%`, width:2, height:2, background:"#fff", borderRadius:"50%", opacity:0.8 }}/>
+            ))}
+            {/* Ground line */}
+            <div style={{ position:"absolute", bottom:50, left:0, right:0, height:2, background:"rgba(75,155,110,0.3)" }}/>
+            {/* Ship */}
+            <div style={{ position:"absolute", bottom:52, left:shipX, transform:"translateX(-50%)", fontSize:32, filter:"drop-shadow(0 0 8px #27ae60)" }}>🦕</div>
+            {/* Bullets */}
+            {bullets.map(b => (
+              <div key={b.id} style={{ position:"absolute", left:b.x, top:b.y, width:4, height:12, background:"#27ae60", borderRadius:2, transform:"translateX(-50%)", boxShadow:"0 0 6px #27ae60" }}/>
+            ))}
+            {/* Meteors */}
+            {meteors.map(m => (
+              <div key={m.id} style={{ position:"absolute", left:m.x, top:m.y, fontSize:24, transform:"translateX(-50%)" }}>☄️</div>
+            ))}
+            {/* Explosions */}
+            {explosions.map(e => (
+              <div key={e.id} style={{ position:"absolute", left:e.x, top:e.y, fontSize:20+e.t*2, transform:"translateX(-50%)", opacity:1-e.t/8 }}>💥</div>
+            ))}
+            {/* Score overlay */}
+            <div style={{ position:"absolute", top:8, left:12, fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#27ae60" }}>{score}</div>
+          </div>
+          {!playing && (
+            <button onClick={start} style={{ marginTop:16, padding:"10px 24px", background:"linear-gradient(135deg,#e74c3c,#c0392b)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>
+              {done ? `💥 Game Over! Score: ${score} — Play Again` : "🚀 Start Blasting! ☄️"}
+            </button>
+          )}
+        </div>
+        {/* Leaderboard */}
+        <div style={{ background:"#f8f9fa", borderRadius:16, padding:16, minWidth:180, maxHeight:320, overflowY:"auto" }}>
+          <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a", marginBottom:10 }}>🏆 Top 10</div>
+          {lb.length === 0 ? <div style={{ color:"#aaa", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>No scores yet!</div> :
+            lb.map((e,i) => (
+              <div key={e.username} style={{ display:"flex", alignItems:"center", gap:8, padding:"6px 0", borderBottom:"1px solid #eee" }}>
+                <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#1a472a", width:24 }}>#{i+1}</div>
+                <div style={{ flex:1, fontFamily:"'Nunito',sans-serif", fontSize:13, fontWeight:700 }}>{e.name}</div>
+                <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#e74c3c" }}>{e.score}</div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+function SnakeGame({ studentUser, appState, update }) {
+  const COLS = 20, ROWS = 15, CELL = 24;
+  const DIR = { UP:[0,-1], DOWN:[0,1], LEFT:[-1,0], RIGHT:[1,0] };
+  const [snake, setSnake] = React.useState([[10,7],[9,7],[8,7]]);
+  const [dir, setDir] = React.useState("RIGHT");
+  const [food, setFood] = React.useState([15,7]);
+  const [playing, setPlaying] = React.useState(false);
+  const [dead, setDead] = React.useState(false);
+  const [score, setScore] = React.useState(0);
+  const snakeRef = React.useRef([[10,7],[9,7],[8,7]]);
+  const dirRef = React.useRef("RIGHT");
+  const nextDirRef = React.useRef("RIGHT");
+  const foodRef = React.useRef([15,7]);
+  const scoreRef = React.useRef(0);
+  const frameRef = React.useRef();
+
+  const randFood = (sn) => {
+    let f;
+    do { f = [Math.floor(Math.random()*COLS), Math.floor(Math.random()*ROWS)]; }
+    while (sn.some(s => s[0]===f[0] && s[1]===f[1]));
+    return f;
+  };
+
+  React.useEffect(() => {
+    if (!playing) return;
+    const handleKey = (e) => {
+      if (e.code==="ArrowUp"    && dirRef.current!=="DOWN")  nextDirRef.current="UP";
+      if (e.code==="ArrowDown"  && dirRef.current!=="UP")    nextDirRef.current="DOWN";
+      if (e.code==="ArrowLeft"  && dirRef.current!=="RIGHT") nextDirRef.current="LEFT";
+      if (e.code==="ArrowRight" && dirRef.current!=="LEFT")  nextDirRef.current="RIGHT";
+      if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)) e.preventDefault();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [playing]);
+
+  React.useEffect(() => {
+    if (!playing) return;
+    const speed = Math.max(80, 200 - scoreRef.current * 2);
+    const interval = setInterval(() => {
+      dirRef.current = nextDirRef.current;
+      const [dx, dy] = DIR[dirRef.current];
+      const head = [snakeRef.current[0][0]+dx, snakeRef.current[0][1]+dy];
+      // Wall collision
+      if (head[0]<0||head[0]>=COLS||head[1]<0||head[1]>=ROWS) {
+        setPlaying(false); setDead(true);
+        if (studentUser) {
+          update(prev => {
+            const lb = prev.leaderboards?.snake || [];
+            const filtered = lb.filter(e => e.username !== studentUser.username);
+            const existing = lb.find(e => e.username === studentUser.username);
+            if (existing && existing.score >= scoreRef.current) return prev;
+            const newLb = [...filtered, { username:studentUser.username, name:studentUser.name.split(" ")[0], dinoId:studentUser.dinoId, score:scoreRef.current }]
+              .sort((a,b) => b.score - a.score).slice(0,10);
+            return { ...prev, leaderboards: { ...(prev.leaderboards||{}), snake: newLb }};
+          });
+        }
+        return;
+      }
+      // Self collision
+      if (snakeRef.current.some(s => s[0]===head[0] && s[1]===head[1])) {
+        setPlaying(false); setDead(true); return;
+      }
+      // Eat food
+      const ate = head[0]===foodRef.current[0] && head[1]===foodRef.current[1];
+      const newSnake = ate ? [head, ...snakeRef.current] : [head, ...snakeRef.current.slice(0,-1)];
+      if (ate) {
+        scoreRef.current += 10;
+        setScore(scoreRef.current);
+        const newFood = randFood(newSnake);
+        foodRef.current = newFood;
+        setFood(newFood);
+      }
+      snakeRef.current = newSnake;
+      setSnake([...newSnake]);
+    }, speed);
+    return () => clearInterval(interval);
+  }, [playing, score]);
+
+  const start = () => {
+    const initSnake = [[10,7],[9,7],[8,7]];
+    snakeRef.current = initSnake; dirRef.current = "RIGHT"; nextDirRef.current = "RIGHT";
+    scoreRef.current = 0; foodRef.current = [15,7];
+    setSnake(initSnake); setDir("RIGHT"); setFood([15,7]);
+    setScore(0); setDead(false); setPlaying(true);
+  };
+
+  const lb = appState?.leaderboards?.snake || [];
+
+  return (
+    <div style={{ textAlign:"center" }}>
+      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>
+        Arrow keys to move! Eat the eggs 🥚 to grow! Score: {score}
+      </div>
+      <div style={{ display:"flex", gap:16, justifyContent:"center", flexWrap:"wrap" }}>
+        <div>
+          <div style={{ display:"inline-block", background:"#1a472a", borderRadius:12, padding:4, border:"3px solid #4B9B6E", position:"relative" }}>
+            <svg width={COLS*CELL} height={ROWS*CELL}>
+              {/* Grid lines */}
+              {Array(COLS).fill(0).map((_,i) => <line key={"v"+i} x1={i*CELL} y1={0} x2={i*CELL} y2={ROWS*CELL} stroke="rgba(255,255,255,0.05)" strokeWidth={1}/>)}
+              {Array(ROWS).fill(0).map((_,i) => <line key={"h"+i} x1={0} y1={i*CELL} x2={COLS*CELL} y2={i*CELL} stroke="rgba(255,255,255,0.05)" strokeWidth={1}/>)}
+              {/* Snake */}
+              {snake.map((s,i) => (
+                <rect key={i} x={s[0]*CELL+1} y={s[1]*CELL+1} width={CELL-2} height={CELL-2} rx={i===0?8:4}
+                  fill={i===0?"#f39c12":i===1?"#e67e22":"#d35400"} opacity={1-i*0.02}/>
+              ))}
+              {/* Snake eyes on head */}
+              {snake[0] && <>
+                <circle cx={snake[0][0]*CELL+CELL*0.3} cy={snake[0][1]*CELL+CELL*0.3} r={2.5} fill="white"/>
+                <circle cx={snake[0][0]*CELL+CELL*0.7} cy={snake[0][1]*CELL+CELL*0.3} r={2.5} fill="white"/>
+                <circle cx={snake[0][0]*CELL+CELL*0.3} cy={snake[0][1]*CELL+CELL*0.3} r={1.2} fill="#111"/>
+                <circle cx={snake[0][0]*CELL+CELL*0.7} cy={snake[0][1]*CELL+CELL*0.3} r={1.2} fill="#111"/>
+              </>}
+              {/* Food */}
+              <text x={food[0]*CELL+CELL/2} y={food[1]*CELL+CELL/2+6} textAnchor="middle" fontSize={18}>🥚</text>
+            </svg>
+          </div>
+          {/* Mobile controls */}
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, marginTop:12 }}>
+            <button onPointerDown={() => nextDirRef.current="UP"} style={{ padding:"8px 20px", background:"#1a472a", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:18 }}>▲</button>
+            <div style={{ display:"flex", gap:4 }}>
+              <button onPointerDown={() => nextDirRef.current="LEFT"} style={{ padding:"8px 20px", background:"#1a472a", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:18 }}>◀</button>
+              <button onPointerDown={() => nextDirRef.current="DOWN"} style={{ padding:"8px 20px", background:"#1a472a", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:18 }}>▼</button>
+              <button onPointerDown={() => nextDirRef.current="RIGHT"} style={{ padding:"8px 20px", background:"#1a472a", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:18 }}>▶</button>
+            </div>
+          </div>
+          {!playing && (
+            <button onClick={start} style={{ marginTop:12, padding:"10px 24px", background:"linear-gradient(135deg,#27ae60,#1a472a)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>
+              {dead ? `💀 Game Over! Score: ${score} — Play Again` : "🐍 Start Dino Snake!"}
+            </button>
+          )}
+        </div>
+        {/* Leaderboard */}
+        <div style={{ background:"#f8f9fa", borderRadius:16, padding:16, minWidth:180, maxHeight:320, overflowY:"auto" }}>
+          <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a", marginBottom:10 }}>🏆 Top 10</div>
+          {lb.length === 0 ? <div style={{ color:"#aaa", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>No scores yet!</div> :
+            lb.map((e,i) => (
+              <div key={e.username} style={{ display:"flex", alignItems:"center", gap:8, padding:"6px 0", borderBottom:"1px solid #eee" }}>
+                <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#1a472a", width:24 }}>#{i+1}</div>
+                <div style={{ flex:1, fontFamily:"'Nunito',sans-serif", fontSize:13, fontWeight:700 }}>{e.name}</div>
+                <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#27ae60" }}>{e.score}</div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+function DinoPacGame({ studentUser, appState, update }) {
+  const CELL = 24;
+  const MAZE = [
+    "####################",
+    "#........##........#",
+    "#.##.###.##.###.##.#",
+    "#.##.###.##.###.##.#",
+    "#..................#",
+    "#.##.#.######.#.##.#",
+    "#....#...##...#....#",
+    "####.### ## ###.####",
+    "####.#        #.####",
+    "####.# ######  #.####",
+    "####.#        #.####",
+    "####.## ###### ##.####",
+    "#........##........#",
+    "#.##.###.##.###.##.#",
+    "#...#.........#...#",
+    "###.#.#######.#.###",
+    "#....#...##...#....#",
+    "#.######.##.######.#",
+    "#..................#",
+    "####################",
+  ];
+  const ROWS = MAZE.length;
+  const COLS = MAZE[0].length;
+
+  const initDots = () => {
+    const dots = {};
+    MAZE.forEach((row, r) => row.split("").forEach((c, col) => {
+      if (c === ".") dots[`${col},${r}`] = "dot";
+      if (c === "*") dots[`${col},${r}`] = "power";
+    }));
+    return dots;
+  };
+
+  const [pos, setPos] = React.useState({ x:1, y:1 });
+  const [dir, setDir] = React.useState({ x:1, y:0 });
+  const [nextDir, setNextDir] = React.useState({ x:1, y:0 });
+  const [ghosts, setGhosts] = React.useState([
+    { x:9, y:9, dx:1, dy:0, color:"#e74c3c" },
+    { x:10, y:9, dx:-1, dy:0, color:"#e67e22" },
+    { x:9, y:10, dx:0, dy:1, color:"#9b59b6" },
+    { x:10, y:10, dx:0, dy:-1, color:"#3498db" },
+  ]);
+  const [dots, setDots] = React.useState(initDots);
+  const [score, setScore] = React.useState(0);
+  const [lives, setLives] = React.useState(3);
+  const [playing, setPlaying] = React.useState(false);
+  const [done, setDone] = React.useState(false);
+  const [powered, setPowered] = React.useState(false);
+
+  const posRef = React.useRef({ x:1, y:1 });
+  const dirRef = React.useRef({ x:1, y:0 });
+  const nextDirRef = React.useRef({ x:1, y:0 });
+  const ghostsRef = React.useRef([...ghosts]);
+  const dotsRef = React.useRef(initDots());
+  const scoreRef = React.useRef(0);
+  const livesRef = React.useRef(3);
+  const poweredRef = React.useRef(false);
+  const powTimerRef = React.useRef(null);
+
+  const isWall = (x, y) => {
+    if (y < 0 || y >= ROWS || x < 0 || x >= COLS) return true;
+    return MAZE[y][x] === "#";
+  };
+
+  React.useEffect(() => {
+    if (!playing) return;
+    const handleKey = (e) => {
+      if (e.code==="ArrowUp")    nextDirRef.current = { x:0, y:-1 };
+      if (e.code==="ArrowDown")  nextDirRef.current = { x:0, y:1 };
+      if (e.code==="ArrowLeft")  nextDirRef.current = { x:-1, y:0 };
+      if (e.code==="ArrowRight") nextDirRef.current = { x:1, y:0 };
+      if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)) e.preventDefault();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [playing]);
+
+  React.useEffect(() => {
+    if (!playing) return;
+    const interval = setInterval(() => {
+      // Try next direction first
+      const nd = nextDirRef.current;
+      const np = { x: posRef.current.x + nd.x, y: posRef.current.y + nd.y };
+      if (!isWall(np.x, np.y)) { dirRef.current = nd; }
+      // Move in current direction
+      const d = dirRef.current;
+      const newPos = { x: posRef.current.x + d.x, y: posRef.current.y + d.y };
+      if (!isWall(newPos.x, newPos.y)) {
+        posRef.current = newPos;
+        setPos({ ...newPos });
+      }
+      // Eat dots
+      const key = `${posRef.current.x},${posRef.current.y}`;
+      if (dotsRef.current[key]) {
+        const isPower = dotsRef.current[key] === "power";
+        delete dotsRef.current[key];
+        scoreRef.current += isPower ? 50 : 10;
+        setScore(scoreRef.current);
+        setDots({ ...dotsRef.current });
+        if (isPower) {
+          poweredRef.current = true;
+          setPowered(true);
+          if (powTimerRef.current) clearTimeout(powTimerRef.current);
+          powTimerRef.current = setTimeout(() => { poweredRef.current = false; setPowered(false); }, 8000);
+        }
+      }
+      // Move ghosts
+      ghostsRef.current = ghostsRef.current.map(g => {
+        const moves = [{ x:1,y:0 },{ x:-1,y:0 },{ x:0,y:1 },{ x:0,y:-1 }]
+          .filter(m => !isWall(g.x+m.x, g.y+m.y) && !(m.x===-g.dx && m.y===-g.dy));
+        if (!moves.length) return g;
+        const m = moves[Math.floor(Math.random()*moves.length)];
+        return { ...g, x:g.x+m.x, y:g.y+m.y, dx:m.x, dy:m.y };
+      });
+      setGhosts([...ghostsRef.current]);
+      // Check ghost collision
+      const hit = ghostsRef.current.some(g => g.x===posRef.current.x && g.y===posRef.current.y);
+      if (hit) {
+        if (poweredRef.current) {
+          // Eat ghost
+          scoreRef.current += 200;
+          setScore(scoreRef.current);
+          ghostsRef.current = ghostsRef.current.map(g =>
+            g.x===posRef.current.x && g.y===posRef.current.y ? { ...g, x:10, y:9 } : g
+          );
+        } else {
+          livesRef.current--;
+          setLives(livesRef.current);
+          posRef.current = { x:1, y:1 };
+          setPos({ x:1, y:1 });
+          if (livesRef.current <= 0) {
+            setPlaying(false); setDone(true);
+            if (studentUser) {
+              update(prev => {
+                const lb = prev.leaderboards?.dinopac || [];
+                const filtered = lb.filter(e => e.username !== studentUser.username);
+                const existing = lb.find(e => e.username === studentUser.username);
+                if (existing && existing.score >= scoreRef.current) return prev;
+                const newLb = [...filtered, { username:studentUser.username, name:studentUser.name.split(" ")[0], dinoId:studentUser.dinoId, score:scoreRef.current }]
+                  .sort((a,b) => b.score - a.score).slice(0,10);
+                return { ...prev, leaderboards: { ...(prev.leaderboards||{}), dinopac: newLb }};
+              });
+            }
+          }
+        }
+      }
+      // Check win
+      if (Object.keys(dotsRef.current).length === 0) {
+        scoreRef.current += 500;
+        setScore(scoreRef.current);
+        setPlaying(false); setDone(true);
+      }
+    }, 150);
+    return () => clearInterval(interval);
+  }, [playing]);
+
+  const start = () => {
+    const d = initDots();
+    dotsRef.current = d; posRef.current = { x:1, y:1 };
+    dirRef.current = { x:1, y:0 }; nextDirRef.current = { x:1, y:0 };
+    scoreRef.current = 0; livesRef.current = 3; poweredRef.current = false;
+    ghostsRef.current = [
+      { x:9, y:9, dx:1, dy:0, color:"#e74c3c" },
+      { x:10, y:9, dx:-1, dy:0, color:"#e67e22" },
+      { x:9, y:10, dx:0, dy:1, color:"#9b59b6" },
+      { x:10, y:10, dx:0, dy:-1, color:"#3498db" },
+    ];
+    setDots(d); setPos({ x:1, y:1 }); setDir({ x:1, y:0 });
+    setGhosts([...ghostsRef.current]);
+    setScore(0); setLives(3); setPowered(false); setDone(false); setPlaying(true);
+  };
+
+  const lb = appState?.leaderboards?.dinopac || [];
+
+  return (
+    <div style={{ textAlign:"center" }}>
+      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>
+        Arrow keys to move! Eat all eggs 🥚 | Score: {score} | Lives: {"🦕".repeat(lives)} {powered ? "⚡ POWERED!" : ""}
+      </div>
+      <div style={{ display:"flex", gap:16, justifyContent:"center", flexWrap:"wrap" }}>
+        <div>
+          <div style={{ display:"inline-block", background:"#000", borderRadius:8, border:"3px solid #4B9B6E", overflow:"hidden" }}>
+            <svg width={COLS*CELL} height={ROWS*CELL}>
+              {/* Maze */}
+              {MAZE.map((row, r) => row.split("").map((c, col) => (
+                c === "#" ? <rect key={`${col},${r}`} x={col*CELL} y={r*CELL} width={CELL} height={CELL} fill="#1a1a6e" rx={2}/> : null
+              )))}
+              {/* Dots */}
+              {Object.entries(dots).map(([k, type]) => {
+                const [x, y] = k.split(",").map(Number);
+                return type === "power"
+                  ? <circle key={k} cx={x*CELL+CELL/2} cy={y*CELL+CELL/2} r={6} fill="#fff"/>
+                  : <circle key={k} cx={x*CELL+CELL/2} cy={y*CELL+CELL/2} r={3} fill="#ffff00"/>;
+              })}
+              {/* Player */}
+              <text x={pos.x*CELL+CELL/2} y={pos.y*CELL+CELL/2+7} textAnchor="middle" fontSize={18}>🦕</text>
+              {/* Ghosts */}
+              {ghosts.map((g,i) => (
+                <text key={i} x={g.x*CELL+CELL/2} y={g.y*CELL+CELL/2+7} textAnchor="middle" fontSize={16}>
+                  {powered ? "👻" : ["👾","🔴","🟠","🟣"][i]}
+                </text>
+              ))}
+            </svg>
+          </div>
+          {/* Mobile controls */}
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, marginTop:8 }}>
+            <button onPointerDown={() => nextDirRef.current={x:0,y:-1}} style={{ padding:"6px 18px", background:"#1a1a6e", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:16 }}>▲</button>
+            <div style={{ display:"flex", gap:4 }}>
+              <button onPointerDown={() => nextDirRef.current={x:-1,y:0}} style={{ padding:"6px 18px", background:"#1a1a6e", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:16 }}>◀</button>
+              <button onPointerDown={() => nextDirRef.current={x:0,y:1}} style={{ padding:"6px 18px", background:"#1a1a6e", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:16 }}>▼</button>
+              <button onPointerDown={() => nextDirRef.current={x:1,y:0}} style={{ padding:"6px 18px", background:"#1a1a6e", color:"#fff", border:"none", borderRadius:8, cursor:"pointer", fontSize:16 }}>▶</button>
+            </div>
+          </div>
+          {!playing && (
+            <button onClick={start} style={{ marginTop:12, padding:"10px 24px", background:"linear-gradient(135deg,#f39c12,#d35400)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>
+              {done ? `Game Over! Score: ${score} — Play Again` : "🦕 Start Dino-Pac!"}
+            </button>
+          )}
+        </div>
+        {/* Leaderboard */}
+        <div style={{ background:"#f8f9fa", borderRadius:16, padding:16, minWidth:180, maxHeight:400, overflowY:"auto" }}>
+          <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a", marginBottom:10 }}>🏆 Top 10</div>
+          {lb.length === 0 ? <div style={{ color:"#aaa", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>No scores yet!</div> :
+            lb.map((e,i) => (
+              <div key={e.username} style={{ display:"flex", alignItems:"center", gap:8, padding:"6px 0", borderBottom:"1px solid #eee" }}>
+                <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#1a472a", width:24 }}>#{i+1}</div>
+                <div style={{ flex:1, fontFamily:"'Nunito',sans-serif", fontSize:13, fontWeight:700 }}>{e.name}</div>
+                <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#f39c12" }}>{e.score}</div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
     </div>
   );
 }
@@ -1201,7 +1755,13 @@ const handleLogin = () => {
                 { id:"egg",    name:"Egg Drop",      emoji:"🥚", desc:"Catch the eggs!",  color:"#e67e22" },
                 { id:"memory", name:"Memory Match",  emoji:"🧠", desc:"Find the pairs!",  color:"#8e44ad" },
                 { id:"trivia", name:"Dino Trivia",   emoji:"🦖", desc:"Test your knowledge!", color:"#2980b9" },
-                { id:"digger", name:"Bone Dig",      emoji:"🦴", desc:"Find the bones!",  color:"#c0392b" },
+                { id:"digger",  name:"Bone Dig",       emoji:"🦴", desc:"Find the bones!",    color:"#c0392b" },
+                { id:"meteor",  name:"Meteor Blaster", emoji:"☄️", desc:"Shoot the meteors!", color:"#e74c3c" },
+                { id:"snake",   name:"Dino Snake",     emoji:"🐍", desc:"Eat the eggs!",       color:"#27ae60" },
+                { id:"dinopac", name:"Dino-Pac",       emoji:"🦕", desc:"Chomp through maze!", color:"#f39c12" },
+                { id:"meteor", name:"Meteor Blaster", emoji:"☄️", desc:"Shoot the meteors!",  color:"#e74c3c" },
+                { id:"snake",  name:"Dino Snake",   emoji:"🐍", desc:"Eat the eggs!",        color:"#27ae60" },
+                { id:"dinopac", name:"Dino-Pac",    emoji:"🦕", desc:"Chomp through maze!",  color:"#f39c12" },
               ].map(game => (
                 <div key={game.id} onClick={() => setActiveGame(game.id)}
                   style={{ background:"#fff", borderRadius:16, padding:16, textAlign:"center", cursor:"pointer",
@@ -1783,7 +2343,10 @@ const handleLogin = () => {
                 { id:"egg",    name:"Egg Drop",     emoji:"🥚", desc:"Catch the eggs!", color:"#e67e22" },
                 { id:"memory", name:"Memory Match", emoji:"🧠", desc:"Find the pairs!", color:"#8e44ad" },
                 { id:"trivia", name:"Dino Trivia",  emoji:"🦖", desc:"Test your knowledge!", color:"#2980b9" },
-                { id:"digger", name:"Bone Dig",     emoji:"🦴", desc:"Find the bones!", color:"#c0392b" },
+                { id:"digger", name:"Bone Dig",     emoji:"🦴", desc:"Find the bones!",     color:"#c0392b" },
+                { id:"meteor", name:"Meteor Blaster", emoji:"☄️", desc:"Shoot the meteors!",  color:"#e74c3c" },
+                { id:"snake",  name:"Dino Snake",   emoji:"🐍", desc:"Eat the eggs!",        color:"#27ae60" },
+                { id:"dinopac", name:"Dino-Pac",    emoji:"🦕", desc:"Chomp through maze!",  color:"#f39c12" },
               ].map(game => (
                 <div key={game.id} onClick={() => setActiveGame(game.id)}
                   style={{ background:"#fff", borderRadius:20, padding:24, textAlign:"center", cursor:"pointer",
