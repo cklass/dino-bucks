@@ -1294,6 +1294,8 @@ export default function App() {
   const [newJobEmoji,setNewJobEmoji]  = useState("⭐");
   const [showReset,  setShowReset]    = useState(false);
   const [activeGame, setActiveGame] = useState(null);
+  const [deductMulti, setDeductMulti] = useState(false);
+  const [deductMultiSelected, setDeductMultiSelected] = useState([]);
   const [deductModal, setDeductModal] = useState(false);
   const [studentUser, setStudentUser]       = useState(null);  // logged-in student object
   const [showStudentLogin, setShowStudentLogin] = useState(false);
@@ -2142,9 +2144,13 @@ const handleLogin = () => {
       style={{ padding:"8px 18px",background:"#8e44ad",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>
       + Custom
     </button>
-                    <button onClick={() => setDeductModal(true)}
+                    <button onClick={() => { setDeductMulti(false); setDeductModal(true); setDeductAmt(payAmt||""); }}
       style={{ padding:"8px 18px",background:"#e74c3c",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>
       − Deduct
+    </button>
+                    <button onClick={() => { setDeductMulti(true); setDeductMultiSelected([]); setDeductModal(true); }}
+      style={{ padding:"8px 18px",background:"#c0392b",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>
+      − Deduct Multiple
     </button>
                   </div>
                   {sLog.length > 0 && <div>{sLog.map(tx => <TxRow key={tx.id} tx={tx} students={students}/>)}</div>}
@@ -2619,10 +2625,39 @@ const handleLogin = () => {
       </div>
 
       {/* DEDUCT MODAL */}
-      {deductModal && selStudent && (
+      {deductModal && (
         <div style={{ position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9998 }}>
-          <div style={{ background:"#fff",borderRadius:20,padding:28,width:"100%",maxWidth:360,boxShadow:"0 12px 48px #0006",fontFamily:"'Fredoka One',sans-serif" }}>
-            <h3 style={{ fontSize:22,color:"#c0392b",margin:"0 0 16px" }}>− Deduct from {selStudent.name.split(" ")[0]}</h3>
+          <div style={{ background:"#fff",borderRadius:20,padding:28,width:"100%",maxWidth:420,boxShadow:"0 12px 48px #0006",fontFamily:"'Fredoka One',sans-serif", maxHeight:"90vh", overflowY:"auto" }}>
+            <h3 style={{ fontSize:22,color:"#c0392b",margin:"0 0 16px" }}>
+              {deductMulti ? "− Deduct from Multiple Students" : `− Deduct from ${selStudent?.name.split(" ")[0]}`}
+            </h3>
+
+            {/* Multi-select students */}
+            {deductMulti && (
+              <div style={{ marginBottom:16 }}>
+                <div style={{ fontFamily:"'Nunito',sans-serif",fontWeight:800,color:"#444",marginBottom:8 }}>Select Students:</div>
+                <div style={{ display:"flex",gap:6,flexWrap:"wrap",marginBottom:8 }}>
+                  <button onClick={() => setDeductMultiSelected(students.map(s=>s.id))}
+                    style={{ padding:"4px 10px",background:"#e74c3c",color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontSize:12,fontFamily:"'Nunito',sans-serif" }}>All</button>
+                  <button onClick={() => setDeductMultiSelected([])}
+                    style={{ padding:"4px 10px",background:"#eee",color:"#333",border:"none",borderRadius:8,cursor:"pointer",fontSize:12,fontFamily:"'Nunito',sans-serif" }}>None</button>
+                </div>
+                <div style={{ display:"flex",gap:6,flexWrap:"wrap" }}>
+                  {students.map(s => {
+                    const dino = DINOS.find(d => d.id === s.dinoId) || DINOS[0];
+                    const isSel = deductMultiSelected.includes(s.id);
+                    return (
+                      <button key={s.id} onClick={() => setDeductMultiSelected(prev => prev.includes(s.id) ? prev.filter(id=>id!==s.id) : [...prev,s.id])}
+                        style={{ padding:"5px 10px",borderRadius:8,border:"none",cursor:"pointer",fontFamily:"'Nunito',sans-serif",fontSize:12,fontWeight:800,
+                          background:isSel?"#e74c3c":"#eee", color:isSel?"#fff":"#333", display:"flex",alignItems:"center",gap:4 }}>
+                        <DinoSVG id={s.dinoId} c={isSel?"#fff":dino.colour} size={16}/>{s.name.split(" ")[0]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div style={{ fontFamily:"'Nunito',sans-serif",fontWeight:800,color:"#444",marginBottom:6 }}>Amount</div>
             <input type="number" value={deductAmt} onChange={e => setDeductAmt(e.target.value)} placeholder="5" autoFocus
               style={{ width:"100%",padding:"10px 14px",borderRadius:12,border:"3px solid #e74c3c",fontSize:22,fontFamily:"'Fredoka One',sans-serif",outline:"none",marginBottom:12 }}/>
@@ -2638,10 +2673,19 @@ const handleLogin = () => {
             <div style={{ display:"flex",gap:10 }}>
               <button onClick={() => {
                 const a = parseInt(deductAmt||"0");
-                if (a > 0) { addTx(selected, -a, deductReason, true); showToast(`-${fmt(a)} from ${selStudent.name}`, "#e74c3c"); }
-                setDeductModal(false); setDeductAmt(""); setDeductReason("Deduction");
+                if (a > 0) {
+                  if (deductMulti) {
+                    if (deductMultiSelected.length === 0) return showToast("Select at least one student!", "#e74c3c");
+                    deductMultiSelected.forEach(id => addTx(id, -a, deductReason, true));
+                    showToast(`-${fmt(a)} from ${deductMultiSelected.length} students!`, "#e74c3c");
+                  } else {
+                    addTx(selected, -a, deductReason, true);
+                    showToast(`-${fmt(a)} from ${selStudent?.name}`, "#e74c3c");
+                  }
+                }
+                setDeductModal(false); setDeductAmt(""); setDeductReason("Deduction"); setDeductMultiSelected([]);
               }} style={{ flex:1,padding:"11px",background:"#e74c3c",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:18,fontFamily:"'Fredoka One',sans-serif" }}>− Deduct</button>
-              <button onClick={() => { setDeductModal(false); setDeductAmt(""); setDeductReason("Deduction"); }}
+              <button onClick={() => { setDeductModal(false); setDeductAmt(""); setDeductReason("Deduction"); setDeductMultiSelected([]); }}
                 style={{ padding:"11px 18px",background:"#eee",color:"#333",border:"none",borderRadius:12,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>Cancel</button>
             </div>
           </div>
