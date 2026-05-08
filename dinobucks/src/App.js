@@ -700,10 +700,10 @@ function MeteorGame({ studentUser, appState, update }) {
       if (keysRef.current["ArrowLeft"] || keysRef.current["KeyA"]) { shipRef.current = Math.max(20, shipRef.current - 5); setShipX(shipRef.current); }
       if (keysRef.current["ArrowRight"] || keysRef.current["KeyD"]) { shipRef.current = Math.min(W-20, shipRef.current + 5); setShipX(shipRef.current); }
       // Spawn meteors
-      const interval = Math.max(400, 1200 - scoreRef.current * 2);
+      const interval = Math.max(600, 2000 - scoreRef.current * 2);
       if (ts - lastMeteor > interval) {
         lastMeteor = ts;
-        meteorsRef.current = [...meteorsRef.current, { id:Math.random(), x:Math.random()*(W-40)+20, y:-20, speed:2+Math.random()*3+scoreRef.current*0.01 }];
+        meteorsRef.current = [...meteorsRef.current, { id:Math.random(), x:Math.random()*(W-40)+20, y:-20, speed:1+Math.random()*1.5+scoreRef.current*0.005 }];
       }
       // Move meteors
       meteorsRef.current = meteorsRef.current.map(m => ({ ...m, y: m.y + m.speed }));
