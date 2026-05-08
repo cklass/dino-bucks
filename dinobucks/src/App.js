@@ -1734,10 +1734,102 @@ const handleLogin = () => {
         </div>
 
         {/* Transaction History */}
-        {/* Student Invest Tab */}
+       {/* Student Invest Tab */}
         {tab==="invest" && (
           <div>
-            <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 16px", fontFamily:"'Fredoka One',sans-serif" }}>📈 Dino Stock Market</h3>
+            {/* Portfolio Summary Card */}
+            {(() => {
+              const totalValue = DINO_STOCKS.reduce((sum, stock) => {
+                const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
+                const shares = appState?.portfolios?.[studentUser.id]?.[stock.id] || 0;
+                return sum + shares * price;
+              }, 0);
+              const totalInvested = (appState?.txLog || [])
+                .filter(t => t.studentId === studentUser.id && t.reason?.includes("Bought"))
+                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+              const totalSold = (appState?.txLog || [])
+                .filter(t => t.studentId === studentUser.id && t.reason?.includes("Sold"))
+                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+              const netInvested = totalInvested - totalSold;
+              const gainLoss = totalValue - netInvested;
+              const gainPct = netInvested > 0 ? ((gainLoss / netInvested) * 100).toFixed(1) : 0;
+              const isUp = gainLoss >= 0;
+
+              // Yesterday's value
+              const yesterday = Object.keys(appState?.stockHistory || {}).sort().slice(-2,-1)[0];
+              const yestValue = yesterday ? DINO_STOCKS.reduce((sum, stock) => {
+                const yPrice = appState.stockHistory[yesterday]?.[stock.id] ?? stock.startPrice;
+                const shares = appState?.portfolios?.[studentUser.id]?.[stock.id] || 0;
+                return sum + shares * yPrice;
+              }, 0) : null;
+              const dayChange = yestValue !== null ? totalValue - yestValue : null;
+              const dayPct = yestValue && yestValue > 0 ? ((dayChange / yestValue) * 100).toFixed(1) : null;
+
+              return (
+                <div style={{ background:"linear-gradient(135deg,#1a472a,#27ae60)", borderRadius:20, padding:24, marginBottom:20, color:"#fff", boxShadow:"0 8px 24px #1a472a44" }}>
+                  <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"rgba(255,255,255,0.7)", marginBottom:4 }}>Total Portfolio Value</div>
+                  <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:48, margin:"0 0 8px", textShadow:"0 2px 8px rgba(0,0,0,0.2)" }}>{fmt(Math.round(totalValue))}</div>
+                  <div style={{ display:"flex", gap:16, flexWrap:"wrap" }}>
+                    {dayChange !== null && (
+                      <div style={{ background:"rgba(255,255,255,0.15)", borderRadius:12, padding:"8px 16px" }}>
+                        <div style={{ fontSize:11, color:"rgba(255,255,255,0.7)", fontFamily:"'Nunito',sans-serif" }}>Today</div>
+                        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:18, color: dayChange >= 0 ? "#a8f0c0" : "#ffaaaa" }}>
+                          {dayChange >= 0 ? "▲" : "▼"} {fmt(Math.abs(Math.round(dayChange)))} ({Math.abs(dayPct)}%)
+                        </div>
+                      </div>
+                    )}
+                    {netInvested > 0 && (
+                      <div style={{ background:"rgba(255,255,255,0.15)", borderRadius:12, padding:"8px 16px" }}>
+                        <div style={{ fontSize:11, color:"rgba(255,255,255,0.7)", fontFamily:"'Nunito',sans-serif" }}>All Time</div>
+                        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:18, color: isUp ? "#a8f0c0" : "#ffaaaa" }}>
+                          {isUp ? "▲" : "▼"} {fmt(Math.abs(Math.round(gainLoss)))} ({Math.abs(gainPct)}%)
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ background:"rgba(255,255,255,0.15)", borderRadius:12, padding:"8px 16px" }}>
+                      <div style={{ fontSize:11, color:"rgba(255,255,255,0.7)", fontFamily:"'Nunito',sans-serif" }}>Invested</div>
+                      <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:18 }}>{fmt(Math.round(netInvested))}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Holdings List */}
+            {(() => {
+              const holdings = DINO_STOCKS.map(stock => {
+                const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
+                const shares = appState?.portfolios?.[studentUser.id]?.[stock.id] || 0;
+                const value = shares * price;
+                const change = ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
+                return { ...stock, price, shares, value, change };
+              }).filter(s => s.shares > 0);
+
+              if (holdings.length > 0) return (
+                <div style={{ background:"#fff", borderRadius:16, padding:16, marginBottom:20, boxShadow:"0 4px 16px #0002" }}>
+                  <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a", marginBottom:12 }}>📊 My Holdings</div>
+                  {holdings.map(s => (
+                    <div key={s.id} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #f0f0f0" }}>
+                      <div style={{ fontSize:28 }}>{s.emoji}</div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#1a472a" }}>{s.name}</div>
+                        <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:11, color:"#888" }}>{s.shares.toFixed(4)} shares @ {fmt(s.price)}</div>
+                      </div>
+                      <div style={{ textAlign:"right" }}>
+                        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:18, color: s.change >= 0 ? "#27ae60" : "#e74c3c" }}>{fmt(Math.round(s.value))}</div>
+                        <div style={{ fontSize:12, color: s.change >= 0 ? "#27ae60" : "#e74c3c", fontWeight:700 }}>
+                          {s.change >= 0 ? "▲" : "▼"} {Math.abs(s.change)}%
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+              return null;
+            })()}
+
+            {/* Stock Market */}
+            <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a", marginBottom:12 }}>🏪 Buy & Sell Stocks</div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(260px, 1fr))", gap:16, marginBottom:24 }}>
               {DINO_STOCKS.map(stock => {
                 const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
@@ -1745,8 +1837,9 @@ const handleLogin = () => {
                 const shares = appState?.portfolios?.[studentUser.id]?.[stock.id] || 0;
                 const value = shares * price;
                 const headline = appState?.stockNews?.[stock.id];
+                const isUp = change >= 0;
                 return (
-                  <div key={stock.id} style={{ background:"#fff", borderRadius:20, padding:18, boxShadow:"0 4px 16px #0003", border:"1.5px solid #f0f0f0" }}>
+                  <div key={stock.id} style={{ background:"#fff", borderRadius:20, padding:18, boxShadow:"0 4px 16px #0003", border:`2px solid ${isUp?"#27ae6044":"#e74c3c44"}` }}>
                     <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
                       <div>
                         <div style={{ fontSize:24 }}>{stock.emoji}</div>
@@ -1755,8 +1848,8 @@ const handleLogin = () => {
                       </div>
                       <div style={{ textAlign:"right" }}>
                         <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:22, color:stock.color }}>{fmt(price)}</div>
-                        <div style={{ fontSize:12, color: change >= 0 ? "#27ae60" : "#e74c3c", fontWeight:700 }}>
-                          {change >= 0 ? "▲" : "▼"} {Math.abs(change)}%
+                        <div style={{ fontSize:12, color: isUp ? "#27ae60" : "#e74c3c", fontWeight:700, background: isUp?"#f0fbf4":"#fff4f4", padding:"2px 8px", borderRadius:20 }}>
+                          {isUp ? "▲" : "▼"} {Math.abs(change)}%
                         </div>
                       </div>
                     </div>
@@ -1766,8 +1859,8 @@ const handleLogin = () => {
                       </div>
                     )}
                     {shares > 0 && (
-                      <div style={{ background:"#f0fbf4", borderRadius:8, padding:"6px 10px", marginBottom:8, fontFamily:"'Nunito',sans-serif", fontSize:12 }}>
-                        You own {shares.toFixed(4)} shares = {fmt(value.toFixed(2))}
+                      <div style={{ background: isUp?"#f0fbf4":"#fff4f4", borderRadius:8, padding:"6px 10px", marginBottom:8, fontFamily:"'Nunito',sans-serif", fontSize:12, color: isUp?"#27ae60":"#e74c3c", fontWeight:700 }}>
+                        📦 You own {shares.toFixed(4)} shares = {fmt(Math.round(value))}
                       </div>
                     )}
                     <div style={{ display:"flex", gap:6, marginTop:8 }}>
@@ -1776,8 +1869,8 @@ const handleLogin = () => {
                       <button onClick={() => {
                         const amt = parseFloat(document.getElementById("stu-buy-" + stock.id).value);
                         if (!amt || amt <= 0) return;
-                        const bal = stuBalance;
-                        if (amt > bal) { showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
+                        const bal = appState?.balances?.[studentUser.id] || 0;
+                        if (amt > bal - 10) { showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
                         const newShares = amt / price;
                         update(prev => ({
                           ...prev,
@@ -1813,7 +1906,6 @@ const handleLogin = () => {
             </div>
           </div>
         )}
-
         {/* Student Play Tab */}
         {tab==="play" && (
           <div style={{ background:"linear-gradient(135deg,#0a0a2e 0%,#1a1a4e 50%,#0d1a3d 100%)", borderRadius:20, padding:24, minHeight:400 }}>
