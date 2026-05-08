@@ -2427,8 +2427,8 @@ const handleLogin = () => {
               <div style={{ marginTop:24, background:"#fff", borderRadius:20, padding:24, boxShadow:"0 4px 16px #0002" }}>
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
                   <h3 style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:20, color:"#1a472a", margin:0 }}>
-                    {activeGame==="runner"?"🦕 Dino Jump":activeGame==="egg"?"🥚 Egg Drop":activeGame==="memory"?"🧠 Memory Match":activeGame==="trivia"?"🦖 Dino Trivia":"🦴 Bone Dig"}
-                  </h3>
+                    {activeGame==="runner"?"🦕 Dino Jump":activeGame==="egg"?"🥚 Egg Drop":activeGame==="memory"?"🧠 Memory Match":activeGame==="trivia"?"🦖 Dino Trivia":activeGame==="digger"?"🦴 Bone Dig":activeGame==="meteor"?"☄️ Meteor Blaster":activeGame==="snake"?"🐍 Dino Snake":"🦕 Dino-Pac"}
+                    </h3>
                   <button onClick={() => setActiveGame(null)} style={{ padding:"6px 14px", background:"#eee", border:"none", borderRadius:8, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:14 }}>✕ Close</button>
                 </div>
                 <GameArea game={activeGame} studentUser={studentUser} appState={appState} update={update} todayStr={todayStr} showToast={showToast} fmt={fmt}/>
