@@ -1804,8 +1804,8 @@ const handleLogin = () => {
                             {/* Today's dot */}
                             <circle cx={x(vals.length-1)} cy={y(vals[vals.length-1])} r={4} fill={lineColor} filter="drop-shadow(0 0 4px white)"/>
                             {/* Date labels */}
-                            {portfolioHistory.length <= 7 && portfolioHistory.map((p,i) => (
-                              <text key={i} x={x(i)} y={H-1} textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.5)">{p.date.slice(5)}</text>
+                            {portfolioHistory.filter((_,i) => i % Math.ceil(portfolioHistory.length/6) === 0 || i === portfolioHistory.length-1).map((p,i) => (
+                              <text key={p.date} x={x(portfolioHistory.indexOf(p))} y={H-1} textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.5)">{p.date.slice(5)}</text>
                             ))}
                           </svg>
                         );
