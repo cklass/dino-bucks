@@ -1825,9 +1825,6 @@ const handleLogin = () => {
                 { id:"meteor",  name:"Meteor Blaster", emoji:"☄️", desc:"Shoot the meteors!", color:"#e74c3c" },
                 { id:"snake",   name:"Dino Snake",     emoji:"🐍", desc:"Eat the eggs!",       color:"#27ae60" },
                 { id:"dinopac", name:"Dino-Pac",       emoji:"🦕", desc:"Chomp through maze!", color:"#f39c12" },
-                { id:"meteor", name:"Meteor Blaster", emoji:"☄️", desc:"Shoot the meteors!",  color:"#e74c3c" },
-                { id:"snake",  name:"Dino Snake",   emoji:"🐍", desc:"Eat the eggs!",        color:"#27ae60" },
-                { id:"dinopac", name:"Dino-Pac",    emoji:"🦕", desc:"Chomp through maze!",  color:"#f39c12" },
               ].map(game => (
                 <div key={game.id} onClick={() => setActiveGame(game.id)}
                   style={{ background:"#fff", borderRadius:16, padding:16, textAlign:"center", cursor:"pointer",
