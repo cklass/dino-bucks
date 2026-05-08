@@ -1762,8 +1762,7 @@ const handleLogin = () => {
               const dayChange = yestValue !== null ? totalValue - yestValue : null;
               const dayPct = yestValue && yestValue > 0 ? ((dayChange / yestValue) * 100).toFixed(1) : null;
 
-              return (
-                // Build portfolio history from stock history
+              // Build portfolio history from stock history
               const historyDates = Object.keys(appState?.stockHistory || {}).sort();
               const portfolioHistory = historyDates.map(date => {
                 const val = DINO_STOCKS.reduce((sum, stock) => {
@@ -1780,14 +1779,14 @@ const handleLogin = () => {
                   <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:48, margin:"0 0 8px", textShadow:"0 2px 8px rgba(0,0,0,0.2)" }}>{fmt(Math.round(totalValue))}</div>
 
                   {/* Line Graph */}
-                  {portfolioHistory.length >= 2 && (
+                  {portfolioHistory.length >= 1 && totalValue > 0 && (
                     <div style={{ marginBottom:12, background:"rgba(0,0,0,0.15)", borderRadius:12, padding:"8px 4px" }}>
                       {(() => {
                         const W = 400, H = 60, pad = 8;
                         const vals = portfolioHistory.map(p => p.val);
                         const minV = Math.min(...vals) * 0.98;
                         const maxV = Math.max(...vals) * 1.02;
-                        const x = i => pad + (i / (vals.length-1)) * (W - pad*2);
+                        const x = i => vals.length === 1 ? W/2 : pad + (i / (vals.length-1)) * (W - pad*2);
                         const y = v => H - pad - ((v - minV) / (maxV - minV || 1)) * (H - pad*2);
                         const points = vals.map((v,i) => `${x(i)},${y(v)}`).join(" ");
                         const areaPoints = `${x(0)},${H} ${points} ${x(vals.length-1)},${H}`;
