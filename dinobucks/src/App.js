@@ -1403,13 +1403,15 @@ const handleLogin = () => {
   };
 
   // ── Actions ───────────────────────────────────────────────────────────────
-  const addTx = (studentId, amount, reason) => {
+  const minBalance = (bal, amount) => Math.max(10, (bal||0) + amount);
+  const canAfford = (bal, amount) => (bal||0) + amount >= 10;
+  const addTx = (studentId, amount, reason, bypassMin=false) => {
     const tx = { id: uuid(), studentId, amount, reason, date: todayStr() };
     if (amount > 0) sounds.ching(); else sounds.deduct();
     update(prev => ({
       ...prev,
       txLog: [tx, ...(prev.txLog || []).slice(0, 299)],
-      balances: { ...prev.balances, [studentId]: Math.max(0, (prev.balances[studentId] || 0) + amount) },
+      balances: { ...prev.balances, [studentId]: bypassMin ? Math.max(0, (prev.balances[studentId] || 0) + amount) : Math.max(10, (prev.balances[studentId] || 0) + amount) },
     }));
   };
 
@@ -1779,7 +1781,7 @@ const handleLogin = () => {
                         const newShares = amt / price;
                         update(prev => ({
                           ...prev,
-                          balances: { ...prev.balances, [studentUser.id]: Math.round(bal - amt) },
+                          balances: { ...prev.balances, [studentUser.id]: Math.max(10, (prev.balances?.[studentUser.id]||0) - Math.round(amt)) },
                           portfolios: { ...prev.portfolios, [studentUser.id]: { ...(prev.portfolios?.[studentUser.id] || {}), [stock.id]: (prev.portfolios?.[studentUser.id]?.[stock.id] || 0) + newShares }},
                           txLog: [{ id:uuid(), studentId:studentUser.id, amount:-Math.round(amt), reason:"Bought " + stock.emoji + " " + stock.name + " shares", date:todayStr() }, ...(prev.txLog||[])],
                         }));
@@ -2302,7 +2304,7 @@ const handleLogin = () => {
                         const shares = amt / price;
                         update(prev => ({
                           ...prev,
-                          balances: { ...prev.balances, [selected]: Math.round(bal - amt) },
+                          balances: { ...prev.balances, [selected]: Math.max(10, (prev.balances?.[selected]||0) - Math.round(amt)) },
                           portfolios: { ...prev.portfolios, [selected]: { ...(prev.portfolios?.[selected] || {}), [stock.id]: (prev.portfolios?.[selected]?.[stock.id] || 0) + shares }},
                           txLog: [{ id:uuid(), studentId:selected, amount:-Math.round(amt), reason:"Bought " + stock.emoji + " " + stock.name + " shares", date:todayStr() }, ...(prev.txLog||[])],
                         }));
@@ -2493,7 +2495,7 @@ const handleLogin = () => {
             <div style={{ display:"flex",gap:10 }}>
               <button onClick={() => {
                 const a = parseInt(deductAmt||"0");
-                if (a > 0) { addTx(selected, -a, deductReason); showToast(`-${fmt(a)} from ${selStudent.name}`, "#e74c3c"); }
+                if (a > 0) { addTx(selected, -a, deductReason, true); showToast(`-${fmt(a)} from ${selStudent.name}`, "#e74c3c"); }
                 setDeductModal(false); setDeductAmt(""); setDeductReason("Deduction");
               }} style={{ flex:1,padding:"11px",background:"#e74c3c",color:"#fff",border:"none",borderRadius:12,cursor:"pointer",fontSize:18,fontFamily:"'Fredoka One',sans-serif" }}>− Deduct</button>
               <button onClick={() => { setDeductModal(false); setDeductAmt(""); setDeductReason("Deduction"); }}
