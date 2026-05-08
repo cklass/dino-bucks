@@ -597,9 +597,9 @@ function RunnerGame({ studentUser, appState, update }) {
       <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>
         Press SPACE or tap to jump! Score: {score} {speedRef.current > 6 ? `⚡ Speed x${speedRef.current-4}` : ""}
       </div>
-      <div style={{ display:"flex", gap:16, justifyContent:"center", flexWrap:"wrap" }}>
-        <div>
-          <div onClick={jump} style={{ position:"relative", width:"100%", maxWidth:560, height:200,
+      <div style={{ display:"flex", gap:16, justifyContent:"center", alignItems:"flex-start", flexWrap:"wrap" }}>
+        <div style={{ flex:"0 0 560px" }}>
+          <div onClick={jump} style={{ position:"relative", width:560, height:200,
             background:"linear-gradient(180deg,#87CEEB 0%,#c8e6f5 55%,#98c87a 55%,#7aaa55 65%,#8B6914 65%,#7a5c10 100%)",
             borderRadius:14, overflow:"hidden", cursor:"pointer", margin:"0 auto", border:"3px solid #4B9B6E" }}>
             {clouds.map(c => <div key={c.id} style={{ position:"absolute", top:c.y, left:c.x, fontSize:22, opacity:0.7 }}>☁️</div>)}
