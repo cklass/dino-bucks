@@ -2572,22 +2572,44 @@ const resetInvestments = () => {
               })}
             </div>
 
-            {/* Price History Chart */}
+           {/* Price History Chart */}
             <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 12px", fontFamily:"'Fredoka One',sans-serif" }}>📊 Price History</h3>
             <div style={{ background:"#f8f9fa", borderRadius:20, padding:20, marginBottom:24, overflowX:"auto" }}>
               {(() => {
                 const history = appState?.stockHistory || {};
                 const dates = Object.keys(history).sort();
                 if (dates.length < 2) return <div style={{ color:"#aaa", fontFamily:"'Nunito',sans-serif", textAlign:"center", padding:20 }}>Price history appears after a few days!</div>;
-                const W = 600, H = 200, pad = 40;
+                const W = 640, H = 240, padL = 52, padR = 20, padT = 20, padB = 36;
                 const allPrices = DINO_STOCKS.flatMap(s => dates.map(d => history[d]?.[s.id] ?? s.startPrice));
-                const minP = Math.min(...allPrices) * 0.95;
-                const maxP = Math.max(...allPrices) * 1.05;
-                const x = i => pad + (i / (dates.length - 1)) * (W - pad * 2);
-                const y = p => H - pad - ((p - minP) / (maxP - minP)) * (H - pad * 2);
+                const minP = Math.floor(Math.min(...allPrices) * 0.95);
+                const maxP = Math.ceil(Math.max(...allPrices) * 1.05);
+                const x = i => padL + (i / (dates.length - 1)) * (W - padL - padR);
+                const y = p => padT + ((maxP - p) / (maxP - minP)) * (H - padT - padB);
+                
+                // Y axis tick values
+                const yTicks = 5;
+                const yTickVals = Array.from({length: yTicks + 1}, (_, i) => 
+                  Math.round(minP + (i / yTicks) * (maxP - minP)));
+
                 return (
-                  <svg viewBox={"0 0 " + W + " " + H} style={{ width:"100%", minWidth:300 }}>
-                    {/* Sort stocks by performance - best first */}
+                  <svg viewBox={"0 0 " + W + " " + H} style={{ width:"100%", minWidth:400 }}>
+                    {/* Grid lines */}
+                    {yTickVals.map(val => (
+                      <line key={val} x1={padL} y1={y(val)} x2={W - padR} y2={y(val)} 
+                        stroke="#e0e0e0" strokeWidth="1" strokeDasharray="4,4"/>
+                    ))}
+                    {/* Y axis labels */}
+                    {yTickVals.map(val => (
+                      <text key={val} x={padL - 6} y={y(val) + 4} textAnchor="end" fontSize="10" fill="#888">${val}</text>
+                    ))}
+                    {/* Y axis title */}
+                    <text x={12} y={H/2} textAnchor="middle" fontSize="10" fill="#888" transform={`rotate(-90, 12, ${H/2})`}>Price ($)</text>
+                    {/* X axis line */}
+                    <line x1={padL} y1={H - padB} x2={W - padR} y2={H - padB} stroke="#ccc" strokeWidth="1"/>
+                    {/* Y axis line */}
+                    <line x1={padL} y1={padT} x2={padL} y2={H - padB} stroke="#ccc" strokeWidth="1"/>
+
+                    {/* Stock lines */}
                     {[...DINO_STOCKS].sort((a, b) => {
                       const aChange = (history[dates[dates.length-1]]?.[a.id] ?? a.startPrice) / a.startPrice;
                       const bChange = (history[dates[dates.length-1]]?.[b.id] ?? b.startPrice) / b.startPrice;
@@ -2600,18 +2622,26 @@ const resetInvestments = () => {
                       return (
                         <g key={stock.id}>
                           <polyline points={points} fill="none" stroke={stock.color} strokeWidth="2.5" strokeLinejoin="round"/>
-                          {/* Legend on left */}
-                          <rect x={8} y={10 + i * 24} width={12} height={12} fill={stock.color} rx={3}/>
-                          <text x={24} y={21 + i * 24} fontSize="11" fill="#333">{stock.emoji} {stock.name.split(" ")[0]}</text>
-                          <text x={110} y={21 + i * 24} fontSize="11" fill={isUp ? "#27ae60" : "#e74c3c"} fontWeight="bold">
+                          {/* Legend */}
+                          <rect x={padL + 8} y={padT + 4 + i * 22} width={10} height={10} fill={stock.color} rx={2}/>
+                          <text x={padL + 22} y={padT + 13 + i * 22} fontSize="10" fill="#333">{stock.emoji} {stock.name.split(" ")[0]}</text>
+                          <text x={padL + 105} y={padT + 13 + i * 22} fontSize="10" fill={isUp ? "#27ae60" : "#e74c3c"} fontWeight="bold">
                             {isUp ? "▲" : "▼"}{Math.abs(change)}%
                           </text>
                         </g>
                       );
                     })}
-                    {dates.map((d, i) => i % Math.ceil(dates.length / 5) === 0 && (
-                      <text key={d} x={x(i)} y={H - 8} textAnchor="middle" fontSize="10" fill="#888">{d.slice(5)}</text>
-                    ))}
+
+                    {/* X axis date labels */}
+                    {dates.map((d, i) => {
+                      if (i % Math.ceil(dates.length / 6) !== 0 && i !== dates.length - 1) return null;
+                      const label = new Date(d).toLocaleDateString("en-CA", { month:"short", day:"numeric" });
+                      return (
+                        <text key={d} x={x(i)} y={H - padB + 14} textAnchor="middle" fontSize="9" fill="#888">{label}</text>
+                      );
+                    })}
+                    {/* X axis title */}
+                    <text x={W/2} y={H - 2} textAnchor="middle" fontSize="10" fill="#888">Date</text>
                   </svg>
                 );
               })()}
