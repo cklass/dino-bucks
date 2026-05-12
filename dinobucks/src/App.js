@@ -1502,6 +1502,29 @@ const handleLogin = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appState?.students]);
 
+const resetInvestments = () => {
+    if (!appState) return;
+    const newBalances = { ...appState.balances };
+    // Refund all invested amounts
+    (appState.txLog || []).forEach(t => {
+      if (t.reason?.includes("Bought")) {
+        newBalances[t.studentId] = (newBalances[t.studentId] || 0) + Math.abs(t.amount);
+      }
+      if (t.reason?.includes("Sold")) {
+        newBalances[t.studentId] = Math.max(0, (newBalances[t.studentId] || 0) - Math.abs(t.amount));
+      }
+    });
+    // Clear portfolios and investment transactions
+    const cleanTxLog = (appState.txLog || []).filter(t => !t.reason?.includes("Bought") && !t.reason?.includes("Sold"));
+    update(prev => ({
+      ...prev,
+      balances: newBalances,
+      portfolios: {},
+      txLog: cleanTxLog,
+    }));
+    showToast("✅ Investments reset — all money refunded!", "#2471A3");
+  };
+
   const seedHistoricalData = () => {
     if (!appState) return;
     
@@ -2689,6 +2712,11 @@ const handleLogin = () => {
             <div style={{ background:"#f0fbf4",borderRadius:14,padding:18,border:"2px solid #4B9B6E44", marginBottom:16 }}>
               <div style={{ fontWeight:800,color:"#1a472a",marginBottom:8,fontSize:16 }}>📈 Stock History</div>
               <p style={{ color:"#666",fontSize:13,fontFamily:"'Nunito',sans-serif",margin:"0 0 12px" }}>Seed historical stock data from September 3, 2025 to today.</p>
+              <div style={{ background:"#f0f4ff",borderRadius:14,padding:18,border:"2px solid #2471A344", marginBottom:16 }}>
+              <div style={{ fontWeight:800,color:"#2471A3",marginBottom:8,fontSize:16 }}>💰 Reset Investments</div>
+              <p style={{ color:"#666",fontSize:13,fontFamily:"'Nunito',sans-serif",margin:"0 0 12px" }}>Refunds all invested money back to student balances and clears all portfolios.</p>
+              <button onClick={resetInvestments} style={{ padding:"8px 20px",background:"#2471A3",color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontFamily:"'Fredoka One',sans-serif",fontSize:15 }}>💰 Reset All Investments</button>
+              </div>
               <button onClick={seedHistoricalData} style={{ padding:"8px 20px",background:"#27ae60",color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontFamily:"'Fredoka One',sans-serif",fontSize:15 }}>📈 Seed Historical Data</button>
             </div>
             <div style={{ background:"#fff4f4",borderRadius:14,padding:18,border:"2px solid #ffcccc" }}>
