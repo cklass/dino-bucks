@@ -1545,12 +1545,13 @@ const handleLogin = () => {
       history[date] = { ...prices };
     });
 
-    update(prev => ({
-      ...prev,
+    const lastPrices = history[weekdays[weekdays.length-1]];
+    saveToFirebase("classroom", {
+      ...appState,
       stockHistory: history,
-      stockPrices: history[weekdays[weekdays.length-1]] || prev.stockPrices,
-    }));
-    showToast("📈 Historical data seeded from Sept 3, 2025!");
+      stockPrices: lastPrices || appState.stockPrices,
+    }).then(() => showToast("📈 Historical data seeded!"))
+      .catch(e => showToast("Error: " + e.message, "#e74c3c"));
   };
   const fetchStockChange = async (tickers) => {
     const changes = await Promise.all(tickers.map(async ticker => {
