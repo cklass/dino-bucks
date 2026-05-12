@@ -1797,11 +1797,14 @@ const handleLogin = () => {
                 const shares = appState?.portfolios?.[studentUser.id]?.[stock.id] || 0;
                 return sum + shares * price;
               }, 0);
-              const totalInvested = (appState?.txLog || [])
-                .filter(t => t.studentId === studentUser.id && t.reason?.includes("Bought"))
+
+              // Calculate cost basis from transaction log
+              const studentTx = (appState?.txLog || []).filter(t => t.studentId === studentUser.id);
+              const totalInvested = studentTx
+                .filter(t => t.reason?.includes("Bought"))
                 .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-              const totalSold = (appState?.txLog || [])
-                .filter(t => t.studentId === studentUser.id && t.reason?.includes("Sold"))
+              const totalSold = studentTx
+                .filter(t => t.reason?.includes("Sold"))
                 .reduce((sum, t) => sum + Math.abs(t.amount), 0);
               const netInvested = totalInvested - totalSold;
               const gainLoss = totalValue - netInvested;
@@ -1818,8 +1821,13 @@ const handleLogin = () => {
               const dayChange = yestValue !== null ? totalValue - yestValue : null;
               const dayPct = yestValue && yestValue > 0 ? ((dayChange / yestValue) * 100).toFixed(1) : null;
 
-              // Build portfolio history from stock history
-              const historyDates = Object.keys(appState?.stockHistory || {}).sort();
+              // Build portfolio history ONLY from first investment date
+              const firstBuyTx = studentTx
+                .filter(t => t.reason?.includes("Bought"))
+                .sort((a,b) => a.date.localeCompare(b.date))[0];
+              const firstInvestDate = firstBuyTx?.date;
+              const historyDates = Object.keys(appState?.stockHistory || {}).sort()
+                .filter(d => !firstInvestDate || d >= firstInvestDate);
               const portfolioHistory = historyDates.map(date => {
                 const val = DINO_STOCKS.reduce((sum, stock) => {
                   const p = appState.stockHistory[date]?.[stock.id] ?? stock.startPrice;
@@ -1900,7 +1908,11 @@ const handleLogin = () => {
                 const price = appState?.stockPrices?.[stock.id] ?? stock.startPrice;
                 const shares = appState?.portfolios?.[studentUser.id]?.[stock.id] || 0;
                 const value = shares * price;
-                const change = ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
+                // Calculate per-stock cost basis from tx log
+              const stockBought = (appState?.txLog||[]).filter(t => t.studentId===studentUser.id && t.reason?.includes(`Bought ${stock.emoji}`)).reduce((sum,t) => sum+Math.abs(t.amount),0);
+              const stockSold = (appState?.txLog||[]).filter(t => t.studentId===studentUser.id && t.reason?.includes(`Sold ${stock.emoji}`)).reduce((sum,t) => sum+Math.abs(t.amount),0);
+              const costBasis = stockBought - stockSold;
+              const change = costBasis > 0 ? ((value - costBasis) / costBasis * 100).toFixed(1) : ((price - stock.startPrice) / stock.startPrice * 100).toFixed(1);
                 return { ...stock, price, shares, value, change };
               }).filter(s => s.shares > 0);
 
