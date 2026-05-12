@@ -179,6 +179,7 @@ const DINOS = [
   { id:"ceratosaurus",       name:"Ceratosaurus",     colour:"#6C3483" },
   { id:"dilophosaurus",      name:"Dilophosaurus",    colour:"#0E6655" },
   { id:"herrerasaurus",      name:"Herrerasaurus",    colour:"#6E4C1E" },
+  { id:"albertosaurus", name:"Albertosaurus", colour:"#E67E22" },
 ];
 
 const CLASS_LIST = [
@@ -208,6 +209,7 @@ const CLASS_LIST = [
   { name:"Sabrina Milligan",    dinoId:"ceratosaurus",       username:"sabrinam",  password:"Egg!937"   },
   { name:"Sasmit Mahindrakar",  dinoId:"dilophosaurus",      username:"sasmitm",   password:"Bone@652"  },
   { name:"Umaima Jabbar",       dinoId:"herrerasaurus",      username:"umaimaj",   password:"Claw#819"  },
+  { name:"Zachary Gittens", dinoId:"albertosaurus", username:"zacharyg", password:"Roar!247" },
 ];
 
 
