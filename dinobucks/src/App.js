@@ -2552,18 +2552,30 @@ const handleLogin = () => {
                 const y = p => H - pad - ((p - minP) / (maxP - minP)) * (H - pad * 2);
                 return (
                   <svg viewBox={"0 0 " + W + " " + H} style={{ width:"100%", minWidth:300 }}>
-                    {DINO_STOCKS.map(stock => {
+                    {/* Sort stocks by performance - best first */}
+                    {[...DINO_STOCKS].sort((a, b) => {
+                      const aChange = (history[dates[dates.length-1]]?.[a.id] ?? a.startPrice) / a.startPrice;
+                      const bChange = (history[dates[dates.length-1]]?.[b.id] ?? b.startPrice) / b.startPrice;
+                      return bChange - aChange;
+                    }).map((stock, i) => {
                       const points = dates.map((d, i) => x(i) + "," + y(history[d]?.[stock.id] ?? stock.startPrice)).join(" ");
-                      return <polyline key={stock.id} points={points} fill="none" stroke={stock.color} strokeWidth="2.5" strokeLinejoin="round"/>;
+                      const lastPrice = history[dates[dates.length-1]]?.[stock.id] ?? stock.startPrice;
+                      const change = ((lastPrice - stock.startPrice) / stock.startPrice * 100).toFixed(1);
+                      const isUp = change >= 0;
+                      return (
+                        <g key={stock.id}>
+                          <polyline points={points} fill="none" stroke={stock.color} strokeWidth="2.5" strokeLinejoin="round"/>
+                          {/* Legend on left */}
+                          <rect x={8} y={10 + i * 24} width={12} height={12} fill={stock.color} rx={3}/>
+                          <text x={24} y={21 + i * 24} fontSize="11" fill="#333">{stock.emoji} {stock.name.split(" ")[0]}</text>
+                          <text x={110} y={21 + i * 24} fontSize="11" fill={isUp ? "#27ae60" : "#e74c3c"} fontWeight="bold">
+                            {isUp ? "▲" : "▼"}{Math.abs(change)}%
+                          </text>
+                        </g>
+                      );
                     })}
                     {dates.map((d, i) => i % Math.ceil(dates.length / 5) === 0 && (
                       <text key={d} x={x(i)} y={H - 8} textAnchor="middle" fontSize="10" fill="#888">{d.slice(5)}</text>
-                    ))}
-                    {DINO_STOCKS.map((stock, i) => (
-                      <g key={stock.id}>
-                        <rect x={W - 130} y={10 + i * 22} width={12} height={12} fill={stock.color} rx={3}/>
-                        <text x={W - 114} y={21 + i * 22} fontSize="11" fill="#333">{stock.emoji} {stock.name.split(" ")[0]}</text>
-                      </g>
                     ))}
                   </svg>
                 );
