@@ -93,6 +93,7 @@ function DinoSVG({ id, c, size=80 }) {
     ceratosaurus:(<svg viewBox="0 0 100 100" width={size} height={size}><ellipse cx="50" cy="63" rx="26" ry="17" fill={c}/><path d="M74 65 Q92 60 94 70 Q86 74 74 69Z" fill={c}/><path d="M30 52 Q20 42 22 28" stroke={c} strokeWidth="13" strokeLinecap="round" fill="none"/><ellipse cx="22" cy="24" rx="15" ry="9" fill={c}/><path d="M16 16 L14 4 L22 14" fill={dk}/><path d="M10 18 L6 9 L14 17" fill={dk}/><path d="M24 16 L24 6 L30 14" fill={dk}/><path d="M38 50 Q46 44 54 46 Q62 43 68 47" stroke={dk} strokeWidth="3" fill="none" strokeLinecap="round"/><circle cx="16" cy="20" r="2.8" fill="white"/><circle cx="17.5" cy="20" r="1.4" fill="#111"/><path d="M8 28 Q14 33 22 30" stroke={dk} strokeWidth="1.5" fill="none"/><path d="M10 26 L12 33 M15 25 L17 32 M20 24 L22 31" stroke="white" strokeWidth="1.4" strokeLinecap="round"/><path d="M36 60 Q28 54 26 58" stroke={dk} strokeWidth="4" strokeLinecap="round" fill="none"/><rect x="34" y="77" width="10" height="16" rx="4" fill={dk}/><rect x="52" y="75" width="10" height="18" rx="4" fill={dk}/><ellipse cx="50" cy="65" rx="16" ry="9" fill={lt} opacity=".3"/></svg>),
     dilophosaurus:(<svg viewBox="0 0 100 100" width={size} height={size}><ellipse cx="50" cy="62" rx="24" ry="16" fill={c}/><path d="M72 64 Q90 58 92 68 Q86 72 72 68Z" fill={c}/><path d="M32 52 Q22 42 24 28" stroke={c} strokeWidth="12" strokeLinecap="round" fill="none"/><ellipse cx="24" cy="24" rx="14" ry="8" fill={c}/><path d="M16 20 Q20 6 28 4 Q30 12 26 20Z" fill={dk}/><path d="M24 20 Q28 6 36 4 Q38 12 34 20Z" fill={dk}/><path d="M18 14 Q22 8 28 8" stroke={lt} strokeWidth="2" fill="none" opacity=".7"/><path d="M26 14 Q30 8 36 8" stroke={lt} strokeWidth="2" fill="none" opacity=".7"/><path d="M10 26 L0 24 L10 30Z" fill={c}/><path d="M0 24 Q4 20 10 24" stroke={dk} strokeWidth="1.5" fill="none"/><path d="M0 28 Q4 32 10 30" stroke={dk} strokeWidth="1.5" fill="none"/><circle cx="16" cy="20" r="2.5" fill="white"/><circle cx="17.5" cy="20" r="1.2" fill="#111"/><path d="M36 58 Q28 52 26 56" stroke={dk} strokeWidth="4" strokeLinecap="round" fill="none"/><rect x="34" y="76" width="10" height="15" rx="4" fill={dk}/><rect x="52" y="74" width="10" height="17" rx="4" fill={dk}/><ellipse cx="50" cy="64" rx="14" ry="8" fill={lt} opacity=".3"/></svg>),
     herrerasaurus:(<svg viewBox="0 0 100 100" width={size} height={size}><ellipse cx="50" cy="60" rx="22" ry="14" fill={c} transform="rotate(-10 50 60)"/><path d="M66 54 Q86 42 94 34 Q88 42 78 50 Q72 54 66 58Z" fill={c}/><path d="M34 50 Q24 40 26 26" stroke={c} strokeWidth="11" strokeLinecap="round" fill="none"/><ellipse cx="26" cy="22" rx="14" ry="8" fill={c}/><path d="M12 22 L2 20 L12 28Z" fill={c}/><path d="M2 20 Q6 16 12 20" stroke={dk} strokeWidth="1.5" fill="none"/><path d="M2 26 Q6 30 12 28" stroke={dk} strokeWidth="1.5" fill="none"/><circle cx="18" cy="18" r="2.8" fill="white"/><circle cx="19.5" cy="18" r="1.4" fill="#111"/><path d="M4 22 L6 29 M9 21 L11 28 M15 20 L17 27 M21 20 L23 26" stroke="white" strokeWidth="1.3" strokeLinecap="round"/><path d="M38 56 Q28 48 26 52 L18 46 M26 52 L22 54 M26 52 L20 57" stroke={dk} strokeWidth="3.5" strokeLinecap="round" fill="none"/><path d="M40 56 Q48 52 56 54 Q64 52 70 56" stroke={dk} strokeWidth="1.5" fill="none" opacity=".5"/><rect x="38" y="72" width="9" height="18" rx="4" fill={dk}/><rect x="54" y="70" width="9" height="20" rx="4" fill={dk}/><path d="M36 88 L30 96 M40 90 L38 98" stroke={dk} strokeWidth="2.5" strokeLinecap="round"/><path d="M52 88 L48 96 M56 90 L58 98" stroke={dk} strokeWidth="2.5" strokeLinecap="round"/><ellipse cx="50" cy="62" rx="14" ry="8" fill={lt} opacity=".3"/></svg>),
+    albertosaurus:(<svg viewBox="0 0 100 100" width={size} height={size}><ellipse cx="50" cy="62" rx="26" ry="17" fill={c}/><path d="M74 64 Q92 58 94 68 Q86 74 74 68Z" fill={c}/><path d="M28 52 Q18 42 20 28" stroke={c} strokeWidth="13" strokeLinecap="round" fill="none"/><ellipse cx="20" cy="24" rx="15" ry="9" fill={c}/><path d="M6 22 L-2 20 L6 28Z" fill={c}/><path d="M-2 20 Q2 16 6 20" stroke={dk} strokeWidth="1.5" fill="none"/><path d="M-2 26 Q2 30 6 28" stroke={dk} strokeWidth="1.5" fill="none"/><circle cx="14" cy="20" r="3" fill="white"/><circle cx="15.5" cy="20" r="1.5" fill="#111"/><path d="M2 22 L4 29 M7 21 L9 28 M13 20 L15 27 M19 20 L21 26" stroke="white" strokeWidth="1.5" strokeLinecap="round"/><path d="M14 18 Q18 13 24 15 Q28 11 32 15" stroke={dk} strokeWidth="3" fill="none" strokeLinecap="round"/><path d="M36 60 Q28 54 26 58" stroke={dk} strokeWidth="4.5" strokeLinecap="round" fill="none"/><rect x="34" y="78" width="10" height="16" rx="4" fill={dk}/><rect x="52" y="76" width="10" height="18" rx="4" fill={dk}/><ellipse cx="50" cy="64" rx="16" ry="9" fill={lt} opacity=".3"/></svg>),
   };
   return svgs[id] || svgs["trex"];
 }
@@ -179,7 +180,7 @@ const DINOS = [
   { id:"ceratosaurus",       name:"Ceratosaurus",     colour:"#6C3483" },
   { id:"dilophosaurus",      name:"Dilophosaurus",    colour:"#0E6655" },
   { id:"herrerasaurus",      name:"Herrerasaurus",    colour:"#6E4C1E" },
-  { id:"albertosaurus", name:"Albertosaurus", colour:"#E67E22" },
+  { id:"albertosaurus",      name:"Albertosaurus",    colour:"#E67E22" },
 ];
 
 const CLASS_LIST = [
@@ -209,7 +210,7 @@ const CLASS_LIST = [
   { name:"Sabrina Milligan",    dinoId:"ceratosaurus",       username:"sabrinam",  password:"Egg!937"   },
   { name:"Sasmit Mahindrakar",  dinoId:"dilophosaurus",      username:"sasmitm",   password:"Bone@652"  },
   { name:"Umaima Jabbar",       dinoId:"herrerasaurus",      username:"umaimaj",   password:"Claw#819"  },
-  { name:"Zachary Gittens", dinoId:"albertosaurus", username:"zacharyg", password:"Roar!247" },
+  { name:"Zachary Gittens",     dinoId:"albertosaurus",      username:"zacharyg",  password:"Roar!247"  },
 ];
 
 
@@ -1501,6 +1502,56 @@ const handleLogin = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appState?.students]);
 
+  const seedHistoricalData = () => {
+    if (!appState) return;
+    
+    // Generate weekdays from Sept 3, 2025 to today
+    const startDate = new Date("2025-09-03");
+    const today = new Date();
+    const weekdays = [];
+    const d = new Date(startDate);
+    while (d <= today) {
+      const day = d.getDay();
+      if (day !== 0 && day !== 6) {
+        weekdays.push(d.toISOString().slice(0,10));
+      }
+      d.setDate(d.getDate() + 1);
+    }
+
+    // Real approximate TSX performance Sept 2025 - May 2026
+    // Based on actual market trends
+    const marketTrends = {
+      bananas:  { start:20,  monthly:[0.01, 0.02, -0.01, 0.02, 0.01, 0.03, 0.01, -0.01, 0.02] },
+      trextech: { start:50,  monthly:[0.05, -0.03, 0.08, 0.04, -0.02, 0.06, 0.03, 0.07, -0.01] },
+      airways:  { start:35,  monthly:[0.02, 0.04, -0.02, 0.03, 0.01, -0.01, 0.04, 0.02, 0.03] },
+      energy:   { start:15,  monthly:[-0.01, 0.02, 0.01, -0.02, 0.03, 0.01, 0.02, -0.01, 0.01] },
+      steel:    { start:28,  monthly:[0.03, -0.01, 0.02, 0.04, -0.02, 0.03, 0.01, 0.02, -0.01] },
+    };
+
+    // Generate price history
+    const history = {};
+    const prices = {};
+    Object.keys(marketTrends).forEach(id => { prices[id] = marketTrends[id].start; });
+
+    weekdays.forEach((date, i) => {
+      const monthIdx = Math.floor(i / 21); // ~21 trading days per month
+      Object.keys(marketTrends).forEach(id => {
+        const trend = marketTrends[id];
+        const monthlyReturn = trend.monthly[Math.min(monthIdx, trend.monthly.length-1)];
+        const dailyReturn = monthlyReturn / 21;
+        const noise = (Math.random() - 0.48) * 0.012;
+        prices[id] = Math.max(1, Math.round(prices[id] * (1 + dailyReturn + noise) * 100) / 100);
+      });
+      history[date] = { ...prices };
+    });
+
+    update(prev => ({
+      ...prev,
+      stockHistory: history,
+      stockPrices: history[weekdays[weekdays.length-1]] || prev.stockPrices,
+    }));
+    showToast("📈 Historical data seeded from Sept 3, 2025!");
+  };
   const fetchStockChange = async (tickers) => {
     const changes = await Promise.all(tickers.map(async ticker => {
       try {
@@ -2609,6 +2660,11 @@ const handleLogin = () => {
                   );
                 })}
               </div>
+            </div>
+            <div style={{ background:"#f0fbf4",borderRadius:14,padding:18,border:"2px solid #4B9B6E44", marginBottom:16 }}>
+              <div style={{ fontWeight:800,color:"#1a472a",marginBottom:8,fontSize:16 }}>📈 Stock History</div>
+              <p style={{ color:"#666",fontSize:13,fontFamily:"'Nunito',sans-serif",margin:"0 0 12px" }}>Seed historical stock data from September 3, 2025 to today.</p>
+              <button onClick={seedHistoricalData} style={{ padding:"8px 20px",background:"#27ae60",color:"#fff",border:"none",borderRadius:8,cursor:"pointer",fontFamily:"'Fredoka One',sans-serif",fontSize:15 }}>📈 Seed Historical Data</button>
             </div>
             <div style={{ background:"#fff4f4",borderRadius:14,padding:18,border:"2px solid #ffcccc" }}>
               <div style={{ fontWeight:800,color:"#c0392b",marginBottom:8,fontSize:16 }}>⚠️ Danger Zone</div>
