@@ -2004,7 +2004,9 @@ const resetInvestments = () => {
                         const amt = parseFloat(document.getElementById("stu-buy-" + stock.id).value);
                         if (!amt || amt <= 0) return;
                         const bal = appState?.balances?.[studentUser.id] || 0;
-                        if (amt > bal - 10) { showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
+                        if (amt > bal - 25) { showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
+                        const todayTx = (appState?.txLog||[]).filter(t => t.studentId===studentUser.id && t.date===todayStr() && t.reason?.includes(stock.name));
+                        if (todayTx.length > 0) { showToast("You already traded this stock today! Come back tomorrow. 📅", "#e67e22"); return; }
                         const newShares = amt / price;
                         update(prev => ({
                           ...prev,
@@ -2019,6 +2021,9 @@ const resetInvestments = () => {
                         style={{ flex:1, padding:"7px 8px", borderRadius:8, border:"2px solid #e74c3c", fontFamily:"'Nunito',sans-serif", fontSize:13, outline:"none", width:0 }}/>
                       <button onClick={() => {
                         if (!shares || shares <= 0) { showToast("No shares to sell!", "#e74c3c"); return; }
+                        if (!shares || shares <= 0) { showToast("No shares to sell!", "#e74c3c"); return; }
+                        const todayTxSell = (appState?.txLog||[]).filter(t => t.studentId===studentUser.id && t.date===todayStr() && t.reason?.includes(stock.name));
+                        if (todayTxSell.length > 0) { showToast("You already traded this stock today! Come back tomorrow. 📅", "#e67e22"); return; }
                         const sellAmt = parseFloat(document.getElementById("stu-sell-" + stock.id).value);
                         const totalVal = shares * price;
                         const amtToSell = (sellAmt > 0) ? Math.min(sellAmt, totalVal) : totalVal;
