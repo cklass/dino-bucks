@@ -383,7 +383,7 @@ function GameArea({ game, studentUser, appState, update, todayStr, showToast, fm
   return null;
 }
 
-function TriviaGame() {
+function TriviaGame({ studentUser, appState, update }) {
   const questions = [
     { q:"What is the largest dinosaur ever discovered?", a:"Argentinosaurus", choices:["T-Rex","Argentinosaurus","Brachiosaurus","Diplodocus"] },
     { q:"What did T-Rex eat?", a:"Meat", choices:["Plants","Meat","Both","Fish only"] },
@@ -407,7 +407,19 @@ function TriviaGame() {
     if (correct) setScore(s => s + 1);
     setTimeout(() => {
       setFeedback(null);
-      if (idx + 1 >= questions.length) setDone(true);
+      if (idx + 1 >= questions.length) {
+  setDone(true);
+  const finalScore = score + (correct ? 1 : 0);
+  if (studentUser) update(prev => {
+    const lb = prev.leaderboards?.trivia || [];
+    const existing = lb.find(e => e.username === studentUser.username);
+    if (existing && existing.score >= finalScore) return prev;
+    const filtered = lb.filter(e => e.username !== studentUser.username);
+    const newLb = [...filtered, { username:studentUser.username, name:studentUser.name.split(" ")[0], dinoId:studentUser.dinoId, score:finalScore }]
+      .sort((a,b) => b.score - a.score).slice(0,10);
+    return { ...prev, leaderboards: { ...(prev.leaderboards||{}), trivia: newLb }};
+  });
+}
       else setIdx(i => i + 1);
     }, 900);
   };
@@ -433,11 +445,24 @@ function TriviaGame() {
           }}>{c}</button>
         ))}
       </div>
+      <div style={{ background:"#f8f9fa", borderRadius:16, padding:16, marginTop:16 }}>
+  <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a", marginBottom:10 }}>🏆 Top 10</div>
+  {(appState?.leaderboards?.trivia||[]).length === 0 ?
+    <div style={{ color:"#aaa", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>No scores yet!</div> :
+    (appState?.leaderboards?.trivia||[]).map((e,i) => (
+      <div key={e.username} style={{ display:"flex", alignItems:"center", gap:8, padding:"6px 0", borderBottom:"1px solid #eee" }}>
+        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#1a472a", width:24 }}>#{i+1}</div>
+        <div style={{ flex:1, fontFamily:"'Nunito',sans-serif", fontSize:13, fontWeight:700 }}>{e.name}</div>
+        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#2980b9" }}>{e.score}/10</div>
+      </div>
+    ))
+  }
+</div>
     </div>
   );
 }
 
-function MemoryGame() {
+function MemoryGame({ studentUser, appState, update }) {
   const emojis = ["🦕","🦖","🦴","🥚","🌿","🏔️","🦷","🌋"];
   const [cards, setCards] = React.useState(() => {
     const deck = [...emojis, ...emojis].map((e, i) => ({ id:i, emoji:e, flipped:false, matched:false }));
@@ -462,7 +487,18 @@ function MemoryGame() {
         const matched = newCards.map(c => newSel.includes(c.id) ? { ...c, matched:true } : c);
         setCards(matched);
         setSelected([]);
-        if (matched.every(c => c.matched)) setWon(true);
+        if (matched.every(c => c.matched)) {
+  setWon(true);
+  if (studentUser) update(prev => {
+    const lb = prev.leaderboards?.memory || [];
+    const existing = lb.find(e => e.username === studentUser.username);
+    if (existing && existing.score <= moves+1) return prev;
+    const filtered = lb.filter(e => e.username !== studentUser.username);
+    const newLb = [...filtered, { username:studentUser.username, name:studentUser.name.split(" ")[0], dinoId:studentUser.dinoId, score:moves+1 }]
+      .sort((a,b) => a.score - b.score).slice(0,10);
+    return { ...prev, leaderboards: { ...(prev.leaderboards||{}), memory: newLb }};
+  });
+}
       } else {
         setTimeout(() => {
           setCards(prev => prev.map(c => newSel.includes(c.id) ? { ...c, flipped:false } : c));
@@ -488,6 +524,19 @@ function MemoryGame() {
           border: c.matched ? "3px solid #27ae60" : "3px solid #145a32",
         }}>{c.flipped||c.matched ? c.emoji : "🌿"}</div>
       ))}
+      <div style={{ background:"#f8f9fa", borderRadius:16, padding:16, marginTop:16 }}>
+  <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a", marginBottom:10 }}>🏆 Top 10 (fewest moves)</div>
+  {(appState?.leaderboards?.memory||[]).length === 0 ?
+    <div style={{ color:"#aaa", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>No scores yet!</div> :
+    (appState?.leaderboards?.memory||[]).map((e,i) => (
+      <div key={e.username} style={{ display:"flex", alignItems:"center", gap:8, padding:"6px 0", borderBottom:"1px solid #eee" }}>
+        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#1a472a", width:24 }}>#{i+1}</div>
+        <div style={{ flex:1, fontFamily:"'Nunito',sans-serif", fontSize:13, fontWeight:700 }}>{e.name}</div>
+        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#8e44ad" }}>{e.score} moves</div>
+      </div>
+    ))
+  }
+</div>
     </div>
   );
 }
@@ -634,7 +683,7 @@ function RunnerGame({ studentUser, appState, update }) {
   );
 }
 
-function EggDropGame() {
+function EggDropGame({ studentUser, appState, update }) {
   const [playing, setPlaying] = React.useState(false);
   const [basketX, setBasketX] = React.useState(250);
   const [eggs, setEggs] = React.useState([]);
@@ -673,13 +722,26 @@ function EggDropGame() {
       if (fell.length) { missedRef.current += fell.length; setMissed(missedRef.current); }
       eggsRef.current = eggsRef.current.filter(e => e.y <= 310);
       setEggs([...eggsRef.current]);
-      if (missedRef.current >= 5) { setPlaying(false); setDone(true); return; }
+      if (missedRef.current >= 5) { setPlaying(false); setDone(true); saveScore(scoreRef.current); return; }
       frameRef.current = requestAnimationFrame(tick);
     };
     frameRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameRef.current);
   }, [playing]);
   const start = () => { setDone(false); setScore(0); setMissed(0); scoreRef.current=0; missedRef.current=0; eggsRef.current=[]; setEggs([]); setPlaying(true); };
+
+  const saveScore = (finalScore) => {
+    if (!studentUser) return;
+    update(prev => {
+      const lb = prev.leaderboards?.egg || [];
+      const existing = lb.find(e => e.username === studentUser.username);
+      if (existing && existing.score >= finalScore) return prev;
+      const filtered = lb.filter(e => e.username !== studentUser.username);
+      const newLb = [...filtered, { username:studentUser.username, name:studentUser.name.split(" ")[0], dinoId:studentUser.dinoId, score:finalScore }]
+        .sort((a,b) => b.score - a.score).slice(0,10);
+      return { ...prev, leaderboards: { ...(prev.leaderboards||{}), egg: newLb }};
+    });
+  };
   return (
     <div style={{ textAlign:"center" }}>
       <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:13, color:"#888", marginBottom:8 }}>Move your mouse to catch eggs! Caught: {score} | Missed: {missed}/5</div>
@@ -694,11 +756,25 @@ function EggDropGame() {
         <div id="basket2" style={{ position:"absolute", bottom:42, left:basketRef.current, transform:"translateX(-50%)", fontSize:44, filter:"drop-shadow(0 4px 8px rgba(0,0,0,0.5))" }}>🧺</div>
       </div>
       {!playing && <button onClick={start} style={{ marginTop:16, padding:"10px 28px", background:"linear-gradient(135deg,#e67e22,#d35400)", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>{done ? `🎉 Game Over! Caught ${score} — Play Again` : "Start Catching! 🥚"}</button>}
+    {/* Leaderboard */}
+      <div style={{ background:"#f8f9fa", borderRadius:16, padding:16, marginTop:16 }}>
+        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a", marginBottom:10 }}>🏆 Top 10</div>
+        {(appState?.leaderboards?.egg||[]).length === 0 ? 
+          <div style={{ color:"#aaa", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>No scores yet!</div> :
+          (appState?.leaderboards?.egg||[]).map((e,i) => (
+            <div key={e.username} style={{ display:"flex", alignItems:"center", gap:8, padding:"6px 0", borderBottom:"1px solid #eee" }}>
+              <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#1a472a", width:24 }}>#{i+1}</div>
+              <div style={{ flex:1, fontFamily:"'Nunito',sans-serif", fontSize:13, fontWeight:700 }}>{e.name}</div>
+              <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#e67e22" }}>{e.score}</div>
+            </div>
+          ))
+        }
+      </div>
     </div>
   );
 }
 
-function DiggerGame() {
+function DiggerGame({ studentUser, appState, update }) {
   const GRID = 16;
   const [cells, setCells] = React.useState(() => Array(GRID).fill(null).map((_,i) => ({ id:i, dug:false, hasBone:Math.random()<0.35, hasRock:Math.random()<0.2 })));
   const [timeLeft, setTimeLeft] = React.useState(20);
@@ -709,7 +785,19 @@ function DiggerGame() {
   React.useEffect(() => {
     if (!playing) return;
     timerRef.current = setInterval(() => {
-      setTimeLeft(t => { if (t <= 1) { clearInterval(timerRef.current); setPlaying(false); setDone(true); return 0; } return t-1; });
+      setTimeLeft(t => { if (t <= 1) { 
+  clearInterval(timerRef.current); setPlaying(false); setDone(true);
+  if (studentUser) update(prev => {
+    const lb = prev.leaderboards?.digger || [];
+    const existing = lb.find(e => e.username === studentUser.username);
+    if (existing && existing.score >= scoreRef.current) return prev;
+    const filtered = lb.filter(e => e.username !== studentUser.username);
+    const newLb = [...filtered, { username:studentUser.username, name:studentUser.name.split(" ")[0], dinoId:studentUser.dinoId, score:scoreRef.current }]
+      .sort((a,b) => b.score - a.score).slice(0,10);
+    return { ...prev, leaderboards: { ...(prev.leaderboards||{}), digger: newLb }};
+  });
+  return 0; 
+} return t-1; });
     }, 1000);
     return () => clearInterval(timerRef.current);
   }, [playing]);
@@ -728,6 +816,19 @@ function DiggerGame() {
         {cells.map(c => <div key={c.id} onClick={() => dig(c.id)} style={{ height:64, borderRadius:10, display:"flex", alignItems:"center", justifyContent:"center", fontSize:28, cursor:playing?"pointer":"default", background: c.dug ? "#f5e6c8" : "#8B6914", border:"3px solid #6b4f10" }}>{c.dug ? (c.hasBone ? "🦴" : c.hasRock ? "🪨" : "💨") : "🟫"}</div>)}
       </div>
       {!playing && <button onClick={start} style={{ padding:"10px 24px", background:"#c0392b", color:"#fff", border:"none", borderRadius:12, cursor:"pointer", fontFamily:"'Fredoka One',sans-serif", fontSize:16 }}>{done ? `Found ${score} bones! Play Again` : "Start Digging! 🦴"}</button>}
+    <div style={{ background:"#f8f9fa", borderRadius:16, padding:16, marginTop:16 }}>
+  <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a", marginBottom:10 }}>🏆 Top 10</div>
+  {(appState?.leaderboards?.digger||[]).length === 0 ?
+    <div style={{ color:"#aaa", fontSize:12, fontFamily:"'Nunito',sans-serif" }}>No scores yet!</div> :
+    (appState?.leaderboards?.digger||[]).map((e,i) => (
+      <div key={e.username} style={{ display:"flex", alignItems:"center", gap:8, padding:"6px 0", borderBottom:"1px solid #eee" }}>
+        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#1a472a", width:24 }}>#{i+1}</div>
+        <div style={{ flex:1, fontFamily:"'Nunito',sans-serif", fontSize:13, fontWeight:700 }}>{e.name}</div>
+        <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:14, color:"#c0392b" }}>{e.score} bones</div>
+      </div>
+    ))
+  }
+</div>
     </div>
   );
 }
