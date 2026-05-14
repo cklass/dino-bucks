@@ -1415,7 +1415,7 @@ export default function App() {
   const [isTeacher,  setIsTeacher]   = useState(false);
   const [payMulti,   setPayMulti]    = useState(false);
   const [multiSelected, setMultiSelected] = useState([]);
-const [loginUser,  setLoginUser]   = useState("");
+const [loginUser,  setLoginUser]   = useState("MrKlassen");
 const [loginPass,  setLoginPass]   = useState("");
 const [loginError, setLoginError]  = useState("");
 
