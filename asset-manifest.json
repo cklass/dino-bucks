@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/dino-bucks/static/js/main.0ec003f7.js",
+    "main.js": "/dino-bucks/static/js/main.7575ceae.js",
     "index.html": "/dino-bucks/index.html",
-    "main.0ec003f7.js.map": "/dino-bucks/static/js/main.0ec003f7.js.map"
+    "main.7575ceae.js.map": "/dino-bucks/static/js/main.7575ceae.js.map"
   },
   "entrypoints": [
-    "static/js/main.0ec003f7.js"
+    "static/js/main.7575ceae.js"
   ]
 }
