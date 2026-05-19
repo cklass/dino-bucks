@@ -184,7 +184,7 @@ const DINOS = [
 ];
 
 const CLASS_LIST = [
-  { name:"Abdul Maalik Fouzan", dinoId:"trex",               username:"abdulm",    password:"Dino#847"  },
+  { name:"Abdul Maalik Fouzan", dinoId:"trex",               username:"abdulm",    password:"abdul1234"  },
   { name:"Adrianna Safronii",   dinoId:"triceratops",        username:"adriannas", password:"Rex$392"   },
   { name:"Alyvia Powers",       dinoId:"stegosaurus",        username:"alyviap",   password:"Egg!651"   },
   { name:"Arisha Haniff",       dinoId:"brachiosaurus",      username:"arishab",   password:"Bone@274"  },
@@ -1184,10 +1184,10 @@ function DinoPacGame({ studentUser, appState, update }) {
   const [dir, setDir] = React.useState({ x:1, y:0 });
   const [nextDir, setNextDir] = React.useState({ x:1, y:0 });
   const [ghosts, setGhosts] = React.useState([
-    { x:9, y:9, dx:1, dy:0, color:"#e74c3c" },
-    { x:10, y:9, dx:-1, dy:0, color:"#e67e22" },
-    { x:9, y:10, dx:0, dy:1, color:"#9b59b6" },
-    { x:10, y:10, dx:0, dy:-1, color:"#3498db" },
+    { x:1, y:1, dx:1, dy:0, color:"#e74c3c" },
+    { x:18, y:1, dx:-1, dy:0, color:"#e67e22" },
+    { x:1, y:18, dx:0, dy:1, color:"#9b59b6" },
+    { x:18, y:18, dx:0, dy:-1, color:"#3498db" },
   ]);
   const [dots, setDots] = React.useState(initDots);
   const [score, setScore] = React.useState(0);
@@ -1498,9 +1498,7 @@ const handleLogin = () => {
     });
   }, [scheduleSave]);
     useEffect(() => {
-    const handleClick = () => playSound("pop");
-    window.addEventListener("click", handleClick);
-    return () => window.removeEventListener("click", handleClick);
+    // Sound handler removed temporarily for debugging
   }, []);
 
   const showToast = (msg, colour = "#27ae60") => {
