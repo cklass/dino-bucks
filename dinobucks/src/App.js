@@ -1498,7 +1498,14 @@ const handleLogin = () => {
     });
   }, [scheduleSave]);
     useEffect(() => {
-    // Sound handler removed temporarily for debugging
+    const handleClick = (e) => {
+      // Only play sound if click is not on a button or input
+      if (e.target.tagName !== "BUTTON" && e.target.tagName !== "INPUT") {
+        playSound("pop");
+      }
+    };
+    window.addEventListener("click", handleClick);
+    return () => window.removeEventListener("click", handleClick);
   }, []);
 
   const showToast = (msg, colour = "#27ae60") => {
