@@ -2107,8 +2107,17 @@ const resetInvestments = () => {
                       <input id={"stu-buy-" + stock.id} type="number" placeholder="$ buy" min="1"
                         style={{ flex:1, padding:"7px 8px", borderRadius:8, border:"2px solid #27ae60", fontFamily:"'Nunito',sans-serif", fontSize:13, outline:"none", width:0 }}/>
                       <button onClick={() => {
-                        console.log("BUY CLICKED", stock.id, studentUser.id);
-                        const amt = parseFloat(document.getElementById("stu-buy-" + stock.id).value);
+  console.log("BUY CLICKED", stock.id, studentUser.id);
+  const amt = parseFloat(document.getElementById("stu-buy-" + stock.id).value);
+  console.log("AMT", amt);
+  const bal = appState?.balances?.[studentUser.id] || 0;
+  console.log("BAL", bal);
+  if (!amt || amt <= 0) { console.log("FAILED: no amount"); return; }
+  if (amt > bal - 25) { console.log("FAILED: not enough balance"); showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
+  const todayTx = (appState?.txLog||[]).filter(t => t.studentId===studentUser.id && t.date===todayStr() && t.reason?.includes(stock.name));
+  console.log("TODAY TX", todayTx);
+  if (todayTx.length > 0) { console.log("FAILED: already traded today"); showToast("You already traded this stock today! Come back tomorrow. 📅", "#e67e22"); return; }
+  console.log("PROCEEDING WITH BUY");
                         if (!amt || amt <= 0) return;
                         const bal = appState?.balances?.[studentUser.id] || 0;
                         if (amt > bal - 25) { showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
