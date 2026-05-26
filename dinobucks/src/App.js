@@ -2107,6 +2107,7 @@ const resetInvestments = () => {
                       <input id={"stu-buy-" + stock.id} type="number" placeholder="$ buy" min="1"
                         style={{ flex:1, padding:"7px 8px", borderRadius:8, border:"2px solid #27ae60", fontFamily:"'Nunito',sans-serif", fontSize:13, outline:"none", width:0 }}/>
                       <button onClick={() => {
+                        console.log("BUY CLICKED", stock.id, studentUser.id);
                         const amt = parseFloat(document.getElementById("stu-buy-" + stock.id).value);
                         if (!amt || amt <= 0) return;
                         const bal = appState?.balances?.[studentUser.id] || 0;
