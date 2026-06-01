@@ -1903,19 +1903,70 @@ const resetInvestments = () => {
 
         {/* Student Tabs */}
         <div style={{ display:"flex", gap:8, marginBottom:16, flexWrap:"wrap" }}>
-          {["invest","play","log"].map(t => (
+          {["invest","store","play","log"].map(t => (
             <button key={t} onClick={() => setTab(t)} style={{
               padding:"10px 18px", border:"none", cursor:"pointer", borderRadius:12,
               fontFamily:"'Fredoka One',sans-serif", fontSize:15,
               background: tab===t ? "#1a472a" : "rgba(255,255,255,0.9)",
               color: tab===t ? "#fff" : "#1a472a",
             }}>
-              {t==="invest" ? "📈 Invest" : t==="play" ? "🎮 Play" : "📋 History"}
+              {t==="invest" ? "📈 Invest" : t==="play" ? "🎮 Play" : t==="store" ? "🏪 Store" : "📋 History"}
             </button>
           ))}
         </div>
 
         {/* Transaction History */}
+        {/* Student Store Tab */}
+        {tab==="store" && (
+          <div>
+            <h3 style={{ fontSize:20, color:"#1a472a", margin:"0 0 16px", fontFamily:"'Fredoka One',sans-serif" }}>🏪 Class Store</h3>
+            {(appState?.storeItems || []).filter(item => item.available !== false).length === 0 ? (
+              <div style={{ background:"#fff", borderRadius:20, padding:32, textAlign:"center", boxShadow:"0 4px 16px #0002" }}>
+                <div style={{ fontSize:48, marginBottom:12 }}>🏪</div>
+                <div style={{ fontFamily:"'Nunito',sans-serif", color:"#888", fontSize:15 }}>The store is empty right now. Check back later!</div>
+              </div>
+            ) : (
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(200px, 1fr))", gap:16 }}>
+                {(appState?.storeItems || []).filter(item => item.available !== false).map(item => {
+                  const canAfford = stuBalance >= item.price * 1.13;
+                  const alreadyPending = (appState?.purchases || []).some(p => p.studentId === studentUser.id && p.itemId === item.id && p.status === "pending");
+                  return (
+                    <div key={item.id} style={{ background:"#fff", borderRadius:20, padding:20, boxShadow:"0 4px 16px #0002", border:`2px solid ${canAfford ? "#27ae6033" : "#e74c3c33"}`, opacity: canAfford ? 1 : 0.7 }}>
+                      <div style={{ fontSize:40, textAlign:"center", marginBottom:10 }}>{item.emoji || "🎁"}</div>
+                      <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:16, color:"#1a472a", marginBottom:4 }}>{item.name}</div>
+                      <div style={{ fontFamily:"'Nunito',sans-serif", fontSize:12, color:"#888", marginBottom:8 }}>{item.description}</div>
+                      <div style={{ fontFamily:"'Fredoka One',sans-serif", fontSize:18, color:"#27ae60", marginBottom:12 }}>
+                        {fmt(Math.round(item.price * 1.13))} <span style={{ fontSize:11, color:"#aaa" }}>incl. tax</span>
+                      </div>
+                      {alreadyPending ? (
+                        <div style={{ background:"#fff9e6", border:"1px solid #f39c12", borderRadius:8, padding:"8px 12px", fontFamily:"'Nunito',sans-serif", fontSize:12, color:"#d68910", textAlign:"center" }}>
+                          ⏳ Purchase pending approval
+                        </div>
+                      ) : (
+                        <button onClick={() => {
+                          if (!canAfford) { showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
+                          update(prev => ({
+                            ...prev,
+                            purchases: [...(prev.purchases||[]), {
+                              id: uuid(), studentId: studentUser.id,
+                              studentName: studentUser.name, itemId: item.id,
+                              itemName: item.name, price: item.price,
+                              status: "pending", date: todayStr(),
+                            }],
+                          }));
+                          showToast("Purchase request sent! Waiting for approval 🦕");
+                        }} disabled={!canAfford}
+                          style={{ width:"100%", padding:"10px", background: canAfford ? "linear-gradient(135deg,#27ae60,#1a472a)" : "#eee", color: canAfford ? "#fff" : "#aaa", border:"none", borderRadius:10, cursor: canAfford ? "pointer" : "default", fontFamily:"'Fredoka One',sans-serif", fontSize:15 }}>
+                          {canAfford ? "🛒 Buy" : "💸 Can't afford"}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
        {/* Student Invest Tab */}
         {tab==="invest" && (
           <div>
@@ -2107,22 +2158,17 @@ const resetInvestments = () => {
                       <input id={"stu-buy-" + stock.id} type="number" placeholder="$ buy" min="1"
                         style={{ flex:1, padding:"7px 8px", borderRadius:8, border:"2px solid #27ae60", fontFamily:"'Nunito',sans-serif", fontSize:13, outline:"none", width:0 }}/>
                       <button onClick={() => {
-  console.log("BUY CLICKED", stock.id, studentUser.id);
-  const amt = parseFloat(document.getElementById("stu-buy-" + stock.id).value);
-  console.log("AMT", amt);
-  const bal = appState?.balances?.[studentUser.id] || 0;
-  console.log("BAL", bal);
-  if (!amt || amt <= 0) { console.log("FAILED: no amount"); return; }
-  if (amt > bal - 25) { console.log("FAILED: not enough balance"); showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
-  const todayTx = (appState?.txLog||[]).filter(t => t.studentId===studentUser.id && t.date===todayStr() && t.reason?.includes(stock.name));
-  console.log("TODAY TX", todayTx);
-  if (todayTx.length > 0) { console.log("FAILED: already traded today"); showToast("You already traded this stock today! Come back tomorrow. 📅", "#e67e22"); return; }
-  console.log("PROCEEDING WITH BUY");
-                        if (!amt || amt <= 0) return;
+                        console.log("BUY CLICKED", stock.id, studentUser.id);
+                        const amt = parseFloat(document.getElementById("stu-buy-" + stock.id).value);
+                        console.log("AMT", amt);
                         const bal = appState?.balances?.[studentUser.id] || 0;
-                        if (amt > bal - 25) { showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
+                        console.log("BAL", bal);
+                        if (!amt || amt <= 0) { console.log("FAILED: no amount"); return; }
+                        if (amt > bal - 25) { console.log("FAILED: not enough balance"); showToast("Not enough Dino Bucks!", "#e74c3c"); return; }
                         const todayTx = (appState?.txLog||[]).filter(t => t.studentId===studentUser.id && t.date===todayStr() && t.reason?.includes(stock.name));
-                        if (todayTx.length > 0) { showToast("You already traded this stock today! Come back tomorrow. 📅", "#e67e22"); return; }
+                        console.log("TODAY TX", todayTx);
+                        if (todayTx.length > 0) { console.log("FAILED: already traded today"); showToast("You already traded this stock today! Come back tomorrow. 📅", "#e67e22"); return; }
+                        console.log("PROCEEDING WITH BUY");
                         const newShares = amt / price;
                         update(prev => ({
                           ...prev,
