@@ -2408,6 +2408,18 @@ const resetInvestments = () => {
       style={{ padding:"8px 18px",background:"#c0392b",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>
       − Deduct Multiple
     </button>
+    <button onClick={() => {
+                      if (!window.confirm(`Reset ${selStudent?.name}'s investment history? This will clear their buy/sell transactions and portfolio.`)) return;
+                      update(prev => ({
+                        ...prev,
+                        portfolios: { ...prev.portfolios, [selected]: {} },
+                        txLog: (prev.txLog||[]).filter(t => !(t.studentId === selected && (t.reason?.includes("Bought") || t.reason?.includes("Sold")))),
+                      }));
+                      showToast(`${selStudent?.name}'s investments reset!`, "#2471A3");
+                    }}
+                      style={{ padding:"8px 18px",background:"#2471A3",color:"#fff",border:"none",borderRadius:10,cursor:"pointer",fontSize:16,fontFamily:"'Fredoka One',sans-serif" }}>
+                      📈 Reset Investments
+                    </button>
                   </div>
                   {sLog.length > 0 && <div>{sLog.map(tx => <TxRow key={tx.id} tx={tx} students={students}/>)}</div>}
                 </div>
