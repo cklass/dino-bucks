@@ -1576,8 +1576,8 @@ const handleLogin = async () => {
     const amount = parseInt(payAmt);
     if (!amount || isNaN(amount)) return showToast("Enter a valid amount", "#e74c3c");
     if (payAll) {
-      appState.students.forEach(s => addTx(s.id, amount, payReason));
-      showToast(`Paid ${fmt(amount)} to all ${appState.students.length} dinos!`);
+      (appState.students||[]).forEach(s => addTx(s.id, amount, payReason));
+      showToast(`Paid ${fmt(amount)} to all ${(appState.students||[]).length} dinos!`);
     } else if (payMulti) {
       if (multiSelected.length === 0) return showToast("Select at least one student!", "#e74c3c");
       multiSelected.forEach(id => addTx(id, amount, payReason));
@@ -1586,7 +1586,7 @@ const handleLogin = async () => {
     } else {
       if (!selected) return showToast("Select a student first", "#e74c3c");
       addTx(selected, amount, payReason);
-      showToast(`Paid ${fmt(amount)} to ${appState.students.find(s => s.id === selected)?.name}!`);
+      showToast(`Paid ${fmt(amount)} to ${(appState.students||[]).find(s => s.id === selected)?.name}!`);
     }
     setPayAmt("");
   };
@@ -1778,6 +1778,22 @@ const resetInvestments = () => {
       <DinoSVG id="trex" c="#C0392B" size={72}/>
       <div>Loading Dino Bucks...</div>
       <div style={{ fontSize:13,color:"#6aad86",fontFamily:"'Nunito',sans-serif" }}>Connecting to Firebase...</div>
+    </div>
+  );
+
+  if (loading) return (
+    <div style={{ minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a472a",color:"#a8d8b5",fontSize:28,fontFamily:"'Fredoka One',sans-serif",gap:16,flexDirection:"column" }}>
+      <DinoSVG id="trex" c="#C0392B" size={72}/>
+      <div>Loading Dino Bucks...</div>
+      <div style={{ fontSize:13,color:"#6aad86",fontFamily:"'Nunito',sans-serif" }}>Connecting to Firebase...</div>
+    </div>
+  );
+
+  if (!appState) return (
+    <div style={{ minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a472a",color:"#a8d8b5",fontSize:28,fontFamily:"'Fredoka One',sans-serif",gap:16,flexDirection:"column" }}>
+      <DinoSVG id="trex" c="#C0392B" size={72}/>
+      <div>Setting up Dino Bucks...</div>
+      <div style={{ fontSize:13,color:"#6aad86",fontFamily:"'Nunito',sans-serif" }}>Please log in as teacher to initialize!</div>
     </div>
   );
 
