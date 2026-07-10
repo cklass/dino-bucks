@@ -1428,25 +1428,6 @@ const handleLogin = async () => {
       await teacherSignIn();
       setIsTeacher(true);
       setLoginError("");
-      // Force seed if no data exists
-      if (!appState || !appState.students) {
-        const seed = SEED_STATE();
-        setAppState(seed);
-        saveToFirebase(seed);
-      }
-    } catch(e) {
-      setLoginError("Authentication failed. Please try again.");
-    }
-  } else {
-    setLoginError("Incorrect username or password.");
-  }
-};const handleLogin = async () => {
-  if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
-    try {
-      await teacherSignIn();
-      setIsTeacher(true);
-      setLoginError("");
-      // Force seed if no data exists
       if (!appState || !appState.students) {
         const seed = SEED_STATE();
         setAppState(seed);
@@ -1884,7 +1865,7 @@ const resetInvestments = () => {
             return (
               <div key={s.id} style={{ background:"rgba(255,255,255,0.95)", borderRadius:20, padding:"16px 12px", textAlign:"center", boxShadow:"0 4px 16px #0003" }}>
                 <DinoSVG id={s.dinoId} c="#1e8449" size={56}/>
-                <div style={{ fontSize:15, color:"#1a472a", margin:"8px 0 4px" }}>{s.name.split(" ")[0]}</div>
+                <div style={{ fontSize:15, color:"#1a472a", margin:"8px 0 4px" }}>{s.name}</div>
                 <div style={{ fontSize:24, color:"#27ae60" }}>{fmt(balance)}</div>
               </div>
             );
