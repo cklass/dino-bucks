@@ -184,33 +184,33 @@ const DINOS = [
 ];
 
 const CLASS_LIST = [
-  { name:"Abdul Maalik Fouzan", dinoId:"trex",               username:"abdulm",    password:"abdul1234"  },
-  { name:"Adrianna Safronii",   dinoId:"triceratops",        username:"adriannas", password:"Rex$392"   },
-  { name:"Alyvia Powers",       dinoId:"stegosaurus",        username:"alyviap",   password:"Egg!651"   },
-  { name:"Arisha Haniff",       dinoId:"brachiosaurus",      username:"arishab",   password:"Bone@274"  },
-  { name:"Arvi Patel",          dinoId:"pterodactyl",        username:"arvip",     password:"Claw#518"  },
-  { name:"Avi Patel",           dinoId:"ankylosaurus",       username:"avip",      password:"Fang$963"  },
-  { name:"Brandon Dobbs",       dinoId:"spinosaurus",        username:"brandond",  password:"Roar!427"  },
-  { name:"Edwin Providence",    dinoId:"velociraptor",       username:"edwinp",    password:"Dino#815"  },
-  { name:"Graham Batten",       dinoId:"parasaurolophus",    username:"grahamb",   password:"Rex$739"   },
-  { name:"Hope Olcay",          dinoId:"diplodocus",         username:"hopeo",     password:"Egg!284"   },
-  { name:"Iqra Ahmed",          dinoId:"iguanodon",          username:"iqraa",     password:"Bone@651"  },
-  { name:"Issy McTiernan",      dinoId:"pachycephalosaurus", username:"issym",     password:"Claw#937"  },
-  { name:"Juliet Perea",        dinoId:"allosaurus",         username:"julietp",   password:"Fang$428"  },
-  { name:"Kaelan Atkinson",     dinoId:"carnotaurus",        username:"kaelana",   password:"Roar!593"  },
-  { name:"Liza Nefedov",        dinoId:"therizinosaurus",    username:"lizanr",    password:"Dino#762"  },
-  { name:"Malika Bisultanova",  dinoId:"gallimimus",         username:"malikab",   password:"Rex$415"   },
-  { name:"Mark Andersen",       dinoId:"oviraptor",          username:"marka",     password:"Egg!836"   },
-  { name:"Mauricio Zavala",     dinoId:"kentrosaurus",       username:"mauricioz", password:"Bone@279"  },
-  { name:"McKayla Disher",      dinoId:"styracosaurus",      username:"mckaylad",  password:"Claw#543"  },
-  { name:"Myra Kathuria",       dinoId:"baryonyx",           username:"myrak",     password:"Fang$918"  },
-  { name:"Nevaeh Austin",       dinoId:"pachyrhinosaurus",   username:"nevaeha",   password:"Roar!364"  },
-  { name:"Riley Crane",         dinoId:"maiasaura",          username:"rileyc",    password:"Dino#725"  },
-  { name:"Ryan Lester",         dinoId:"suchomimus",         username:"ryanl",     password:"Rex$481"   },
-  { name:"Sabrina Milligan",    dinoId:"ceratosaurus",       username:"sabrinam",  password:"Egg!937"   },
-  { name:"Sasmit Mahindrakar",  dinoId:"dilophosaurus",      username:"sasmitm",   password:"Bone@652"  },
-  { name:"Umaima Jabbar",       dinoId:"herrerasaurus",      username:"umaimaj",   password:"Claw#819"  },
-  { name:"Zachary Gittens",     dinoId:"albertosaurus",      username:"zacharyg",  password:"Roar!247"  },
+  { name:"Student 1",  dinoId:"trex",            username:"student1",  password:"Pass1234" },
+  { name:"Student 2",  dinoId:"triceratops",      username:"student2",  password:"Pass1234" },
+  { name:"Student 3",  dinoId:"stegosaurus",      username:"student3",  password:"Pass1234" },
+  { name:"Student 4",  dinoId:"brachiosaurus",    username:"student4",  password:"Pass1234" },
+  { name:"Student 5",  dinoId:"pterodactyl",      username:"student5",  password:"Pass1234" },
+  { name:"Student 6",  dinoId:"ankylosaurus",     username:"student6",  password:"Pass1234" },
+  { name:"Student 7",  dinoId:"spinosaurus",      username:"student7",  password:"Pass1234" },
+  { name:"Student 8",  dinoId:"velociraptor",     username:"student8",  password:"Pass1234" },
+  { name:"Student 9",  dinoId:"parasaurolophus",  username:"student9",  password:"Pass1234" },
+  { name:"Student 10", dinoId:"diplodocus",       username:"student10", password:"Pass1234" },
+  { name:"Student 11", dinoId:"iguanodon",        username:"student11", password:"Pass1234" },
+  { name:"Student 12", dinoId:"pachycephalosaurus",username:"student12",password:"Pass1234" },
+  { name:"Student 13", dinoId:"allosaurus",       username:"student13", password:"Pass1234" },
+  { name:"Student 14", dinoId:"carnotaurus",      username:"student14", password:"Pass1234" },
+  { name:"Student 15", dinoId:"therizinosaurus",  username:"student15", password:"Pass1234" },
+  { name:"Student 16", dinoId:"gallimimus",       username:"student16", password:"Pass1234" },
+  { name:"Student 17", dinoId:"oviraptor",        username:"student17", password:"Pass1234" },
+  { name:"Student 18", dinoId:"kentrosaurus",     username:"student18", password:"Pass1234" },
+  { name:"Student 19", dinoId:"styracosaurus",    username:"student19", password:"Pass1234" },
+  { name:"Student 20", dinoId:"baryonyx",         username:"student20", password:"Pass1234" },
+  { name:"Student 21", dinoId:"pachyrhinosaurus", username:"student21", password:"Pass1234" },
+  { name:"Student 22", dinoId:"maiasaura",        username:"student22", password:"Pass1234" },
+  { name:"Student 23", dinoId:"suchomimus",       username:"student23", password:"Pass1234" },
+  { name:"Student 24", dinoId:"ceratosaurus",     username:"student24", password:"Pass1234" },
+  { name:"Student 25", dinoId:"dilophosaurus",    username:"student25", password:"Pass1234" },
+  { name:"Student 26", dinoId:"herrerasaurus",    username:"student26", password:"Pass1234" },
+  { name:"Student 27", dinoId:"albertosaurus",    username:"student27", password:"Pass1234" },
 ];
 
 
@@ -1428,6 +1428,30 @@ const handleLogin = async () => {
       await teacherSignIn();
       setIsTeacher(true);
       setLoginError("");
+      // Force seed if no data exists
+      if (!appState || !appState.students) {
+        const seed = SEED_STATE();
+        setAppState(seed);
+        saveToFirebase(seed);
+      }
+    } catch(e) {
+      setLoginError("Authentication failed. Please try again.");
+    }
+  } else {
+    setLoginError("Incorrect username or password.");
+  }
+};const handleLogin = async () => {
+  if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
+    try {
+      await teacherSignIn();
+      setIsTeacher(true);
+      setLoginError("");
+      // Force seed if no data exists
+      if (!appState || !appState.students) {
+        const seed = SEED_STATE();
+        setAppState(seed);
+        saveToFirebase(seed);
+      }
     } catch(e) {
       setLoginError("Authentication failed. Please try again.");
     }
