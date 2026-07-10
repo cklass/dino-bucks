@@ -1859,7 +1859,7 @@ const resetInvestments = () => {
             <div style={{ color:"#fff", fontSize:32 }}>{fmt(wbTotal)}</div>
           </div>
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(160px, 1fr))", gap:16, marginBottom:32 }}>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(180px, 1fr))", gap:16, marginBottom:32 }}>
           {(appState?.students || []).map(s => {
             const balance = appState?.balances?.[s.id] || 0;
             return (
