@@ -1,6 +1,6 @@
 /* eslint-disable */
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { saveToFirebase, subscribeToFirebase } from "./firebase";
+import { saveToFirebase, subscribeToFirebase, teacherSignIn, teacherSignOut, auth } from "./firebase";
 
 // — Sound effects
 const playSound = (type) => {
@@ -215,11 +215,11 @@ const CLASS_LIST = [
 
 
 const DINO_STOCKS = [
-  { id:"bananas",  name:"Brachiosaur Bananas",   emoji:"🦕", color:"#27ae60", startPrice:20, volatility:0.03, tickers:["L.TO","MRU.TO","ATD.TO"],   description:"Staples & Grocery"  },
-  { id:"trextech", name:"T-Rex Tech",            emoji:"🦖", color:"#8e44ad", startPrice:50, volatility:0.10, tickers:["SHOP.TO","CSU.TO","CLS.TO"], description:"Technology"         },
-  { id:"airways",  name:"Pterodactyl Airways",   emoji:"🐉", color:"#2471A3", startPrice:35, volatility:0.07, tickers:["AC.TO","DOO.TO","CJT.TO"],   description:"Travel & Leisure"   },
-  { id:"energy",   name:"DinoEgg Energy",        emoji:"🥚", color:"#e67e22", startPrice:15, volatility:0.02, tickers:["ENB.TO","FTS.TO","TRP.TO"],  description:"Energy & Utilities" },
-  { id:"steel",    name:"Stegosaurus Steel",     emoji:"💎", color:"#7f8c8d", startPrice:28, volatility:0.05, tickers:["CNR.TO","CAE.TO","WSP.TO"],  description:"Industrials"        },
+  { id:"bananas",  name:"Brachiosaur Bananas",   emoji:"🦕", color:"#27ae60", startPrice:20, volatility:0.06, tickers:["L.TO","MRU.TO","ATD.TO"],   description:"Staples & Grocery"  },
+  { id:"trextech", name:"T-Rex Tech",            emoji:"🦖", color:"#8e44ad", startPrice:50, volatility:0.18, tickers:["SHOP.TO","CSU.TO","CLS.TO"], description:"Technology"         },
+  { id:"airways",  name:"Pterodactyl Airways",   emoji:"🐉", color:"#2471A3", startPrice:35, volatility:0.12, tickers:["AC.TO","DOO.TO","CJT.TO"],   description:"Travel & Leisure"   },
+  { id:"energy",   name:"DinoEgg Energy",        emoji:"🥚", color:"#e67e22", startPrice:15, volatility:0.05, tickers:["ENB.TO","FTS.TO","TRP.TO"],  description:"Energy & Utilities" },
+  { id:"steel",    name:"Stegosaurus Steel",     emoji:"💎", color:"#7f8c8d", startPrice:28, volatility:0.10, tickers:["CNR.TO","CAE.TO","WSP.TO"],  description:"Industrials"        },
 ];
 
 const DINO_NEWS = {
@@ -1422,10 +1422,15 @@ const [loginError, setLoginError]  = useState("");
 const TEACHER_USER = "MrKlassen";
 const TEACHER_PASS = "DinoBucks2026";
 
-const handleLogin = () => {
+const handleLogin = async () => {
   if (loginUser === TEACHER_USER && loginPass === TEACHER_PASS) {
-    setIsTeacher(true);
-    setLoginError("");
+    try {
+      await teacherSignIn();
+      setIsTeacher(true);
+      setLoginError("");
+    } catch(e) {
+      setLoginError("Authentication failed. Please try again.");
+    }
   } else {
     setLoginError("Incorrect username or password.");
   }
