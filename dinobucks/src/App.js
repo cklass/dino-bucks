@@ -1865,7 +1865,7 @@ const resetInvestments = () => {
             return (
               <div key={s.id} style={{ background:"rgba(255,255,255,0.95)", borderRadius:20, padding:"16px 12px", textAlign:"center", boxShadow:"0 4px 16px #0003" }}>
                 <DinoSVG id={s.dinoId} c="#1e8449" size={56}/>
-                <div style={{ fontSize:15, color:"#1a472a", margin:"8px 0 4px" }}>{s.name}</div>
+                <div style={{ fontSize:15, color:"#1a472a", margin:"8px 0 4px", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.name}</div>
                 <div style={{ fontSize:24, color:"#27ae60" }}>{fmt(balance)}</div>
               </div>
             );
